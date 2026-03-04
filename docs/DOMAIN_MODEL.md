@@ -94,7 +94,6 @@ Buyer onboarding:
 ## users
 
 - id (uuid, PK)
-- email (unique)
 - country_code (char(2))  ← ISO-2 country code
 - region (region_enum, nullable)  ← required if country_code = "IT"
 - role (user_role_enum)
@@ -148,11 +147,11 @@ Private table.
 - quality (truffle_quality_enum)
 - weight_grams (int)
 - price_total (decimal)
-- price_per_kg (decimal, calculated server-side)
+- price_per_kg (decimal, generated/stored, server-derived)
 - shipping_price_italy (decimal)
 - shipping_price_abroad (decimal)
 - region (region_enum)  ← region of harvest (Italy)
-- harvest_date (date)
+- harvest_date (date, no future dates)
 - status (active / sold / expired)
 - expires_at (timestamp)
 - created_at
@@ -208,14 +207,14 @@ Constraints:
 
 - id (uuid, PK)
 - order_id (FK → orders.id, unique)
-- seller_id (FK → users.id)
-- buyer_id (FK → users.id)
 - rating (1–5)
 - comment (nullable)
 - created_at
 
 Constraint:
 - One review per order
+
+Note: seller/buyer derived from orders via join
 
 ---
 
@@ -247,7 +246,7 @@ Unique:
 Metadata table only (no public URLs).
 
 - id (uuid, PK)
-- user_id (FK → users.id)
+- user_id (FK → users.id, unique)
 - tesserino_number
 - uploaded_at
 

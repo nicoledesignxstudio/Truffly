@@ -53,11 +53,15 @@ SELECT:
 - User can read only own row.
 - Must have is_active = true.
 
+INSERT: 
+- no insert from client, user profile created server-side
+
 UPDATE:
 - User can update:
   - first_name
   - last_name
-  - region
+  - region (only if country_code equal to 'IT') 
+  - country_code 
   - bio
   - profile_image_url
 - Cannot update:

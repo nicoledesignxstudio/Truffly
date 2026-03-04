@@ -98,8 +98,58 @@ Identity document:
 
 # 3. EDGE FUNCTIONS (CORE BUSINESS LOGIC)
 
-All monetary logic runs in Edge Functions.
+# 3. EDGE FUNCTIONS (CORE BUSINESS LOGIC)
 
+All sensitive business logic and financial operations are handled by Supabase Edge Functions.
+
+Clients (mobile app) must never perform direct writes for operations involving:
+- payments
+- order lifecycle
+- seller approval
+- document verification
+- financial calculations
+
+Edge Functions run with **service_role privileges** and enforce all critical business rules.
+
+---
+
+## EDGE FUNCTIONS
+
+### ensure_user_profile
+Creates the user profile in `public.users` after authentication if it does not already exist.
+
+### create_order_payment
+Creates the Stripe PaymentIntent and inserts the order in the database when a buyer purchases a truffle.
+
+### mark_order_shipped
+Allows the seller to insert the tracking code and mark the order as shipped.
+
+### confirm_order_delivery
+Allows the buyer to confirm package delivery and releases the payment to the seller.
+
+### cancel_unshipped_orders
+Automatically cancels orders that were not shipped within 48 hours and refunds the buyer.
+
+### auto_complete_orders
+Automatically completes orders if the buyer does not confirm delivery after the allowed time window.
+
+### submit_seller_application
+Submits a request for a user to become a verified seller and stores the seller documents.
+
+### approve_seller
+Admin function that approves a seller, updates the seller status, and creates the Stripe Connect account.
+
+### reject_seller
+Admin function that rejects a seller application and removes uploaded verification documents.
+
+### create_review
+Creates a review for a completed order and updates seller rating statistics.
+
+### create_notification
+Creates a new in-app notification for a specific user.
+
+### log_audit_event
+Records security-critical actions in the audit logs for traceability.
 ---
 
 ## 3.1 create-payment-intent
