@@ -158,6 +158,7 @@ Required:
 - First Name
 - Last Name
 - Region
+- Country Code
 
 ---
 

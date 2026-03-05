@@ -2,22 +2,61 @@ create or replace function public.is_admin()
 returns boolean
 language sql
 stable
+set search_path = pg_catalog, public, auth
 as $$
-  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+  select coalesce(
+    ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin',
+    false
+  );
 $$;
 
 create or replace function public.is_active_account()
 returns boolean
 language sql
 stable
+set search_path = pg_catalog, public, auth
 as $$
   select exists (
     select 1
     from public.users u
-    where u.id = auth.uid()
+    where u.id = (select auth.uid())
       and u.is_active = true
   );
 $$;
+
+create or replace function public.admin_list_seller_requests()
+returns table (
+  user_id uuid,
+  first_name text,
+  last_name text,
+  country_code char(2),
+  region public.region_enum,
+  seller_status public.seller_status_enum
+)
+language plpgsql
+stable
+security definer
+set search_path = pg_catalog, public, auth
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Not allowed';
+  end if;
+
+  return query
+  select
+    u.id,
+    u.first_name,
+    u.last_name,
+    u.country_code,
+    u.region,
+    u.seller_status
+  from public.users u
+  where u.seller_status = 'pending';
+end;
+$$;
+
+grant execute on function public.admin_list_seller_requests() to authenticated;
 
 alter table public.users enable row level security;
 alter table public.shipping_addresses enable row level security;
@@ -30,6 +69,20 @@ alter table public.notifications enable row level security;
 alter table public.seller_documents enable row level security;
 alter table public.audit_logs enable row level security;
 
+--ADMIN
+drop policy if exists admins_select_admin_only on public.admins;
+create policy admins_select_admin_only
+  on public.admins
+  for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.admins a
+      where a.user_id = (select auth.uid())
+    )
+  );
+
 -- USERS
 revoke update on table public.users from authenticated;
 grant update (first_name, last_name, region, bio, profile_image_url, country_code) on table public.users to authenticated;
@@ -37,14 +90,13 @@ grant update (first_name, last_name, region, bio, profile_image_url, country_cod
 drop policy if exists users_select_own_active on public.users;
 drop policy if exists users_insert_own_active on public.users;
 drop policy if exists users_update_own_profile on public.users;
-drop policy if exists users_update_seller_status_admin on public.users;
 
 create policy users_select_own_active
   on public.users
   for select
   to authenticated
   using (
-    id = auth.uid()
+    id = (select auth.uid())
     and is_active = true
   ); 
 
@@ -53,11 +105,11 @@ create policy users_update_own_profile
   for update
   to authenticated
   using (
-    id = auth.uid()
+    id = (select auth.uid())
     and is_active = true
   )
   with check (
-    id = auth.uid()
+    id = (select auth.uid())
     and is_active = true
     and country_code ~ '^[A-Z]{2}$'
     and (
@@ -66,13 +118,6 @@ create policy users_update_own_profile
       (country_code <> 'IT' and region is null)
     )  
   );
-
-create policy users_update_seller_status_admin
-  on public.users
-  for update
-  to authenticated
-  using (public.is_admin())
-  with check (public.is_admin());
 
 -- SHIPPING_ADDRESSES
 
@@ -86,7 +131,7 @@ create policy shipping_addresses_owner_select
   for select
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -95,7 +140,7 @@ create policy shipping_addresses_owner_insert
   for insert
   to authenticated
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -104,11 +149,11 @@ create policy shipping_addresses_owner_update
   for update
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   )
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -117,7 +162,7 @@ create policy shipping_addresses_owner_delete
   for delete
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -141,12 +186,12 @@ create policy truffles_insert_approved_seller_only
   for insert
   to authenticated
   with check (
-    seller_id = auth.uid()
+    seller_id = (select auth.uid())
     and status = 'active'
     and exists (
       select 1
       from public.users u
-      where u.id = auth.uid()
+      where u.id = (select auth.uid())
         and u.role = 'seller'
         and u.seller_status = 'approved'
         and u.stripe_account_id is not null
@@ -159,7 +204,7 @@ create policy truffles_delete_owner_active_without_orders
   for delete
   to authenticated
   using (
-    seller_id = auth.uid()
+    seller_id = (select auth.uid())
     and status = 'active'
     and public.is_active_account()
     and not exists (
@@ -190,7 +235,7 @@ create policy truffle_images_insert_owner_active_truffle
       select 1
       from public.truffles t
       where t.id = truffle_id
-        and t.seller_id = auth.uid()
+        and t.seller_id = (select auth.uid())
         and t.status = 'active'
     )
     and public.is_active_account()
@@ -205,7 +250,7 @@ create policy truffle_images_delete_owner_active_truffle
       select 1
       from public.truffles t
       where t.id = truffle_id
-        and t.seller_id = auth.uid()
+        and t.seller_id = (select auth.uid())
         and t.status = 'active'
     )
     and public.is_active_account()
@@ -222,7 +267,7 @@ create policy orders_select_buyer_or_seller
   for select
   to authenticated
   using (
-    (buyer_id = auth.uid() or seller_id = auth.uid())
+    (buyer_id = (select auth.uid()) or seller_id = (select auth.uid()))
     and public.is_active_account()
   );
 
@@ -260,7 +305,7 @@ create policy reviews_insert_buyer_completed_order
       select 1
       from public.orders o
       where o.id = order_id
-        and o.buyer_id = auth.uid()
+        and o.buyer_id = (select auth.uid())
         and o.status = 'completed'
     )
   );
@@ -276,7 +321,7 @@ create policy favorites_owner_select
   for select
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -285,7 +330,7 @@ create policy favorites_owner_insert
   for insert
   to authenticated
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
     and exists (
       select 1
@@ -300,7 +345,7 @@ create policy favorites_owner_delete
   for delete
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -318,7 +363,7 @@ create policy notifications_owner_select
   for select
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -327,11 +372,11 @@ create policy notifications_owner_update
   for update
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   )
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -340,7 +385,7 @@ create policy notifications_owner_delete
   for delete
   to authenticated
   using (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and public.is_active_account()
   );
 
@@ -363,7 +408,7 @@ create policy seller_documents_owner_or_admin_select
   using (
     public.is_admin()
     or (
-      user_id = auth.uid()
+      user_id = (select auth.uid())
       and public.is_active_account()
     )
   );
@@ -373,11 +418,11 @@ create policy seller_documents_owner_insert_onboarding_only
   for insert
   to authenticated
   with check (
-    user_id = auth.uid()
+    user_id = (select auth.uid())
     and exists (
       select 1
       from public.users u
-      where u.id = auth.uid()
+      where u.id = (select auth.uid())
         and u.is_active = true
         and u.role = 'seller'
         and u.seller_status in ('not_requested', 'pending', 'rejected')
@@ -391,7 +436,7 @@ create policy seller_documents_owner_or_admin_delete
   using (
     public.is_admin()
     or (
-      user_id = auth.uid()
+      user_id = (select auth.uid())
       and public.is_active_account()
     )
   );
@@ -452,7 +497,7 @@ create policy storage_truffle_images_insert_owner_active_truffle
       select 1
       from public.truffles t
       where t.id::text = split_part(name, '/', 1)
-        and t.seller_id = auth.uid()
+        and t.seller_id = (select auth.uid())
         and t.status = 'active'
     )
   );
@@ -468,7 +513,7 @@ create policy storage_truffle_images_delete_owner_active_truffle
       select 1
       from public.truffles t
       where t.id::text = split_part(name, '/', 1)
-        and t.seller_id = auth.uid()
+        and t.seller_id = (select auth.uid())
         and t.status = 'active'
     )
   );
@@ -487,7 +532,7 @@ create policy storage_seller_documents_select_owner_or_admin
     bucket_id = 'seller_documents'
     and (
       public.is_admin()
-      or split_part(name, '/', 1) = auth.uid()::text
+      or split_part(name, '/', 1) = (select auth.uid())::text
     )
   );
 
@@ -497,11 +542,11 @@ create policy storage_seller_documents_insert_owner_onboarding_only
   to authenticated
   with check (
     bucket_id = 'seller_documents'
-    and split_part(name, '/', 1) = auth.uid()::text
+    and split_part(name, '/', 1) = (select auth.uid())::text
     and exists (
       select 1
       from public.users u
-      where u.id = auth.uid()
+      where u.id = (select auth.uid())
         and u.is_active = true
         and u.role = 'seller'
         and u.seller_status in ('not_requested', 'pending', 'rejected')
@@ -516,6 +561,6 @@ create policy storage_seller_documents_delete_owner_or_admin
     bucket_id = 'seller_documents'
     and (
       public.is_admin()
-      or split_part(name, '/', 1) = auth.uid()::text
+      or split_part(name, '/', 1) = (select auth.uid())::text
     )
   );

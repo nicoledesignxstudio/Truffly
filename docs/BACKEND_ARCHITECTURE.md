@@ -98,8 +98,6 @@ Identity document:
 
 # 3. EDGE FUNCTIONS (CORE BUSINESS LOGIC)
 
-# 3. EDGE FUNCTIONS (CORE BUSINESS LOGIC)
-
 All sensitive business logic and financial operations are handled by Supabase Edge Functions.
 
 Clients (mobile app) must never perform direct writes for operations involving:
