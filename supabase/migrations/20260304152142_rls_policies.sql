@@ -69,20 +69,6 @@ alter table public.notifications enable row level security;
 alter table public.seller_documents enable row level security;
 alter table public.audit_logs enable row level security;
 
---ADMIN
-drop policy if exists admins_select_admin_only on public.admins;
-create policy admins_select_admin_only
-  on public.admins
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.admins a
-      where a.user_id = (select auth.uid())
-    )
-  );
-
 -- USERS
 revoke update on table public.users from authenticated;
 grant update (first_name, last_name, region, bio, profile_image_url, country_code) on table public.users to authenticated;
