@@ -115,6 +115,7 @@ What was done:
 * Added `core/bootstrap/domain/bootstrap_failure.dart` (typed failures):
   * `BackendUnavailableFailure`
   * `NetworkTimeoutFailure`
+  * `NetworkFailure`
   * `ConfigFailure`
   * `InvalidSessionFailure`
   * `UnknownBootstrapFailure`
@@ -135,6 +136,7 @@ What was done:
   * `features/startup/presentation/startup_loading_screen.dart`
   * `features/startup/presentation/startup_error_screen.dart`
 * `StartupGateScreen` only triggers bootstrap and renders loading/error UI
+  * bootstrap start triggered directly in `initState()` (no post-frame callback)
 
 ## Routing Refactor with go_router
 

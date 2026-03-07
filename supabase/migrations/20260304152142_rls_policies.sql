@@ -71,7 +71,7 @@ alter table public.audit_logs enable row level security;
 
 -- USERS
 revoke update on table public.users from authenticated;
-grant update (first_name, last_name, region, bio, profile_image_url, country_code) on table public.users to authenticated;
+grant update (first_name, last_name, region, bio, profile_image_url, country_code, onboarding_completed) on table public.users to authenticated;
 
 drop policy if exists users_select_own_active on public.users;
 drop policy if exists users_insert_own_active on public.users;
@@ -97,12 +97,21 @@ create policy users_update_own_profile
   with check (
     id = (select auth.uid())
     and is_active = true
-    and country_code ~ '^[A-Z]{2}$'
     and (
-      (country_code = 'IT'  and region is not null)
-      or
-      (country_code <> 'IT' and region is null)
-    )  
+      onboarding_completed = false
+      or (
+        first_name is not null
+        and btrim(first_name) <> ''
+        and last_name is not null
+        and btrim(last_name) <> ''
+        and country_code ~ '^[A-Z]{2}$'
+        and (
+          (country_code = 'IT' and region is not null)
+          or
+          (country_code <> 'IT' and region is null)
+        )
+      )
+    )
   );
 
 -- SHIPPING_ADDRESSES
