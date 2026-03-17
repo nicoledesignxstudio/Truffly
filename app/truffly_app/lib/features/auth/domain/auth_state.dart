@@ -41,25 +41,25 @@ final class AuthUnauthenticated extends AuthState {
 /// Session exists but email is not verified yet.
 final class AuthAuthenticatedUnverified extends AuthAuthenticatedState {
   const AuthAuthenticatedUnverified({
-    required this.userId,
-    required this.email,
-  }) : super(userId: userId, email: email);
+    required super.userId,
+    required super.email,
+  });
 }
 
 /// Session and email verification are valid, but onboarding is still required.
 final class AuthAuthenticatedOnboardingRequired extends AuthAuthenticatedState {
   const AuthAuthenticatedOnboardingRequired({
-    required this.userId,
-    required this.email,
-  }) : super(userId: userId, email: email);
+    required super.userId,
+    required super.email,
+  });
 }
 
 /// User is fully authenticated and onboarding is complete.
 final class AuthAuthenticatedReady extends AuthAuthenticatedState {
   const AuthAuthenticatedReady({
-    required this.userId,
-    required this.email,
-  }) : super(userId: userId, email: email);
+    required super.userId,
+    required super.email,
+  });
 }
 
 bool _listEquals(List<Object?> left, List<Object?> right) {

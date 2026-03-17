@@ -16,7 +16,10 @@ class _StartupGateScreenState extends ConsumerState<StartupGateScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(bootstrapNotifierProvider.notifier).startBootstrap();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(bootstrapNotifierProvider.notifier).startBootstrap();
+    });
   }
 
   @override

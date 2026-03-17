@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:truffly_app/core/theme/app_colors.dart';
 
 class StartupLoadingScreen extends StatelessWidget {
   const StartupLoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.white,
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 12),
-            Text('Starting Truffly...'),
-          ],
+        child: SvgPicture.asset(
+          'assets/images/auth/truffly_logo.svg',
+          width: 144,
+          colorFilter: const ColorFilter.mode(
+            AppColors.black,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );

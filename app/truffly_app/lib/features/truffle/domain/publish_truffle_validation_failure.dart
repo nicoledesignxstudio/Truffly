@@ -1,0 +1,17 @@
+enum PublishTruffleValidationFailure {
+  imagesRequired,
+  imagesTooMany,
+  qualityRequired,
+  typeRequired,
+  weightRequired,
+  weightInvalid,
+  totalPriceRequired,
+  totalPriceInvalid,
+  shippingItalyRequired,
+  shippingItalyInvalid,
+  shippingAbroadRequired,
+  shippingAbroadInvalid,
+  regionRequired,
+  harvestDateRequired,
+  harvestDateFuture,
+}

@@ -1,0 +1,4 @@
+enum NotificationPermissionResult {
+  granted,
+  denied,
+}

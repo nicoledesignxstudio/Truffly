@@ -53,7 +53,7 @@ create table public.users (
   seller_review_count integer not null default 0,
   seller_rating_avg numeric(2,1) not null default 0,
   is_active boolean not null default true,
-  onboarding_completed boolean not null default false;
+  onboarding_completed boolean not null default false,
   deleted_at timestamptz,
   created_at timestamptz not null default timezone('utc', now()),
   constraint users_country_code_format_chk check (country_code ~ '^[A-Z]{2}$'),
@@ -235,4 +235,3 @@ alter table public.favorites enable row level security;
 alter table public.notifications enable row level security;
 alter table public.seller_documents enable row level security;
 alter table public.audit_logs enable row level security;
-

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:truffly_app/core/config/auth_redirects.dart';
 import 'package:truffly_app/features/auth/data/auth_result.dart';
 import 'package:truffly_app/features/auth/domain/auth_failure.dart';
 
@@ -36,19 +37,30 @@ final class AuthService {
 
   final SupabaseClient _supabaseClient;
 
-  Future<AuthResult<AuthUnit>> signUp({
+  Future<AuthResult<AuthSignupSuccess>> signUp({
     required String email,
     required String password,
+    String? emailRedirectTo,
   }) async {
     final normalizedEmail = _normalizeEmail(email);
 
     try {
-      await _supabaseClient.auth
-          .signUp(email: normalizedEmail, password: password)
+      final response = await _supabaseClient.auth
+          .signUp(
+            email: normalizedEmail,
+            password: password,
+            emailRedirectTo:
+                emailRedirectTo ?? AuthRedirects.verifyEmailCallbackUri.toString(),
+          )
           .timeout(_requestTimeout);
-      return const AuthSuccess<AuthUnit>(AuthUnit.value);
+      return AuthSuccess<AuthSignupSuccess>(
+        AuthSignupSuccess(
+          email: normalizedEmail,
+          sessionEstablished: response.session != null,
+        ),
+      );
     } catch (error) {
-      return AuthFailureResult<AuthUnit>(_mapAuthError(error));
+      return AuthFailureResult<AuthSignupSuccess>(_mapAuthError(error));
     }
   }
 
@@ -88,7 +100,8 @@ final class AuthService {
           .resend(
             email: normalizedEmail,
             type: OtpType.signup,
-            emailRedirectTo: emailRedirectTo,
+            emailRedirectTo:
+                emailRedirectTo ?? AuthRedirects.verifyEmailCallbackUri.toString(),
           )
           .timeout(_requestTimeout);
       return const AuthSuccess<AuthUnit>(AuthUnit.value);
@@ -107,7 +120,9 @@ final class AuthService {
       await _supabaseClient.auth
           .resetPasswordForEmail(
             normalizedEmail,
-            redirectTo: emailRedirectTo,
+            redirectTo:
+                emailRedirectTo ??
+                AuthRedirects.resetPasswordCallbackUri.toString(),
           )
           .timeout(_requestTimeout);
       return const AuthSuccess<AuthUnit>(AuthUnit.value);

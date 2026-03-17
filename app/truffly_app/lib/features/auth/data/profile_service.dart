@@ -77,6 +77,38 @@ final class ProfileService {
     }
   }
 
+  Future<AuthResult<AuthUnit>> completeBuyerOnboarding({
+    required String firstName,
+    required String lastName,
+    required String countryCode,
+    required String? region,
+  }) async {
+    final authUser = _supabaseClient.auth.currentUser;
+    if (authUser == null) {
+      return const AuthFailureResult<AuthUnit>(UnauthenticatedFailure());
+    }
+
+    try {
+      await _supabaseClient
+          .from('users')
+          .update({
+            'first_name': firstName,
+            'last_name': lastName,
+            'country_code': countryCode,
+            'region': region,
+            'onboarding_completed': true,
+          })
+          .eq('id', authUser.id)
+          .select('id')
+          .single()
+          .timeout(_requestTimeout);
+
+      return const AuthSuccess<AuthUnit>(AuthUnit.value);
+    } catch (error) {
+      return AuthFailureResult<AuthUnit>(_mapProfileError(error));
+    }
+  }
+
   AuthFailure _mapProfileError(Object error) {
     if (error is TimeoutException) {
       return const TimeoutFailure();
@@ -89,6 +121,11 @@ final class ProfileService {
     if (error is PostgrestException) {
       if (error.code == 'PGRST116') {
         return const UserProfileMissingFailure();
+      }
+
+      final message = error.message.toLowerCase();
+      if (message.contains('network') || message.contains('fetch')) {
+        return const NetworkErrorFailure();
       }
 
       // PostgREST codes are not reliable HTTP status codes.

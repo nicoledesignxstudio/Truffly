@@ -59,3 +59,28 @@ final class AuthUnit {
 
   static const value = AuthUnit._();
 }
+
+final class AuthSignupSuccess {
+  const AuthSignupSuccess({
+    required this.email,
+    this.verificationRequired = true,
+    this.sessionEstablished = false,
+  });
+
+  final String email;
+  final bool verificationRequired;
+  final bool sessionEstablished;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthSignupSuccess &&
+            other.email == email &&
+            other.verificationRequired == verificationRequired &&
+            other.sessionEstablished == sessionEstablished);
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(email, verificationRequired, sessionEstablished);
+}
