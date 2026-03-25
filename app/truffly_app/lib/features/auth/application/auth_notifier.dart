@@ -28,7 +28,7 @@ enum _AuthReevaluationTrigger {
   localActionFallback,
 }
 
-final class AuthNotifier extends Notifier<AuthState> {
+class AuthNotifier extends Notifier<AuthState> {
   StreamSubscription<sb.AuthState>? _authStateSub;
   final ListQueue<_QueuedAuthEvaluation> _evaluationQueue = ListQueue();
   _QueuedAuthEvaluation? _activeEvaluation;
@@ -149,6 +149,18 @@ final class AuthNotifier extends Notifier<AuthState> {
 
   Future<AuthResult<AuthUnit>> refreshAuthState() async {
     return _requestAuthEvaluation(_AuthReevaluationTrigger.manualRefresh);
+  }
+
+  void markReadyFromCurrentSession() {
+    final currentAuthUser = _readCurrentAuthUser();
+    if (currentAuthUser == null) return;
+
+    _setResolvedState(
+      AuthAuthenticatedReady(
+        userId: currentAuthUser.id,
+        email: (currentAuthUser.email ?? '').trim(),
+      ),
+    );
   }
 
   void _subscribeToAuthStateChanges() {

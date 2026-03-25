@@ -64,7 +64,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                 currentStep.id != OnboardingStepId.notifications) ...[
               AuthErrorMessage(
                 message: _submissionErrorText(
-                  onboardingState.submissionFailure,
+                  onboardingState.submissionIssue,
                   l10n,
                 ),
               ),
@@ -139,10 +139,10 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
 }
 
 String _submissionErrorText(
-  OnboardingSubmissionFailure? failure,
+  OnboardingSubmissionIssue? issue,
   AppLocalizations l10n,
 ) {
-  return switch (failure) {
+  final baseMessage = switch (issue?.failure) {
     OnboardingSubmissionFailure.network => l10n.onboardingSubmitNetworkError,
     OnboardingSubmissionFailure.validation => l10n.onboardingSubmitValidationError,
     OnboardingSubmissionFailure.documentUpload => l10n.onboardingSubmitDocumentError,
@@ -150,4 +150,19 @@ String _submissionErrorText(
     OnboardingSubmissionFailure.unimplemented => l10n.onboardingSubmitUnavailableError,
     OnboardingSubmissionFailure.unknown || null => l10n.onboardingFlowSubmissionError,
   };
+
+  final diagnostics = <String>[
+    if (issue?.httpStatus != null) 'status=${issue!.httpStatus}',
+    if (issue?.backendCode != null && issue!.backendCode!.trim().isNotEmpty)
+      'code=${issue.backendCode}',
+    if (issue?.backendMessage != null &&
+        issue!.backendMessage!.trim().isNotEmpty)
+      'message=${issue.backendMessage}',
+  ];
+
+  if (diagnostics.isEmpty) {
+    return baseMessage;
+  }
+
+  return '$baseMessage\n${diagnostics.join(' | ')}';
 }

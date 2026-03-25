@@ -1,6 +1,6 @@
 # Project Status - Truffly
 
-Current phase: Flutter auth + onboarding implementation completed, marketplace/product areas still pending
+Current phase: Auth + onboarding implemented, marketplace listing and seller publish flow now materially integrated
 Goal: Build MVP marketplace for truffles
 
 ---
@@ -38,6 +38,7 @@ Main entities currently present in schema:
 * shipping_addresses
 * truffles
 * truffle_images
+* publish_truffle_requests
 * orders
 * reviews
 * favorites
@@ -47,15 +48,19 @@ Main entities currently present in schema:
 
 ## Seed Data
 
-* `seed.sql` created
-* Local database can be populated with test users, truffles, orders and reviews
+* `seed.sql` created and revised for current schema constraints
+* local database can be populated with test users, truffles, orders and reviews
+* seed consistency fixes applied for:
+  * seller auth users required by `truffles.seller_id`
+  * matching `public.users` profile rows
+  * `truffle_images.order_index` valid values
 
 ## Flutter + Supabase Integration
 
 * `.env.local` loading added in Flutter bootstrap
-* Environment validation for `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+* environment validation for `SUPABASE_URL` and `SUPABASE_ANON_KEY`
 * Supabase initialized in `main.dart`
-* App runs inside `ProviderScope`
+* app runs inside `ProviderScope`
 * Supabase-backed startup/auth flow connected to router
 
 ## Flutter Project Architecture
@@ -68,13 +73,15 @@ Main areas already structured:
 * `features/auth/`
 * `features/onboarding/`
 * `features/home/`
-* placeholder feature roots for marketplace/product areas
+* `features/marketplace/`
+* `features/truffle/`
 
 The app currently uses:
 
 * Riverpod for application state
 * go_router for route-driven navigation
 * Supabase Auth + database integration
+* Supabase Edge Functions for seller onboarding and seller publish flows
 
 ## Bootstrap + Routing Foundation
 
@@ -114,6 +121,12 @@ Implemented auth behavior:
 * onboarding-required gating
 * password recovery support
 * sign out and session refresh handling
+
+Recent auth UI refinements:
+
+* welcome screen hero image now uses rounded corners
+* welcome screen copy simplified to a single title
+* welcome layout spacing rebalanced to remove overflow on smaller screens
 
 ## Onboarding Feature Implemented
 
@@ -271,6 +284,12 @@ Backend behavior in `supabase/functions/submit_seller_application/index.ts`:
   * seller_documents metadata
   * uploaded storage objects
 
+Recent seller submit hardening:
+
+* backend errors now expose more precise codes for document upload / metadata / user update failures
+* client-side onboarding diagnostics now preserve backend status/code/message for easier debugging
+* auth readiness fallback support was added for cases where onboarding completion needs to promote the current session immediately
+
 ## Onboarding Error Mapping
 
 Typed onboarding submission failures are implemented.
@@ -329,11 +348,83 @@ Recent UI refinements already applied:
 * onboarding content kept top-aligned instead of vertically centered
 * document cards compacted and refined
 * seller document outer card border aligned with other inputs
-* seller document empty state now uses document type label instead of generic “no file selected”
+* seller document empty state now uses document type label instead of generic "no file selected"
+
+## Marketplace Listing Implemented
+
+Marketplace is no longer a placeholder.
+
+Current listing surface includes:
+
+* truffle listing page with authenticated access
+* debounced search input with trim handling
+* truffle-type quick filters
+* filter bottom sheet for:
+  * quality
+  * price range
+  * weight range
+  * harvest date
+  * region
+* refresh + pagination/load-more behavior
+* loading skeletons
+* empty state
+* error state and retry flow
+* favorite toggle wiring
+* seller publish floating action button gated by seller eligibility
+
+Current marketplace UI refinements:
+
+* centered page title
+* auth/onboarding-consistent radii, shadows, spacing and field styling
+* custom filter chips and type chips aligned with project theme
+* partial-height filter sheet with safe area handling
+* product cards updated with refined typography, badge, favorite affordance and shadow/border styling
+
+## Truffle Images + Detail Retrieval
+
+Truffle image retrieval has been hardened for the current Supabase storage setup.
+
+Implemented behavior:
+
+* listing and detail flows resolve image URLs through `TruffleImageUrlResolver`
+* private storage objects are accessed via signed URLs
+* resolver now normalizes storage paths from database values
+* Android emulator host normalization is applied for storage URLs when needed
+
+## Seller Publish Truffle Flow Implemented
+
+Seller publish is now materially wired end-to-end.
+
+Current publish flow includes:
+
+* seller publish entry from marketplace page
+* dedicated publish form page
+* local image picking and validation
+* quality, type, latin name, pricing, shipping, region and harvest date inputs
+* client-side validation before submit
+* confirmation dialog before publish
+* request submission through the publish edge flow
+
+Current publish UI refinements:
+
+* publish page visual language aligned with marketplace/auth
+* custom quality chips
+* separate shipping section
+* validation errors shown only after publish is attempted
+* default quality preselection
+* refined image upload cards and confirmation dialog styling
+
+## Publish Backend / RLS Hardening
+
+Recent backend changes for publish flow:
+
+* idempotency support via `publish_truffle_requests`
+* dedicated RLS enablement added for `public.publish_truffle_requests`
+* service-role-only policies applied for function-owned access patterns
 
 ## Localization
 
-Onboarding strings are localized through ARB files.
+Onboarding and marketplace/publish strings are localized through ARB files.
 
 Updated localization coverage includes:
 
@@ -344,12 +435,21 @@ Updated localization coverage includes:
 * notifications
 * welcome pages
 * document picker errors and actions
+* marketplace filters and labels
+* publish form labels and validation
+
+## Local Development Runtime Hardening
+
+Recent local-dev fixes include:
+
+* Android emulator normalization from `localhost` / `127.0.0.1` to `10.0.2.2` in env handling
+* `usesCleartextTraffic=true` for local HTTP Supabase access on Android
 
 ## Current Validation / Analysis Status
 
 Verified in current codebase:
 
-* `flutter analyze` clean after recent onboarding/auth UI and flow changes
+* no clean full-project `flutter analyze` confirmation has been recorded after the latest marketplace / publish / local-runtime changes
 
 Existing automated tests in repository still primarily cover:
 
@@ -366,24 +466,27 @@ The following items are still incomplete or still need stronger verification:
 * no dedicated automated test coverage yet for onboarding notifier / onboarding flow UI
 * notification permission step still uses fallback behavior instead of platform-native permission integration
 * onboarding asset strategy currently relies on safe fallback rendering if onboarding images are missing
-* manual end-to-end verification of the latest buyer flow progression fix is still recommended
-* home / marketplace / orders / profile areas are still placeholders or only lightly wired compared to auth/onboarding
+* manual end-to-end verification is still recommended for:
+  * seller onboarding submit
+  * local storage image rendering on emulator/device
+  * seller publish flow
+* home / orders / favorites / profile areas still need broader product completion beyond the current marketplace listing surface
 
 ---
 
 # Current Task
 
-## Marketplace / Product Surface Still Pending
+## Product Surface Expansion And Stabilization
 
-Auth and onboarding are now materially implemented.  
-The next major product phase is the actual marketplace experience.
+Auth, onboarding, marketplace listing and seller publish foundations are now in place.  
+The next major phase is stabilization plus expansion of the remaining user-facing product areas.
 
 Planned next tasks:
 
-* implement marketplace listing flow
-* implement truffle detail screens
-* replace placeholder home with real authenticated shell
+* verify and stabilize seller onboarding + seller publish flows end-to-end
+* implement / refine truffle detail experience
+* replace placeholder home with a real authenticated shell
 * add profile view/editing beyond onboarding completion
 * wire seller review/admin follow-up flows after seller application submission
 * implement favorites / orders / profile feature surfaces
-* add dedicated onboarding test coverage
+* add dedicated onboarding / marketplace / publish test coverage

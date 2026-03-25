@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:truffly_app/core/theme/app_colors.dart';
+import 'package:truffly_app/core/theme/app_radii.dart';
+import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
@@ -32,21 +35,27 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.spacingM,
-          right: AppSpacing.spacingM,
-          top: AppSpacing.spacingS,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.spacingM,
-        ),
-        child: SingleChildScrollView(
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.auth)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.spacingM,
+            right: AppSpacing.spacingM,
+            top: AppSpacing.spacingM,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.spacingM,
+          ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  TextButton(
+                  IconButton(
                     onPressed: () {
                       setState(() {
                         _draft = TruffleListingFilters.defaults().copyWith(
@@ -54,7 +63,8 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                         );
                       });
                     },
-                    child: Text(l10n.truffleFiltersReset),
+                    icon: const Icon(Icons.refresh_rounded),
+                    color: AppColors.black80,
                   ),
                   Expanded(
                     child: Text(
@@ -66,81 +76,98 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close_rounded),
+                    color: AppColors.black,
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingS),
+              const SizedBox(height: 30),
               _SectionTitle(title: l10n.truffleFilterQuality),
-              _buildAllToggle(
-                label: l10n.truffleFilterAll,
-                selected: _draft.qualities.isEmpty,
-                onTap: () => setState(() {
-                  _draft = _draft.copyWith(qualities: <TruffleQuality>{});
-                }),
-              ),
-              Wrap(
-                spacing: AppSpacing.spacingXS,
-                runSpacing: AppSpacing.spacingXS,
+              _HorizontalChipList(
                 children: [
+                  _StyledSheetChip(
+                    label: l10n.truffleFilterAll,
+                    selected: _draft.qualities.isEmpty,
+                    onTap: () => setState(() {
+                      _draft = _draft.copyWith(qualities: <TruffleQuality>{});
+                    }),
+                  ),
                   for (final quality in TruffleQuality.values)
-                    FilterChip(
-                      label: Text(quality.localizedLabel(l10n)),
+                    _StyledSheetChip(
+                      label: quality.choiceLabel(l10n),
                       selected: _draft.qualities.contains(quality),
-                      onSelected: (_) => _toggleQuality(quality),
+                      onTap: () => _toggleQuality(quality),
                     ),
                 ],
               ),
               const SizedBox(height: AppSpacing.spacingL),
               _SectionTitle(title: l10n.truffleFilterPriceRange),
-              RangeSlider(
-                values: RangeValues(_draft.minPrice, _draft.maxPrice),
-                min: TruffleListingFilterBounds.minPriceEuro,
-                max: TruffleListingFilterBounds.maxPriceEuro,
-                divisions: TruffleListingFilterBounds.priceDivisions,
-                labels: RangeLabels(
-                  _draft.minPrice.round().toString(),
-                  _draft.maxPrice.round().toString(),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: AppColors.black,
+                  inactiveTrackColor: AppColors.softGrey,
+                  thumbColor: AppColors.black,
+                  overlayColor: AppColors.black10,
+                  activeTickMarkColor: AppColors.black,
+                  inactiveTickMarkColor: AppColors.softGrey,
                 ),
-                onChanged: (values) {
-                  setState(() {
-                    _draft = _draft.copyWith(
-                      minPrice: values.start,
-                      maxPrice: values.end,
-                    );
-                  });
-                },
+                child: RangeSlider(
+                  values: RangeValues(_draft.minPrice, _draft.maxPrice),
+                  min: TruffleListingFilterBounds.minPriceEuro,
+                  max: TruffleListingFilterBounds.maxPriceEuro,
+                  divisions: TruffleListingFilterBounds.priceDivisions,
+                  labels: RangeLabels(
+                    _draft.minPrice.round().toString(),
+                    _draft.maxPrice.round().toString(),
+                  ),
+                  onChanged: (values) {
+                    setState(() {
+                      _draft = _draft.copyWith(
+                        minPrice: values.start,
+                        maxPrice: values.end,
+                      );
+                    });
+                  },
+                ),
               ),
               const SizedBox(height: AppSpacing.spacingL),
               _SectionTitle(title: l10n.truffleFilterWeight),
-              RangeSlider(
-                values: RangeValues(_draft.minWeight, _draft.maxWeight),
-                min: TruffleListingFilterBounds.minWeightGrams,
-                max: TruffleListingFilterBounds.maxWeightGrams,
-                divisions: TruffleListingFilterBounds.weightDivisions,
-                labels: RangeLabels(
-                  _draft.minWeight.round().toString(),
-                  _draft.maxWeight.round().toString(),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: AppColors.black,
+                  inactiveTrackColor: AppColors.softGrey,
+                  thumbColor: AppColors.black,
+                  overlayColor: AppColors.black10,
+                  activeTickMarkColor: AppColors.black,
+                  inactiveTickMarkColor: AppColors.softGrey,
                 ),
-                onChanged: (values) {
-                  setState(() {
-                    _draft = _draft.copyWith(
-                      minWeight: values.start,
-                      maxWeight: values.end,
-                    );
-                  });
-                },
+                child: RangeSlider(
+                  values: RangeValues(_draft.minWeight, _draft.maxWeight),
+                  min: TruffleListingFilterBounds.minWeightGrams,
+                  max: TruffleListingFilterBounds.maxWeightGrams,
+                  divisions: TruffleListingFilterBounds.weightDivisions,
+                  labels: RangeLabels(
+                    _draft.minWeight.round().toString(),
+                    _draft.maxWeight.round().toString(),
+                  ),
+                  onChanged: (values) {
+                    setState(() {
+                      _draft = _draft.copyWith(
+                        minWeight: values.start,
+                        maxWeight: values.end,
+                      );
+                    });
+                  },
+                ),
               ),
               const SizedBox(height: AppSpacing.spacingL),
               _SectionTitle(title: l10n.truffleFilterHarvestDate),
-              Wrap(
-                spacing: AppSpacing.spacingXS,
-                runSpacing: AppSpacing.spacingXS,
+              _HorizontalChipList(
                 children: [
                   for (final preset in HarvestDatePreset.values)
-                    ChoiceChip(
-                      label: Text(_harvestLabel(l10n, preset)),
+                    _StyledSheetChip(
+                      label: _harvestLabel(l10n, preset),
                       selected: _draft.harvestDatePreset == preset,
-                      onSelected: (_) {
+                      onTap: () {
                         setState(() {
                           _draft = _draft.copyWith(harvestDatePreset: preset);
                         });
@@ -150,26 +177,24 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
               ),
               const SizedBox(height: AppSpacing.spacingL),
               _SectionTitle(title: l10n.truffleFilterRegion),
-              _buildAllToggle(
-                label: l10n.truffleFilterAll,
-                selected: _draft.regions.isEmpty,
-                onTap: () => setState(() {
-                  _draft = _draft.copyWith(regions: <String>{});
-                }),
-              ),
-              Wrap(
-                spacing: AppSpacing.spacingXS,
-                runSpacing: AppSpacing.spacingXS,
+              _HorizontalChipList(
                 children: [
+                  _StyledSheetChip(
+                    label: l10n.truffleFilterAll,
+                    selected: _draft.regions.isEmpty,
+                    onTap: () => setState(() {
+                      _draft = _draft.copyWith(regions: <String>{});
+                    }),
+                  ),
                   for (final region in ItalianRegions.values)
-                    FilterChip(
-                      label: Text(ItalianRegions.localizedLabel(l10n, region)),
+                    _StyledSheetChip(
+                      label: ItalianRegions.localizedLabel(l10n, region),
                       selected: _draft.regions.contains(region),
-                      onSelected: (_) => _toggleRegion(region),
+                      onTap: () => _toggleRegion(region),
                     ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: 30),
               AuthPrimaryButton(
                 label: l10n.truffleFiltersApply,
                 onPressed: () => Navigator.of(context).pop(_draft),
@@ -177,21 +202,6 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildAllToggle({
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.spacingS),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onTap(),
       ),
     );
   }
@@ -240,7 +250,76 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.spacingS),
       child: Text(
         title,
-        style: AppTextStyles.cardTitle,
+        style: AppTextStyles.bodyLarge.copyWith(
+          fontWeight: FontWeight.w500,
+          color: AppColors.black,
+        ),
+      ),
+    );
+  }
+}
+
+class _HorizontalChipList extends StatelessWidget {
+  const _HorizontalChipList({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var index = 0; index < children.length; index++) ...[
+            if (index > 0) const SizedBox(width: AppSpacing.spacingXS),
+            children[index],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StyledSheetChip extends StatelessWidget {
+  const _StyledSheetChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: selected ? AppColors.accent : AppColors.white,
+        borderRadius: AppRadii.authBorderRadius,
+        border: Border.all(
+          color: selected ? AppColors.accent : AppColors.black10,
+        ),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadii.authBorderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.spacingM + 2,
+              vertical: AppSpacing.spacingS,
+            ),
+            child: Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: selected ? AppColors.white : AppColors.black80,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

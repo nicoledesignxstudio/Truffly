@@ -17,6 +17,8 @@ enum TruffleQuality {
         TruffleQuality.third => l10n.truffleQualityThird,
       };
 
+  String choiceLabel(AppLocalizations l10n) => localizedLabel(l10n);
+
   static TruffleQuality fromDbValue(String value) {
     return values.firstWhere(
       (candidate) => candidate.dbValue == value,

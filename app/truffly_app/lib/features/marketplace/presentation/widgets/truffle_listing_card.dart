@@ -20,6 +20,9 @@ class TruffleListingCard extends StatelessWidget {
     required this.onFavoriteTap,
   });
 
+  static const double _cardRadius = 10;
+  static const double _favoriteButtonSize = 43;
+
   final TruffleListItem item;
   final bool isFavorite;
   final bool isFavoritePending;
@@ -31,18 +34,19 @@ class TruffleListingCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 240, maxHeight: 270),
+      constraints: const BoxConstraints(minHeight: 300, maxHeight: 330),
       child: Material(
         color: AppColors.white,
-        borderRadius: AppRadii.authBorderRadius,
+        borderRadius: BorderRadius.circular(_cardRadius),
         child: InkWell(
           onTap: onTap,
-          borderRadius: AppRadii.authBorderRadius,
+          borderRadius: BorderRadius.circular(_cardRadius),
           child: Ink(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: AppRadii.authBorderRadius,
-              boxShadow: AppShadows.authField,
+              borderRadius: BorderRadius.circular(_cardRadius),
+              border: Border.all(color: AppColors.black10),
+              boxShadow: AppShadows.truffleCard,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,7 +55,9 @@ class TruffleListingCard extends StatelessWidget {
                   flex: 55,
                   child: Stack(
                     children: [
-                      Positioned.fill(child: _CardImage(imageUrl: item.primaryImageUrl)),
+                      Positioned.fill(
+                        child: _CardImage(imageUrl: item.primaryImageUrl),
+                      ),
                       Positioned(
                         top: AppSpacing.spacingS,
                         left: AppSpacing.spacingS,
@@ -66,11 +72,19 @@ class TruffleListingCard extends StatelessWidget {
                             borderRadius: AppRadii.circularBorderRadius,
                             boxShadow: AppShadows.authField,
                           ),
-                          child: IconButton(
-                            onPressed: isFavoritePending ? null : onFavoriteTap,
-                            icon: Icon(
-                              isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                              color: isFavorite ? AppColors.accent : AppColors.black,
+                          child: SizedBox(
+                            height: _favoriteButtonSize,
+                            width: _favoriteButtonSize,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 20,
+                              onPressed: isFavoritePending ? null : onFavoriteTap,
+                              icon: Icon(
+                                isFavorite
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
+                                color: isFavorite ? AppColors.accent : AppColors.black,
+                              ),
                             ),
                           ),
                         ),
@@ -81,12 +95,7 @@ class TruffleListingCard extends StatelessWidget {
                 Expanded(
                   flex: 45,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.spacingM,
-                      AppSpacing.spacingM,
-                      AppSpacing.spacingM,
-                      AppSpacing.spacingM,
-                    ),
+                    padding: const EdgeInsets.all(AppSpacing.spacingM),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -94,26 +103,36 @@ class TruffleListingCard extends StatelessWidget {
                           item.type.localizedName(l10n),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.cardTitle,
+                          style: AppTextStyles.cardTitle.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           item.type.latinName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.cardSubtitle,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.black80,
+                          ),
                         ),
                         const Spacer(),
                         Text(
-                          '${formatEuro(item.priceTotal)} • ${formatWeightGrams(item.weightGrams)}',
-                          style: AppTextStyles.cardPrice,
+                          '${formatEuro(item.priceTotal)} - ${formatWeightGrams(item.weightGrams)}',
+                          style: AppTextStyles.cardPrice.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${l10n.truffleShippingPlus} • ${ItalianRegions.localizedLabel(l10n, item.region)}',
+                          '${l10n.truffleShippingPlus} - ${ItalianRegions.localizedLabel(l10n, item.region)}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.micro,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.black80,
+                          ),
                         ),
                       ],
                     ),
@@ -139,7 +158,9 @@ class _CardImage extends StatelessWidget {
       return Container(
         decoration: const BoxDecoration(
           color: AppColors.softGrey,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.auth)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(TruffleListingCard._cardRadius),
+          ),
         ),
         child: const Center(
           child: Icon(
@@ -152,7 +173,9 @@ class _CardImage extends StatelessWidget {
     }
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.auth)),
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(TruffleListingCard._cardRadius),
+      ),
       child: Image.network(
         imageUrl!,
         fit: BoxFit.cover,
@@ -160,7 +183,10 @@ class _CardImage extends StatelessWidget {
           return Container(
             color: AppColors.softGrey,
             child: const Center(
-              child: Icon(Icons.broken_image_outlined, color: AppColors.black50),
+              child: Icon(
+                Icons.broken_image_outlined,
+                color: AppColors.black50,
+              ),
             ),
           );
         },

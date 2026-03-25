@@ -22,6 +22,18 @@ type SubmitSellerApplicationPayload = {
   tesserino_document: SellerDocumentPayload;
 };
 
+class SubmitSellerApplicationError extends Error {
+  constructor(
+    readonly appCode: string,
+    readonly status: number,
+    message: string,
+    readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = "SubmitSellerApplicationError";
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -40,6 +52,11 @@ Deno.serve(async (request) => {
     !supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey || !authHeader
   ) {
     return jsonResponse({ error: "missing_runtime_configuration" }, 500);
+  }
+
+  const runtimeUrlValidationError = validateRuntimeSupabaseUrl(supabaseUrl);
+  if (runtimeUrlValidationError != null) {
+    return jsonResponse(runtimeUrlValidationError, 500);
   }
 
   const authClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -148,7 +165,12 @@ Deno.serve(async (request) => {
         upsert: false,
       });
     if (identityUpload.error) {
-      throw identityUpload.error;
+      throw new SubmitSellerApplicationError(
+        "seller_documents_identity_upload_failed",
+        500,
+        "Failed to upload identity document.",
+        identityUpload.error,
+      );
     }
     uploadedPaths.push(identityPath);
 
@@ -158,7 +180,12 @@ Deno.serve(async (request) => {
         upsert: false,
       });
     if (tesserinoUpload.error) {
-      throw tesserinoUpload.error;
+      throw new SubmitSellerApplicationError(
+        "seller_documents_tesserino_upload_failed",
+        500,
+        "Failed to upload tesserino document.",
+        tesserinoUpload.error,
+      );
     }
     uploadedPaths.push(tesserinoPath);
 
@@ -169,7 +196,12 @@ Deno.serve(async (request) => {
         tesserino_number: payload.tesserino_number.trim(),
       }, { onConflict: "user_id" });
     if (sellerDocumentsUpsert.error) {
-      throw sellerDocumentsUpsert.error;
+      throw new SubmitSellerApplicationError(
+        "seller_documents_upsert_failed",
+        500,
+        "Failed to persist seller document metadata.",
+        sellerDocumentsUpsert.error,
+      );
     }
     metadataWritten = true;
 
@@ -187,7 +219,12 @@ Deno.serve(async (request) => {
       .eq("id", user.id);
 
     if (userUpdate.error) {
-      throw userUpdate.error;
+      throw new SubmitSellerApplicationError(
+        "seller_user_update_failed",
+        500,
+        "Failed to update seller onboarding profile.",
+        userUpdate.error,
+      );
     }
     userUpdated = true;
 
@@ -263,7 +300,7 @@ Deno.serve(async (request) => {
       await adminClient.storage.from("seller_documents").remove(uploadedPaths);
     }
 
-    console.error("submit_seller_application failed", error);
+    console.error("submit_seller_application failed", normalizeErrorForLogging(error));
     return toErrorResponse(error);
   }
 });
@@ -351,6 +388,16 @@ function jsonResponse(body: Record<string, unknown>, status: number): Response {
 }
 
 function toErrorResponse(error: unknown): Response {
+  if (error instanceof SubmitSellerApplicationError) {
+    return jsonResponse(
+      {
+        error: error.appCode,
+        message: error.message,
+      },
+      error.status,
+    );
+  }
+
   const code = readErrorCode(error);
   const message = readErrorMessage(error);
 
@@ -367,7 +414,30 @@ function toErrorResponse(error: unknown): Response {
     return jsonResponse({ error: "invalid_region" }, 400);
   }
 
-  return jsonResponse({ error: "seller_submit_failed" }, 500);
+  return jsonResponse(
+    {
+      error: "seller_submit_failed",
+      message: "Unexpected seller onboarding failure.",
+    },
+    500,
+  );
+}
+
+function normalizeErrorForLogging(error: unknown): Record<string, unknown> {
+  if (error instanceof SubmitSellerApplicationError) {
+    return {
+      appCode: error.appCode,
+      status: error.status,
+      message: error.message,
+      causeCode: readErrorCode(error.cause),
+      causeMessage: readErrorMessage(error.cause),
+    };
+  }
+
+  return {
+    code: readErrorCode(error),
+    message: readErrorMessage(error),
+  };
 }
 
 function readErrorCode(error: unknown): string {
@@ -390,4 +460,28 @@ function readErrorMessage(error: unknown): string {
   }
 
   return "";
+}
+
+function validateRuntimeSupabaseUrl(
+  supabaseUrl: string,
+): Record<string, unknown> | null {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(supabaseUrl);
+  } catch {
+    return {
+      error: "invalid_runtime_supabase_url",
+      message: "SUPABASE_URL is not a valid URL for the seller onboarding function.",
+    };
+  }
+
+  if (parsedUrl.hostname === "10.0.2.2") {
+    return {
+      error: "invalid_runtime_supabase_url",
+      message:
+        "SUPABASE_URL points to the Android emulator loopback. Edge Functions must not be started with the Flutter app env file.",
+    };
+  }
+
+  return null;
 }

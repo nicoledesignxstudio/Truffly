@@ -10,12 +10,16 @@ class AuthPrimaryButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.enabled = true,
+    this.backgroundColor = AppColors.black,
+    this.foregroundColor = AppColors.white,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool enabled;
+  final Color backgroundColor;
+  final Color foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +31,9 @@ class AuthPrimaryButton extends StatelessWidget {
         onPressed: isEnabled ? onPressed : null,
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(55),
-          backgroundColor: AppColors.black,
-          foregroundColor: AppColors.white,
-          disabledBackgroundColor: AppColors.black,
+          backgroundColor: backgroundColor,
+          foregroundColor: foregroundColor,
+          disabledBackgroundColor: backgroundColor,
           disabledForegroundColor: Colors.white70,
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadii.authBorderRadius,
@@ -37,12 +41,12 @@ class AuthPrimaryButton extends StatelessWidget {
           textStyle: AppTextStyles.buttonText,
         ),
         child: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 height: 18,
                 width: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.white,
+                  color: foregroundColor,
                 ),
               )
             : Text(label),

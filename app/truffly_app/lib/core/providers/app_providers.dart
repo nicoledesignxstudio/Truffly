@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:truffly_app/core/bootstrap/data/auth_session_service.dart';
@@ -23,4 +25,8 @@ final authServiceProvider = Provider<AuthService>((ref) {
 
 final profileServiceProvider = Provider<ProfileService>((ref) {
   return ProfileService(ref.read(supabaseClientProvider));
+});
+
+final appLocaleCodeProvider = Provider<String>((ref) {
+  return PlatformDispatcher.instance.locale.languageCode;
 });

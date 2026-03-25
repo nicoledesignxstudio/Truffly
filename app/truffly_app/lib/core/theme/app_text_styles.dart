@@ -54,7 +54,7 @@ abstract final class AppTextStyles {
 
   static const TextStyle cardSubtitle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.3,
     color: AppColors.black50,

@@ -27,6 +27,7 @@ class AuthTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.errorText,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final TextEditingController controller;
@@ -47,6 +48,7 @@ class AuthTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final String? errorText;
+  final TextCapitalization textCapitalization;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +72,7 @@ class AuthTextField extends StatelessWidget {
         maxLines: maxLines,
         obscureText: obscureText,
         inputFormatters: inputFormatters,
+        textCapitalization: textCapitalization,
         cursorColor: AppColors.accent,
         style: AppTextStyles.bodyLarge,
         decoration: InputDecoration(
@@ -89,9 +92,20 @@ class AuthTextField extends StatelessWidget {
             borderRadius: AppRadii.authBorderRadius,
             borderSide: BorderSide(color: AppColors.black20),
           ),
+          disabledBorder: const OutlineInputBorder(
+            borderRadius: AppRadii.authBorderRadius,
+            borderSide: BorderSide(color: AppColors.black20),
+          ),
+          border: const OutlineInputBorder(
+            borderRadius: AppRadii.authBorderRadius,
+            borderSide: BorderSide(color: AppColors.black20),
+          ),
           focusedBorder: const OutlineInputBorder(
             borderRadius: AppRadii.authBorderRadius,
-            borderSide: BorderSide(color: AppColors.accent),
+            borderSide: BorderSide(
+              color: AppColors.accent,
+              width: 1.5,
+            ),
           ),
           errorBorder: const OutlineInputBorder(
             borderRadius: AppRadii.authBorderRadius,

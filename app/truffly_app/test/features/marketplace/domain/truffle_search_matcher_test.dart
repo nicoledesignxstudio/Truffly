@@ -22,6 +22,24 @@ void main() {
       expect(result, contains(TruffleType.tuberMelanosporum));
     });
 
+    test('matches new Italian names', () {
+      final result = resolveSearchMatchingTypes(
+        localeCode: 'it',
+        searchQuery: 'mesenterico',
+      );
+
+      expect(result, contains(TruffleType.tuberMesentericum));
+    });
+
+    test('matches new English names', () {
+      final result = resolveSearchMatchingTypes(
+        localeCode: 'en',
+        searchQuery: 'musky',
+      );
+
+      expect(result, contains(TruffleType.tuberBrumaleMoschatum));
+    });
+
     test('returns empty when nothing matches', () {
       final result = resolveSearchMatchingTypes(
         localeCode: 'it',

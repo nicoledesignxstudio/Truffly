@@ -1505,13 +1505,13 @@ abstract class AppLocalizations {
   /// No description provided for @truffleQualitySecond.
   ///
   /// In en, this message translates to:
-  /// **'Second'**
+  /// **'Second choice'**
   String get truffleQualitySecond;
 
   /// No description provided for @truffleQualityThird.
   ///
   /// In en, this message translates to:
-  /// **'Third'**
+  /// **'Third choice'**
   String get truffleQualityThird;
 
   /// No description provided for @truffleTypeMagnatum.
@@ -1550,6 +1550,306 @@ abstract class AppLocalizations {
   /// **'Brumale'**
   String get truffleTypeBrumale;
 
+  /// No description provided for @truffleTypeMacrosporum.
+  ///
+  /// In en, this message translates to:
+  /// **'Smooth Black Truffle'**
+  String get truffleTypeMacrosporum;
+
+  /// No description provided for @truffleTypeBrumaleMoschatum.
+  ///
+  /// In en, this message translates to:
+  /// **'Musky Brumal Truffle'**
+  String get truffleTypeBrumaleMoschatum;
+
+  /// No description provided for @truffleTypeMesentericum.
+  ///
+  /// In en, this message translates to:
+  /// **'Mesenteric Truffle'**
+  String get truffleTypeMesentericum;
+
+  /// No description provided for @homeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// No description provided for @homeGreetingPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get homeGreetingPrefix;
+
+  /// No description provided for @homeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load the home screen right now.'**
+  String get homeLoadError;
+
+  /// No description provided for @homeSeasonalSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal Highlight'**
+  String get homeSeasonalSectionTitle;
+
+  /// No description provided for @homeSeasonalInSeasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'In season'**
+  String get homeSeasonalInSeasonLabel;
+
+  /// No description provided for @homeSeasonalComingSoonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get homeSeasonalComingSoonLabel;
+
+  /// No description provided for @homeSeasonalLoadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading seasonal highlights...'**
+  String get homeSeasonalLoadingLabel;
+
+  /// No description provided for @homeSeasonalCountdownLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left until {truffleName} season begins'**
+  String homeSeasonalCountdownLine(int days, Object truffleName);
+
+  /// No description provided for @homeSeasonalEmptyText.
+  ///
+  /// In en, this message translates to:
+  /// **'No seasonal highlight is available right now.'**
+  String get homeSeasonalEmptyText;
+
+  /// No description provided for @homeSeasonalErrorText.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load seasonal information.'**
+  String get homeSeasonalErrorText;
+
+  /// No description provided for @homeSeasonalRetryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get homeSeasonalRetryLabel;
+
+  /// No description provided for @homeLatestNewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest News'**
+  String get homeLatestNewsTitle;
+
+  /// No description provided for @homeTopSellersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Truffle Hunters'**
+  String get homeTopSellersTitle;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeSeeAll;
+
+  /// No description provided for @homeLatestNewsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No truffles are available right now.'**
+  String get homeLatestNewsEmpty;
+
+  /// No description provided for @homeTopSellersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No truffle hunters are available right now.'**
+  String get homeTopSellersEmpty;
+
+  /// No description provided for @homeSectionErrorText.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load this section right now.'**
+  String get homeSectionErrorText;
+
+  /// No description provided for @homeSellerOrdersInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders in progress'**
+  String get homeSellerOrdersInProgress;
+
+  /// No description provided for @homeSellerActiveTruffles.
+  ///
+  /// In en, this message translates to:
+  /// **'Active truffles'**
+  String get homeSellerActiveTruffles;
+
+  /// No description provided for @seasonalTruffleNameMagnatum.
+  ///
+  /// In en, this message translates to:
+  /// **'White Truffle'**
+  String get seasonalTruffleNameMagnatum;
+
+  /// No description provided for @seasonalTruffleNameMelanosporum.
+  ///
+  /// In en, this message translates to:
+  /// **'Black Winter Truffle'**
+  String get seasonalTruffleNameMelanosporum;
+
+  /// No description provided for @seasonalTruffleNameAestivum.
+  ///
+  /// In en, this message translates to:
+  /// **'Summer Truffle'**
+  String get seasonalTruffleNameAestivum;
+
+  /// No description provided for @seasonalTruffleNameUncinatum.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncinatum Truffle'**
+  String get seasonalTruffleNameUncinatum;
+
+  /// No description provided for @seasonalTruffleNameBorchii.
+  ///
+  /// In en, this message translates to:
+  /// **'Bianchetto'**
+  String get seasonalTruffleNameBorchii;
+
+  /// No description provided for @seasonalTruffleNameBrumale.
+  ///
+  /// In en, this message translates to:
+  /// **'Brumale'**
+  String get seasonalTruffleNameBrumale;
+
+  /// No description provided for @seasonalTruffleNameMacrosporum.
+  ///
+  /// In en, this message translates to:
+  /// **'Smooth Black Truffle'**
+  String get seasonalTruffleNameMacrosporum;
+
+  /// No description provided for @seasonalTruffleNameBrumaleMoschatum.
+  ///
+  /// In en, this message translates to:
+  /// **'Musky Brumal Truffle'**
+  String get seasonalTruffleNameBrumaleMoschatum;
+
+  /// No description provided for @seasonalTruffleNameMesentericum.
+  ///
+  /// In en, this message translates to:
+  /// **'Mesenteric Truffle'**
+  String get seasonalTruffleNameMesentericum;
+
+  /// No description provided for @guidesPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffle Guides'**
+  String get guidesPageTitle;
+
+  /// No description provided for @guidesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load guides right now.'**
+  String get guidesLoadError;
+
+  /// No description provided for @guidesRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get guidesRetry;
+
+  /// No description provided for @guidesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No guides are available right now.'**
+  String get guidesEmpty;
+
+  /// No description provided for @guidesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get guidesDescription;
+
+  /// No description provided for @guidesAroma.
+  ///
+  /// In en, this message translates to:
+  /// **'Aroma'**
+  String get guidesAroma;
+
+  /// No description provided for @guidesPriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Price range'**
+  String get guidesPriceRange;
+
+  /// No description provided for @guidesRarity.
+  ///
+  /// In en, this message translates to:
+  /// **'Rarity'**
+  String get guidesRarity;
+
+  /// No description provided for @guidesSymbioticPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbiotic plants'**
+  String get guidesSymbioticPlants;
+
+  /// No description provided for @guidesSoil.
+  ///
+  /// In en, this message translates to:
+  /// **'Soil'**
+  String get guidesSoil;
+
+  /// No description provided for @guidesSoilComposition.
+  ///
+  /// In en, this message translates to:
+  /// **'Composition'**
+  String get guidesSoilComposition;
+
+  /// No description provided for @guidesSoilStructure.
+  ///
+  /// In en, this message translates to:
+  /// **'Structure'**
+  String get guidesSoilStructure;
+
+  /// No description provided for @guidesSoilPh.
+  ///
+  /// In en, this message translates to:
+  /// **'pH'**
+  String get guidesSoilPh;
+
+  /// No description provided for @guidesSoilAltitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Altitude'**
+  String get guidesSoilAltitude;
+
+  /// No description provided for @guidesSoilHumidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Humidity'**
+  String get guidesSoilHumidity;
+
+  /// No description provided for @guidesSoilHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover the characteristics of the environment where this truffle grows: humidity, altitude, and soil type.'**
+  String get guidesSoilHelper;
+
+  /// No description provided for @guidesHarvestPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvest period'**
+  String get guidesHarvestPeriod;
+
+  /// No description provided for @guidesTruffleQualityMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffle quality'**
+  String get guidesTruffleQualityMetric;
+
+  /// No description provided for @guidesPriceRangeMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Price range'**
+  String get guidesPriceRangeMetric;
+
   /// No description provided for @truffleShippingPlus.
   ///
   /// In en, this message translates to:
@@ -1561,6 +1861,624 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Italy'**
   String get truffleShippingItaly;
+
+  /// No description provided for @sellerPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sellers'**
+  String get sellerPageTitle;
+
+  /// No description provided for @sellerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by first or last name'**
+  String get sellerSearchHint;
+
+  /// No description provided for @sellerLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load sellers right now. Please try again.'**
+  String get sellerLoadError;
+
+  /// No description provided for @sellerEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sellers are available right now'**
+  String get sellerEmptyTitle;
+
+  /// No description provided for @sellerEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back later to discover more verified profiles.'**
+  String get sellerEmptySubtitle;
+
+  /// No description provided for @sellerEmptyFilteredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sellers match your current filters'**
+  String get sellerEmptyFilteredTitle;
+
+  /// No description provided for @sellerEmptyFilteredSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try removing a filter or changing your search.'**
+  String get sellerEmptyFilteredSubtitle;
+
+  /// No description provided for @sellerResetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get sellerResetFilters;
+
+  /// No description provided for @sellerFilterRatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get sellerFilterRatingTitle;
+
+  /// No description provided for @sellerFilterCompletedOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed orders'**
+  String get sellerFilterCompletedOrdersTitle;
+
+  /// No description provided for @sellerFilterRatingThreePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'3+ stars'**
+  String get sellerFilterRatingThreePlus;
+
+  /// No description provided for @sellerFilterRatingFourPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'4+ stars'**
+  String get sellerFilterRatingFourPlus;
+
+  /// No description provided for @sellerFilterRatingFive.
+  ///
+  /// In en, this message translates to:
+  /// **'5 stars'**
+  String get sellerFilterRatingFive;
+
+  /// No description provided for @sellerFilterCompletedOrdersFivePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'5+ orders'**
+  String get sellerFilterCompletedOrdersFivePlus;
+
+  /// No description provided for @sellerFilterCompletedOrdersTwentyPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'20+ orders'**
+  String get sellerFilterCompletedOrdersTwentyPlus;
+
+  /// No description provided for @sellerFilterCompletedOrdersFiftyPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'50+ orders'**
+  String get sellerFilterCompletedOrdersFiftyPlus;
+
+  /// No description provided for @sellerRatingNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get sellerRatingNew;
+
+  /// No description provided for @sellerRegionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Region unavailable'**
+  String get sellerRegionUnavailable;
+
+  /// No description provided for @sellerActiveSearchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Search: {query}'**
+  String sellerActiveSearchFilter(Object query);
+
+  /// No description provided for @sellerReviewsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {No reviews} =1 {1 review} other {{count} reviews}}'**
+  String sellerReviewsCount(int count);
+
+  /// No description provided for @sellerCompletedOrdersShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {0 orders} =1 {1 order} other {{count} orders}}'**
+  String sellerCompletedOrdersShort(int count);
+
+  /// No description provided for @accountDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account details'**
+  String get accountDetailsTitle;
+
+  /// No description provided for @accountDetailsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your account information up to date. Email changes require a new verification step.'**
+  String get accountDetailsSubtitle;
+
+  /// No description provided for @accountDetailsSaveCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get accountDetailsSaveCta;
+
+  /// No description provided for @accountDetailsPersonalSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal details'**
+  String get accountDetailsPersonalSectionTitle;
+
+  /// No description provided for @accountDetailsEmailSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get accountDetailsEmailSectionTitle;
+
+  /// No description provided for @accountDetailsLocationSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get accountDetailsLocationSectionTitle;
+
+  /// No description provided for @accountDetailsPhotoSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile image'**
+  String get accountDetailsPhotoSectionTitle;
+
+  /// No description provided for @accountDetailsBioSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get accountDetailsBioSectionTitle;
+
+  /// No description provided for @accountDetailsBioPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell buyers a little more about you'**
+  String get accountDetailsBioPlaceholder;
+
+  /// No description provided for @accountDetailsEmailVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified'**
+  String get accountDetailsEmailVerified;
+
+  /// No description provided for @accountDetailsEmailHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'If you change your email, we will send a new verification link and the app will bring you back to the email verification screen.'**
+  String get accountDetailsEmailHelper;
+
+  /// No description provided for @accountDetailsChangeEmailCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get accountDetailsChangeEmailCta;
+
+  /// No description provided for @accountDetailsSaveNewEmailCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Save new email'**
+  String get accountDetailsSaveNewEmailCta;
+
+  /// No description provided for @accountDetailsCancelEmailChangeCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get accountDetailsCancelEmailChangeCta;
+
+  /// No description provided for @accountDetailsPhotoHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'You can update the seller avatar from camera or gallery. If you remove the current photo, the profile falls back to initials.'**
+  String get accountDetailsPhotoHelper;
+
+  /// No description provided for @accountDetailsPhotoPendingHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'You selected a new photo locally. The final upload connection will be added in the next step without polluting the current data model.'**
+  String get accountDetailsPhotoPendingHelper;
+
+  /// No description provided for @accountDetailsChangePhotoCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get accountDetailsChangePhotoCta;
+
+  /// No description provided for @accountDetailsRemovePhotoCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get accountDetailsRemovePhotoCta;
+
+  /// No description provided for @accountDetailsTakePhotoOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get accountDetailsTakePhotoOption;
+
+  /// No description provided for @accountDetailsChooseFromGalleryOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get accountDetailsChooseFromGalleryOption;
+
+  /// No description provided for @accountDetailsPhotoSourceCancelOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get accountDetailsPhotoSourceCancelOption;
+
+  /// No description provided for @accountDetailsPhotoUploadPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The new photo is ready as a local preview. We will connect the final upload in the next technical step.'**
+  String get accountDetailsPhotoUploadPending;
+
+  /// No description provided for @accountDetailsSellerCountryLockedHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller accounts stay linked to Italy according to the current domain rules.'**
+  String get accountDetailsSellerCountryLockedHelper;
+
+  /// No description provided for @accountDetailsRegionHiddenHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Region is only required when the selected country is Italy. Saving with another country will clear the region.'**
+  String get accountDetailsRegionHiddenHelper;
+
+  /// No description provided for @accountDetailsRequiredFieldError.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get accountDetailsRequiredFieldError;
+
+  /// No description provided for @accountDetailsSellerCountryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller accounts must keep Italy as country.'**
+  String get accountDetailsSellerCountryError;
+
+  /// No description provided for @accountDetailsInvalidImageUrlError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid image URL.'**
+  String get accountDetailsInvalidImageUrlError;
+
+  /// No description provided for @accountDetailsSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again to continue.'**
+  String get accountDetailsSessionExpired;
+
+  /// No description provided for @accountDetailsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load your account details right now.'**
+  String get accountDetailsLoadError;
+
+  /// No description provided for @accountDetailsSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save your account details right now. Please try again.'**
+  String get accountDetailsSaveError;
+
+  /// No description provided for @accountDetailsSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account details updated successfully.'**
+  String get accountDetailsSaveSuccess;
+
+  /// No description provided for @accountDetailsEmailVerificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to your new email address. Verify your email to continue.'**
+  String get accountDetailsEmailVerificationSent;
+
+  /// No description provided for @shippingAddressesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping addresses'**
+  String get shippingAddressesTitle;
+
+  /// No description provided for @shippingAddressesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which address to keep ready for checkout and update it whenever your delivery details change.'**
+  String get shippingAddressesSubtitle;
+
+  /// No description provided for @shippingAddressesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved addresses'**
+  String get shippingAddressesSectionTitle;
+
+  /// No description provided for @shippingAddressesAddCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get shippingAddressesAddCta;
+
+  /// No description provided for @shippingAddressesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved addresses'**
+  String get shippingAddressesEmptyTitle;
+
+  /// No description provided for @shippingAddressesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first shipping address so it is ready to use during checkout.'**
+  String get shippingAddressesEmptySubtitle;
+
+  /// No description provided for @shippingAddressesDefaultBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get shippingAddressesDefaultBadge;
+
+  /// No description provided for @shippingAddressesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load your shipping addresses right now.'**
+  String get shippingAddressesLoadError;
+
+  /// No description provided for @shippingAddressesNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error while loading shipping addresses. Please try again.'**
+  String get shippingAddressesNetworkError;
+
+  /// No description provided for @shippingAddressesUnauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again to manage shipping addresses.'**
+  String get shippingAddressesUnauthorizedError;
+
+  /// No description provided for @shippingAddressesNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'This shipping address could not be found anymore.'**
+  String get shippingAddressesNotFoundError;
+
+  /// No description provided for @shippingAddressesValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Some shipping address data is invalid. Please review the form and try again.'**
+  String get shippingAddressesValidationError;
+
+  /// No description provided for @shippingAddressAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get shippingAddressAddTitle;
+
+  /// No description provided for @shippingAddressEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit address'**
+  String get shippingAddressEditTitle;
+
+  /// No description provided for @shippingAddressFormSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a dedicated shipping address for deliveries. The default address will be highlighted and ready for future checkout flows.'**
+  String get shippingAddressFormSubtitle;
+
+  /// No description provided for @shippingAddressSaveCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Save address'**
+  String get shippingAddressSaveCta;
+
+  /// No description provided for @shippingAddressDeleteCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete address'**
+  String get shippingAddressDeleteCta;
+
+  /// No description provided for @shippingAddressDeleteDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this address?'**
+  String get shippingAddressDeleteDialogTitle;
+
+  /// No description provided for @shippingAddressDeleteDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This shipping address will be removed from your saved list.'**
+  String get shippingAddressDeleteDialogMessage;
+
+  /// No description provided for @shippingAddressDeleteDialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shippingAddressDeleteDialogCancel;
+
+  /// No description provided for @shippingAddressDeleteDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get shippingAddressDeleteDialogConfirm;
+
+  /// No description provided for @shippingAddressFullNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get shippingAddressFullNameLabel;
+
+  /// No description provided for @shippingAddressFullNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter full name'**
+  String get shippingAddressFullNamePlaceholder;
+
+  /// No description provided for @shippingAddressStreetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get shippingAddressStreetLabel;
+
+  /// No description provided for @shippingAddressStreetPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Street and house number'**
+  String get shippingAddressStreetPlaceholder;
+
+  /// No description provided for @shippingAddressCityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get shippingAddressCityLabel;
+
+  /// No description provided for @shippingAddressCityPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter city'**
+  String get shippingAddressCityPlaceholder;
+
+  /// No description provided for @shippingAddressPostalCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code'**
+  String get shippingAddressPostalCodeLabel;
+
+  /// No description provided for @shippingAddressPostalCodePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter postal code'**
+  String get shippingAddressPostalCodePlaceholder;
+
+  /// No description provided for @shippingAddressCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get shippingAddressCountryLabel;
+
+  /// No description provided for @shippingAddressCountryPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a country'**
+  String get shippingAddressCountryPlaceholder;
+
+  /// No description provided for @shippingAddressPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get shippingAddressPhoneLabel;
+
+  /// No description provided for @shippingAddressPhonePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter phone number'**
+  String get shippingAddressPhonePlaceholder;
+
+  /// No description provided for @shippingAddressDefaultToggleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default address'**
+  String get shippingAddressDefaultToggleLabel;
+
+  /// No description provided for @shippingAddressDefaultToggleHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Default addresses are highlighted in your list and ready for future checkout selection.'**
+  String get shippingAddressDefaultToggleHelper;
+
+  /// No description provided for @shippingAddressRequiredFieldError.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get shippingAddressRequiredFieldError;
+
+  /// No description provided for @shippingAddressFullNameRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name is required.'**
+  String get shippingAddressFullNameRequiredError;
+
+  /// No description provided for @shippingAddressStreetRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Street is required.'**
+  String get shippingAddressStreetRequiredError;
+
+  /// No description provided for @shippingAddressCityRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'City is required.'**
+  String get shippingAddressCityRequiredError;
+
+  /// No description provided for @shippingAddressCityInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid city name.'**
+  String get shippingAddressCityInvalidError;
+
+  /// No description provided for @shippingAddressPostalCodeRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code is required.'**
+  String get shippingAddressPostalCodeRequiredError;
+
+  /// No description provided for @shippingAddressPostalCodeInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid postal code.'**
+  String get shippingAddressPostalCodeInvalidError;
+
+  /// No description provided for @shippingAddressCountryRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Country is required.'**
+  String get shippingAddressCountryRequiredError;
+
+  /// No description provided for @shippingAddressCountryInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a valid country.'**
+  String get shippingAddressCountryInvalidError;
+
+  /// No description provided for @shippingAddressPhoneRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is required.'**
+  String get shippingAddressPhoneRequiredError;
+
+  /// No description provided for @shippingAddressPhoneInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number with prefix.'**
+  String get shippingAddressPhoneInvalidError;
+
+  /// No description provided for @shippingAddressValidationFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Review this field and try again.'**
+  String get shippingAddressValidationFallback;
+
+  /// No description provided for @shippingAddressSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save this shipping address right now. Please try again.'**
+  String get shippingAddressSaveError;
+
+  /// No description provided for @shippingAddressSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping address saved successfully.'**
+  String get shippingAddressSavedSuccess;
+
+  /// No description provided for @shippingAddressDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping address deleted successfully.'**
+  String get shippingAddressDeletedSuccess;
 
   /// No description provided for @publishTruffleTitle.
   ///
@@ -1885,6 +2803,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to verify publish permissions right now. Pull to refresh and try again.'**
   String get publishTruffleAccessError;
+
+  /// No description provided for @sellerMyTrufflesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My truffles'**
+  String get sellerMyTrufflesTitle;
+
+  /// No description provided for @sellerMyTrufflesTabActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get sellerMyTrufflesTabActive;
+
+  /// No description provided for @sellerMyTrufflesTabSold.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold'**
+  String get sellerMyTrufflesTabSold;
+
+  /// No description provided for @sellerMyTrufflesTabExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get sellerMyTrufflesTabExpired;
+
+  /// No description provided for @sellerMyTrufflesEmptyActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No active truffles'**
+  String get sellerMyTrufflesEmptyActiveTitle;
+
+  /// No description provided for @sellerMyTrufflesEmptyActiveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a truffle and it will appear here while it is available.'**
+  String get sellerMyTrufflesEmptyActiveSubtitle;
+
+  /// No description provided for @sellerMyTrufflesEmptySoldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sold truffles'**
+  String get sellerMyTrufflesEmptySoldTitle;
+
+  /// No description provided for @sellerMyTrufflesEmptySoldSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed sales will appear here once a truffle has been purchased.'**
+  String get sellerMyTrufflesEmptySoldSubtitle;
+
+  /// No description provided for @sellerMyTrufflesEmptyExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No expired truffles'**
+  String get sellerMyTrufflesEmptyExpiredTitle;
+
+  /// No description provided for @sellerMyTrufflesEmptyExpiredSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired truffles will remain visible here for quick reference.'**
+  String get sellerMyTrufflesEmptyExpiredSubtitle;
+
+  /// No description provided for @sellerMyTrufflesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load your truffles right now.'**
+  String get sellerMyTrufflesLoadError;
+
+  /// No description provided for @sellerMyTrufflesRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get sellerMyTrufflesRetry;
+
+  /// No description provided for @sellerMyTrufflesDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this truffle?'**
+  String get sellerMyTrufflesDeleteTitle;
+
+  /// No description provided for @sellerMyTrufflesDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is irreversible. The truffle, its images, and related saves will be removed.'**
+  String get sellerMyTrufflesDeleteMessage;
+
+  /// No description provided for @sellerMyTrufflesDeleteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get sellerMyTrufflesDeleteCancel;
+
+  /// No description provided for @sellerMyTrufflesDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sellerMyTrufflesDeleteConfirm;
+
+  /// No description provided for @sellerMyTrufflesDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffle deleted successfully.'**
+  String get sellerMyTrufflesDeleteSuccess;
+
+  /// No description provided for @sellerMyTrufflesDeleteForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This truffle can no longer be deleted.'**
+  String get sellerMyTrufflesDeleteForbidden;
+
+  /// No description provided for @sellerMyTrufflesDeleteNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection issue while deleting the truffle. Please try again.'**
+  String get sellerMyTrufflesDeleteNetwork;
+
+  /// No description provided for @sellerMyTrufflesDeleteUnauthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again before deleting a truffle.'**
+  String get sellerMyTrufflesDeleteUnauthenticated;
+
+  /// No description provided for @sellerMyTrufflesDeleteUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to delete the truffle right now.'**
+  String get sellerMyTrufflesDeleteUnknown;
 }
 
 class _AppLocalizationsDelegate

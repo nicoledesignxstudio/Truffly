@@ -10,9 +10,13 @@ class TruffleQualityBadge extends StatelessWidget {
   const TruffleQualityBadge({
     super.key,
     required this.quality,
+    this.backgroundColor = AppColors.black,
+    this.textColor = AppColors.white,
   });
 
   final TruffleQuality quality;
+  final Color backgroundColor;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +24,8 @@ class TruffleQualityBadge extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.accent,
-        borderRadius: BorderRadius.circular(AppRadii.auth),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -29,8 +33,11 @@ class TruffleQualityBadge extends StatelessWidget {
           vertical: 6,
         ),
         child: Text(
-          quality.localizedLabel(l10n),
-          style: AppTextStyles.micro.copyWith(color: AppColors.white),
+          quality.choiceLabel(l10n),
+          style: AppTextStyles.bodySmall.copyWith(
+            color: textColor,
+            fontSize: 14,
+          ),
         ),
       ),
     );

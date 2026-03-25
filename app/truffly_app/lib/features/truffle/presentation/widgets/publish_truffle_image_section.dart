@@ -93,6 +93,8 @@ class _AddPhotoCard extends StatelessWidget {
     required this.onPressed,
   });
 
+  static const double _cardRadius = 10;
+
   final String label;
   final Future<void> Function() onPressed;
 
@@ -101,18 +103,18 @@ class _AddPhotoCard extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: AppRadii.authBorderRadius,
+        borderRadius: BorderRadius.all(Radius.circular(_cardRadius)),
         boxShadow: AppShadows.authField,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => onPressed(),
-          borderRadius: AppRadii.authBorderRadius,
+          borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
           child: Ink(
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: AppRadii.authBorderRadius,
+              borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
               border: Border.all(color: AppColors.black10),
             ),
             child: Padding(
@@ -148,6 +150,8 @@ class _SelectedPhotoCard extends StatelessWidget {
     required this.onRemovePressed,
   });
 
+  static const double _cardRadius = 10;
+
   final PublishTruffleImageDraft image;
   final String removeLabel;
   final VoidCallback onRemovePressed;
@@ -157,11 +161,11 @@ class _SelectedPhotoCard extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: AppRadii.authBorderRadius,
+        borderRadius: BorderRadius.all(Radius.circular(_cardRadius)),
         boxShadow: AppShadows.authField,
       ),
       child: ClipRRect(
-        borderRadius: AppRadii.authBorderRadius,
+        borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -180,10 +184,20 @@ class _SelectedPhotoCard extends StatelessWidget {
             Positioned(
               right: AppSpacing.spacingXS,
               top: AppSpacing.spacingXS,
-              child: IconButton.filledTonal(
-                onPressed: onRemovePressed,
-                icon: const Icon(Icons.close_rounded),
-                tooltip: removeLabel,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: AppColors.black,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  onPressed: onRemovePressed,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.white,
+                  ),
+                  tooltip: removeLabel,
+                  visualDensity: VisualDensity.compact,
+                ),
               ),
             ),
             Positioned(

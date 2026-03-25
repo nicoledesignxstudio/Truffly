@@ -12,10 +12,7 @@ void main() {
     userId: 'u2',
     email: 'u2@example.com',
   );
-  const ready = AuthAuthenticatedReady(
-    userId: 'u3',
-    email: 'u3@example.com',
-  );
+  const ready = AuthAuthenticatedReady(userId: 'u3', email: 'u3@example.com');
 
   Uri uriFor(String value) => Uri.parse(value);
 
@@ -49,7 +46,9 @@ void main() {
 
     test('/verify-email with signup email is accessible', () {
       final location = AppRoutes.verifyEmail;
-      final uri = uriFor(AppRoutes.verifyEmailWithPrefill('signup@example.com'));
+      final uri = uriFor(
+        AppRoutes.verifyEmailWithPrefill('signup@example.com'),
+      );
       final redirect = resolveAuthRedirectForTesting(
         authState: const AuthUnauthenticated(),
         location: location,
@@ -172,6 +171,15 @@ void main() {
       expect(redirect, isNull);
     });
 
+    test('/guides stays on guides', () {
+      final redirect = resolveAuthRedirectForTesting(
+        authState: ready,
+        location: AppRoutes.guides,
+        uri: uriFor(AppRoutes.guides),
+      );
+      expect(redirect, isNull);
+    });
+
     test('/truffles/:id stays on detail route', () {
       final location = AppRoutes.truffleDetailPath('abc');
       final redirect = resolveAuthRedirectForTesting(
@@ -202,14 +210,17 @@ void main() {
       expect(redirect, isNull);
     });
 
-    test('with valid recovery context is accessible even when authenticated', () {
-      final redirect = resolveAuthRedirectForTesting(
-        authState: ready,
-        location: AppRoutes.resetPassword,
-        uri: uriFor('${AppRoutes.resetPassword}?type=recovery&code=abc'),
-      );
-      expect(redirect, isNull);
-    });
+    test(
+      'with valid recovery context is accessible even when authenticated',
+      () {
+        final redirect = resolveAuthRedirectForTesting(
+          authState: ready,
+          location: AppRoutes.resetPassword,
+          uri: uriFor('${AppRoutes.resetPassword}?type=recovery&code=abc'),
+        );
+        expect(redirect, isNull);
+      },
+    );
 
     test('with valid recovery fragment tokens is accessible', () {
       final redirect = resolveAuthRedirectForTesting(

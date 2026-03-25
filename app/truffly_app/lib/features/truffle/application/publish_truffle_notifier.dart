@@ -92,11 +92,23 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
     _setState(state.copyWith(harvestDate: harvestDate));
   }
 
+  bool revealValidationErrors() {
+    final validationFailures = _validate(state);
+    state = state.copyWith(
+      validationFailures: validationFailures,
+      showValidationErrors: true,
+      submitFailure: null,
+      publishRequestId: null,
+    );
+    return validationFailures.isEmpty;
+  }
+
   Future<bool> submit() async {
     final validationFailures = _validate(state);
     if (validationFailures.isNotEmpty) {
       state = state.copyWith(
         validationFailures: validationFailures,
+        showValidationErrors: true,
         submitFailure: null,
         publishRequestId: null,
       );
@@ -107,6 +119,7 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
     if (input == null) {
       state = state.copyWith(
         validationFailures: validationFailures,
+        showValidationErrors: true,
         submitFailure: PublishTruffleSubmissionFailure.validation,
         publishRequestId: null,
       );
@@ -117,6 +130,7 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
     state = state.copyWith(
       isSubmitting: true,
       validationFailures: validationFailures,
+      showValidationErrors: true,
       submitFailure: null,
       publishRequestId: publishRequestId,
     );
@@ -128,6 +142,7 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
           );
       state = state.copyWith(
         isSubmitting: false,
+        showValidationErrors: false,
         submitFailure: null,
         publishRequestId: null,
       );
@@ -152,6 +167,7 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
     state = nextState.copyWith(
       publishRequestId: null,
       validationFailures: _validate(nextState),
+      showValidationErrors: state.showValidationErrors,
       submitFailure: null,
     );
   }

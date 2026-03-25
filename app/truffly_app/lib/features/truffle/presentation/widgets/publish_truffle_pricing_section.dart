@@ -17,6 +17,7 @@ class PublishTrufflePricingSection extends StatelessWidget {
     required this.totalPriceLabel,
     required this.shippingItalyLabel,
     required this.shippingAbroadLabel,
+    required this.shippingTitle,
     required this.previewLabel,
     required this.previewValue,
     required this.onWeightChanged,
@@ -37,6 +38,7 @@ class PublishTrufflePricingSection extends StatelessWidget {
   final String totalPriceLabel;
   final String shippingItalyLabel;
   final String shippingAbroadLabel;
+  final String shippingTitle;
   final String previewLabel;
   final String previewValue;
   final ValueChanged<String> onWeightChanged;
@@ -77,30 +79,6 @@ class PublishTrufflePricingSection extends StatelessWidget {
           errorText: totalPriceErrorText,
         ),
         const SizedBox(height: AppSpacing.spacingM),
-        AuthTextField(
-          controller: shippingItalyController,
-          labelText: shippingItalyLabel,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          textInputAction: TextInputAction.next,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-          ],
-          onChanged: onShippingItalyChanged,
-          errorText: shippingItalyErrorText,
-        ),
-        const SizedBox(height: AppSpacing.spacingM),
-        AuthTextField(
-          controller: shippingAbroadController,
-          labelText: shippingAbroadLabel,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          textInputAction: TextInputAction.done,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-          ],
-          onChanged: onShippingAbroadChanged,
-          errorText: shippingAbroadErrorText,
-        ),
-        const SizedBox(height: AppSpacing.spacingM),
         DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.softGrey,
@@ -125,6 +103,35 @@ class PublishTrufflePricingSection extends StatelessWidget {
               ],
             ),
           ),
+        ),
+        const SizedBox(height: AppSpacing.spacingL),
+        Text(
+          shippingTitle,
+          style: AppTextStyles.sectionTitle,
+        ),
+        const SizedBox(height: AppSpacing.spacingS),
+        AuthTextField(
+          controller: shippingItalyController,
+          labelText: shippingItalyLabel,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          textInputAction: TextInputAction.next,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+          ],
+          onChanged: onShippingItalyChanged,
+          errorText: shippingItalyErrorText,
+        ),
+        const SizedBox(height: AppSpacing.spacingM),
+        AuthTextField(
+          controller: shippingAbroadController,
+          labelText: shippingAbroadLabel,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          textInputAction: TextInputAction.done,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+          ],
+          onChanged: onShippingAbroadChanged,
+          errorText: shippingAbroadErrorText,
         ),
       ],
     );

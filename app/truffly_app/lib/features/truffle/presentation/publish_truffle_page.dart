@@ -8,6 +8,7 @@ import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
+import 'package:truffly_app/features/auth/presentation/widgets/auth_secondary_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:truffly_app/features/onboarding/presentation/widgets/onboarding_input_field.dart';
 import 'package:truffly_app/features/truffle/application/publish_truffle_providers.dart';
@@ -114,6 +115,10 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.white,
+        surfaceTintColor: AppColors.white,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
         leadingWidth: 66,
         leading: Padding(
           padding: const EdgeInsets.only(left: AppSpacing.spacingM),
@@ -123,11 +128,14 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
         ),
         title: Text(
           l10n.publishTruffleTitle,
-          style: AppTextStyles.sectionTitle,
+          style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
         ),
       ),
-      body: SafeArea(
-        child: ListView(
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: ListView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.spacingM,
             AppSpacing.spacingS,
@@ -148,17 +156,20 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
             const SizedBox(height: AppSpacing.spacingL),
             _SectionTitle(title: l10n.publishTruffleQualityLabel),
             const SizedBox(height: AppSpacing.spacingS),
-            Wrap(
-              spacing: AppSpacing.spacingXS,
-              runSpacing: AppSpacing.spacingXS,
-              children: [
-                for (final quality in TruffleQuality.values)
-                  ChoiceChip(
-                    label: Text(quality.localizedLabel(l10n)),
-                    selected: state.quality == quality,
-                    onSelected: (_) => notifier.updateQuality(quality),
-                  ),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (var index = 0; index < TruffleQuality.values.length; index++) ...[
+                    if (index > 0) const SizedBox(width: AppSpacing.spacingXS),
+                    _PublishChoiceChip(
+                      label: TruffleQuality.values[index].choiceLabel(l10n),
+                      selected: state.quality == TruffleQuality.values[index],
+                      onTap: () => notifier.updateQuality(TruffleQuality.values[index]),
+                    ),
+                  ],
+                ],
+              ),
             ),
             if (_qualityErrorText(l10n, state) != null) ...[
               const SizedBox(height: AppSpacing.spacingXS),
@@ -189,11 +200,11 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
               ],
               onChanged: notifier.updateTruffleType,
             ),
-            const SizedBox(height: AppSpacing.spacingL),
+            const SizedBox(height: AppSpacing.spacingM),
             AuthTextField(
               controller: _latinNameController,
               labelText: l10n.publishTruffleLatinNameLabel,
-              enabled: false,
+              readOnly: true,
             ),
             const SizedBox(height: AppSpacing.spacingL),
             _SectionTitle(title: l10n.publishTrufflePricingTitle),
@@ -207,6 +218,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
               totalPriceLabel: l10n.publishTruffleTotalPriceLabel,
               shippingItalyLabel: l10n.publishTruffleShippingItalyLabel,
               shippingAbroadLabel: l10n.publishTruffleShippingAbroadLabel,
+              shippingTitle: 'Shipping',
               previewLabel: l10n.publishTrufflePricePerKgPreviewLabel,
               previewValue: state.pricePerKgPreview == null
                   ? l10n.publishTrufflePricePerKgPreviewPlaceholder
@@ -240,7 +252,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
               ],
               onChanged: notifier.updateRegion,
             ),
-            const SizedBox(height: AppSpacing.spacingL),
+            const SizedBox(height: AppSpacing.spacingM),
             AuthTextField(
               controller: _harvestDateController,
               labelText: l10n.publishTruffleHarvestDateLabel,
@@ -262,10 +274,10 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
             AuthPrimaryButton(
               label: l10n.publishTruffleCta,
               isLoading: state.isSubmitting,
-              enabled: state.isFormValid,
               onPressed: () => _handlePublishPressed(),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -312,6 +324,43 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
       initialDate: initialDate.isAfter(today) ? today : initialDate,
       firstDate: TruffleHarvestDateBounds.earliestAllowedDate,
       lastDate: today,
+      builder: (context, child) {
+        final theme = Theme.of(context);
+        return Theme(
+          data: theme.copyWith(
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: AppColors.white,
+              surfaceTintColor: AppColors.white,
+              cancelButtonStyle: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacingM,
+                  vertical: AppSpacing.spacingS,
+                ),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadii.authBorderRadius,
+                ),
+                foregroundColor: AppColors.black,
+                backgroundColor: AppColors.softGrey,
+              ),
+              confirmButtonStyle: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacingM,
+                  vertical: AppSpacing.spacingS,
+                ),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadii.authBorderRadius,
+                ),
+                foregroundColor: AppColors.white,
+                backgroundColor: AppColors.accent,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.spacingS),
+            child: child!,
+          ),
+        );
+      },
     );
 
     if (!mounted || pickedDate == null) return;
@@ -321,22 +370,66 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   Future<void> _handlePublishPressed() async {
     final notifier = ref.read(publishTruffleNotifierProvider.notifier);
     notifier.clearSubmitFailure();
+    if (!notifier.revealValidationErrors()) {
+      return;
+    }
 
     final shouldPublish = await showDialog<bool>(
       context: context,
       builder: (context) {
         final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          title: Text(l10n.publishTruffleConfirmTitle),
-          content: Text(l10n.publishTruffleConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.publishTruffleCancelAction),
+          insetPadding: const EdgeInsets.all(AppSpacing.spacingM),
+          titlePadding: const EdgeInsets.fromLTRB(
+            AppSpacing.spacingM,
+            30,
+            AppSpacing.spacingM,
+            8,
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(
+            AppSpacing.spacingM,
+            0,
+            AppSpacing.spacingM,
+            20,
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(
+            AppSpacing.spacingM,
+            0,
+            AppSpacing.spacingM,
+            30,
+          ),
+          title: Text(
+            l10n.publishTruffleConfirmTitle,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.cardTitle.copyWith(
+              fontSize: 28,
+              fontWeight: FontWeight.w600,
             ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.publishTruffleConfirmAction),
+          ),
+          content: Text(
+            l10n.publishTruffleConfirmMessage,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.black80,
+            ),
+          ),
+          actions: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AuthPrimaryButton(
+                  label: l10n.publishTruffleConfirmAction,
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: AppColors.white,
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+                const SizedBox(height: AppSpacing.spacingS),
+                AuthSecondaryButton(
+                  label: l10n.publishTruffleCancelAction,
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+              ],
             ),
           ],
         );
@@ -438,6 +531,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String? _imageErrorText(AppLocalizations l10n, PublishTruffleState state) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.imagesRequired,
     )) {
@@ -452,6 +546,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String? _qualityErrorText(AppLocalizations l10n, PublishTruffleState state) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.qualityRequired,
     )) {
@@ -461,6 +556,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String? _typeErrorText(AppLocalizations l10n, PublishTruffleState state) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.typeRequired,
     )) {
@@ -470,6 +566,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String? _weightErrorText(AppLocalizations l10n, PublishTruffleState state) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.weightRequired,
     )) {
@@ -484,6 +581,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String? _totalPriceErrorText(AppLocalizations l10n, PublishTruffleState state) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.totalPriceRequired,
     )) {
@@ -501,6 +599,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
     AppLocalizations l10n,
     PublishTruffleState state,
   ) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.shippingItalyRequired,
     )) {
@@ -518,6 +617,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
     AppLocalizations l10n,
     PublishTruffleState state,
   ) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.shippingAbroadRequired,
     )) {
@@ -532,6 +632,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String? _regionErrorText(AppLocalizations l10n, PublishTruffleState state) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.regionRequired,
     )) {
@@ -544,6 +645,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
     AppLocalizations l10n,
     PublishTruffleState state,
   ) {
+    if (!state.showValidationErrors) return null;
     if (state.validationFailures.contains(
       PublishTruffleValidationFailure.harvestDateRequired,
     )) {
@@ -577,6 +679,57 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
       PublishTruffleSubmissionFailure.unknown =>
         l10n.publishTruffleSubmitUnknown,
     };
+  }
+}
+
+class _PublishChoiceChip extends StatelessWidget {
+  const _PublishChoiceChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: selected ? AppColors.black : AppColors.white,
+        borderRadius: AppRadii.authBorderRadius,
+        border: Border.all(
+          color: selected ? AppColors.black : AppColors.black10,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.black10,
+            offset: Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadii.authBorderRadius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.spacingM + 2,
+              vertical: AppSpacing.spacingS,
+            ),
+            child: Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: selected ? AppColors.white : AppColors.black80,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

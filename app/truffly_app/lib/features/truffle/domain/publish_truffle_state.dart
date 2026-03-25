@@ -17,6 +17,7 @@ final class PublishTruffleState {
     this.region,
     this.harvestDate,
     this.validationFailures = const [],
+    this.showValidationErrors = false,
     this.submitFailure,
     this.isSubmitting = false,
   });
@@ -34,6 +35,7 @@ final class PublishTruffleState {
   final String? region;
   final DateTime? harvestDate;
   final List<PublishTruffleValidationFailure> validationFailures;
+  final bool showValidationErrors;
   final PublishTruffleSubmissionFailure? submitFailure;
   final bool isSubmitting;
 
@@ -61,6 +63,7 @@ final class PublishTruffleState {
     Object? region = _sentinel,
     Object? harvestDate = _sentinel,
     List<PublishTruffleValidationFailure>? validationFailures,
+    bool? showValidationErrors,
     Object? submitFailure = _sentinel,
     bool? isSubmitting,
   }) {
@@ -84,6 +87,7 @@ final class PublishTruffleState {
           ? this.harvestDate
           : harvestDate as DateTime?,
       validationFailures: validationFailures ?? this.validationFailures,
+      showValidationErrors: showValidationErrors ?? this.showValidationErrors,
       submitFailure: identical(submitFailure, _sentinel)
           ? this.submitFailure
           : submitFailure as PublishTruffleSubmissionFailure?,
@@ -91,7 +95,8 @@ final class PublishTruffleState {
     );
   }
 
-  static PublishTruffleState initial() => const PublishTruffleState();
+  static PublishTruffleState initial() =>
+      const PublishTruffleState(quality: TruffleQuality.first);
 
   static int? _parsePositiveInt(String rawValue) {
     final trimmed = rawValue.trim();

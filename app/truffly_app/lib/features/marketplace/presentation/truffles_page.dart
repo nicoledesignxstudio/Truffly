@@ -6,13 +6,14 @@ import 'package:go_router/go_router.dart';
 import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_radii.dart';
-import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:truffly_app/features/home/presentation/widgets/home_nav_bar.dart';
 import 'package:truffly_app/features/marketplace/application/marketplace_providers.dart';
+import 'package:truffly_app/features/marketplace/presentation/widgets/listing_filter_button.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_filters_sheet.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_listing_card.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_listing_empty_state.dart';
@@ -71,7 +72,12 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
     }
 
     return Scaffold(
+      bottomNavigationBar: const HomeNavBar(activeTab: HomeNavTab.truffles),
       appBar: AppBar(
+        backgroundColor: AppColors.white,
+        surfaceTintColor: AppColors.white,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
         leadingWidth: 66,
         leading: Padding(
           padding: const EdgeInsets.only(left: AppSpacing.spacingM),
@@ -87,113 +93,118 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
         ),
         title: Text(
           l10n.trufflePageTitle,
-          style: AppTextStyles.sectionTitle,
+          style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(currentSellerPublishAccessProvider);
-          await notifier.refresh();
-        },
-        child: ListView(
-          controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.spacingM,
-            AppSpacing.spacingS,
-            AppSpacing.spacingM,
-            AppSpacing.spacingL,
-          ),
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: AuthTextField(
-                    controller: _searchController,
-                    labelText: l10n.truffleSearchHint,
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    textInputAction: TextInputAction.search,
-                    onFieldSubmitted: (_) => notifier.updateSearchQuery(_searchController.text),
-                    onChanged: (value) {
-                      _searchDebounce?.cancel();
-                      _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-                        notifier.updateSearchQuery(value);
-                      });
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(currentSellerPublishAccessProvider);
+            await notifier.refresh();
+          },
+          child: ListView(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.spacingM,
+              AppSpacing.spacingS,
+              AppSpacing.spacingM,
+              AppSpacing.spacingL,
+            ),
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: AuthTextField(
+                      controller: _searchController,
+                      labelText: l10n.truffleSearchHint.replaceFirst('Latin', 'latin'),
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      textInputAction: TextInputAction.search,
+                      onFieldSubmitted: (_) {
+                        notifier.updateSearchQuery(_searchController.text.trim());
+                      },
+                      onChanged: (value) {
+                        _searchDebounce?.cancel();
+                        _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+                          notifier.updateSearchQuery(value.trim());
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.spacingXS),
+                  ListingFilterButton(
+                    onPressed: () async {
+                      FocusScope.of(context).unfocus();
+                      final draft = await showModalBottomSheet(
+                        context: context,
+                        useSafeArea: true,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) {
+                          return TruffleFiltersSheet(
+                            initialFilters: state.appliedFilters,
+                          );
+                        },
+                      );
+
+                      if (!mounted || draft == null) return;
+                      await notifier.applyFilters(draft);
                     },
                   ),
-                ),
-                const SizedBox(width: AppSpacing.spacingXS),
-                _FilterButton(
-                  onPressed: () async {
-                    final draft = await showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: AppColors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(AppRadii.auth),
-                        ),
-                      ),
-                      builder: (context) {
-                        return TruffleFiltersSheet(
-                          initialFilters: state.appliedFilters,
-                        );
-                      },
-                    );
-
-                    if (!mounted || draft == null) return;
-                    await notifier.applyFilters(draft);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.spacingM),
-            if (publishGateState.isError) ...[
-              _PublishAccessErrorBanner(
-                message: l10n.publishTruffleAccessError,
-                retryLabel: l10n.truffleRetry,
-                onRetry: _retryPublishGateCheck,
+                ],
               ),
               const SizedBox(height: AppSpacing.spacingM),
-            ],
-            TruffleTypeChips(
-              selectedType: state.appliedFilters.selectedType,
-              onSelected: notifier.selectTypeChip,
-            ),
-            const SizedBox(height: AppSpacing.spacingM),
-            if (state.isInitialLoading)
-              const TruffleListingSkeletonGrid()
-            else if (state.failure != null && !state.hasItems)
-              _FullPageError(onRetry: notifier.refresh)
-            else if (state.isEmpty)
-              const TruffleListingEmptyState()
-            else
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: state.items.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: AppSpacing.spacingXS,
-                  crossAxisSpacing: AppSpacing.spacingXS,
-                  childAspectRatio: 0.66,
+              if (publishGateState.isError) ...[
+                _PublishAccessErrorBanner(
+                  message: l10n.publishTruffleAccessError,
+                  retryLabel: l10n.truffleRetry,
+                  onRetry: _retryPublishGateCheck,
                 ),
-                itemBuilder: (context, index) {
-                  final item = state.items[index];
-                  return TruffleListingCard(
-                    item: item,
-                    isFavorite: favoriteState.ids.contains(item.id),
-                    isFavoritePending: favoriteState.pendingIds.contains(item.id),
-                    onTap: () => context.push(AppRoutes.truffleDetailPath(item.id)),
-                    onFavoriteTap: () => favoriteNotifier.toggleFavorite(item.id),
-                  );
+                const SizedBox(height: AppSpacing.spacingM),
+              ],
+              TruffleTypeChips(
+                selectedType: state.appliedFilters.selectedType,
+                onSelected: (selectedType) {
+                  notifier.selectTypeChip(selectedType);
                 },
               ),
-            if (state.isLoadingMore) ...[
               const SizedBox(height: AppSpacing.spacingM),
-              const Center(child: CircularProgressIndicator()),
+              if (state.isInitialLoading)
+                const TruffleListingSkeletonGrid()
+              else if (state.failure != null && !state.hasItems)
+                _FullPageError(onRetry: notifier.refresh)
+              else if (state.isEmpty)
+                const TruffleListingEmptyState()
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: state.items.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: AppSpacing.spacingXS,
+                    crossAxisSpacing: AppSpacing.spacingXS,
+                    childAspectRatio: 0.58,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = state.items[index];
+                    return TruffleListingCard(
+                      item: item,
+                      isFavorite: favoriteState.ids.contains(item.id),
+                      isFavoritePending: favoriteState.pendingIds.contains(item.id),
+                      onTap: () => context.push(AppRoutes.truffleDetailPath(item.id)),
+                      onFavoriteTap: () => favoriteNotifier.toggleFavorite(item.id),
+                    );
+                  },
+                ),
+              if (state.isLoadingMore) ...[
+                const SizedBox(height: AppSpacing.spacingM),
+                const Center(child: CircularProgressIndicator()),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       floatingActionButton: _buildPublishFloatingActionButton(
@@ -245,6 +256,7 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
           },
           backgroundColor: AppColors.accent,
           foregroundColor: AppColors.white,
+          shape: const CircleBorder(),
           child: const Icon(Icons.add_rounded),
         );
     }
@@ -260,31 +272,6 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
 
   void _retryPublishGateCheck() {
     ref.invalidate(currentSellerPublishAccessProvider);
-  }
-}
-
-class _FilterButton extends StatelessWidget {
-  const _FilterButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      width: 56,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: AppRadii.authBorderRadius,
-          boxShadow: AppShadows.authField,
-        ),
-        child: IconButton(
-          onPressed: onPressed,
-          icon: const Icon(Icons.tune_rounded),
-        ),
-      ),
-    );
   }
 }
 

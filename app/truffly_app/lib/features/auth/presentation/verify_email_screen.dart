@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:truffly_app/core/providers/app_providers.dart';
 import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
@@ -89,8 +88,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authNotifierProvider);
-    final sessionExists =
-        ref.read(authServiceProvider).getCurrentSession() != null;
     final resolvedEmail = _resolveEmail(authState);
     final userEmail = resolvedEmail.isEmpty ? null : resolvedEmail;
     final isBusy = _isResendingVerification;
@@ -146,24 +143,12 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           enabled: !isBusy,
           onPressed: _resendVerification,
         ),
-        if (sessionExists) ...[
-          const SizedBox(height: AppSpacing.authFieldGap),
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              l10n.authVerifyEmailAutoContinueHint,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.black80),
-            ),
-          ),
-        ] else ...[
-          const SizedBox(height: AppSpacing.authFieldGap),
-          AuthSecondaryButton(
-            label: l10n.authVerifyEmailRecheckButton,
-            enabled: !isBusy,
-            onPressed: _goToLogin,
-          ),
-        ],
+        const SizedBox(height: AppSpacing.authFieldGap),
+        AuthSecondaryButton(
+          label: l10n.authVerifyEmailRecheckButton,
+          enabled: !isBusy,
+          onPressed: _goToLogin,
+        ),
         const SizedBox(height: 20),
         Align(
           alignment: Alignment.center,

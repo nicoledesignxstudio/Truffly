@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:truffly_app/features/auth/data/auth_result.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
@@ -21,9 +22,9 @@ abstract interface class OnboardingService {
 }
 
 final class OnboardingSubmissionException implements Exception {
-  const OnboardingSubmissionException(this.failure);
+  const OnboardingSubmissionException(this.issue);
 
-  final OnboardingSubmissionFailure failure;
+  final OnboardingSubmissionIssue issue;
 }
 
 final class UnimplementedOnboardingService implements OnboardingService {
@@ -32,7 +33,9 @@ final class UnimplementedOnboardingService implements OnboardingService {
   @override
   Future<void> completeBuyerOnboarding(CompleteBuyerOnboardingInput input) {
     throw const OnboardingSubmissionException(
-      OnboardingSubmissionFailure.unimplemented,
+      OnboardingSubmissionIssue(
+        failure: OnboardingSubmissionFailure.unimplemented,
+      ),
     );
   }
 
@@ -44,7 +47,9 @@ final class UnimplementedOnboardingService implements OnboardingService {
   @override
   Future<void> submitSellerOnboarding(SubmitSellerOnboardingInput input) {
     throw const OnboardingSubmissionException(
-      OnboardingSubmissionFailure.unimplemented,
+      OnboardingSubmissionIssue(
+        failure: OnboardingSubmissionFailure.unimplemented,
+      ),
     );
   }
 }
@@ -54,15 +59,18 @@ final class AppOnboardingService implements OnboardingService {
     required SupabaseClient supabaseClient,
     required ProfileService profileService,
     required Future<AuthResult<AuthUnit>> Function() refreshAuthState,
+    required void Function() markAuthReadyFromCurrentSession,
   }) : _supabaseClient = supabaseClient,
        _profileService = profileService,
-       _refreshAuthState = refreshAuthState;
+       _refreshAuthState = refreshAuthState,
+       _markAuthReadyFromCurrentSession = markAuthReadyFromCurrentSession;
 
   static const _submitSellerApplicationFunction = 'submit_seller_application';
 
   final SupabaseClient _supabaseClient;
   final ProfileService _profileService;
   final Future<AuthResult<AuthUnit>> Function() _refreshAuthState;
+  final void Function() _markAuthReadyFromCurrentSession;
 
   @override
   Future<void> completeBuyerOnboarding(CompleteBuyerOnboardingInput input) async {
@@ -75,15 +83,15 @@ final class AppOnboardingService implements OnboardingService {
 
     if (persistenceResult is AuthFailureResult<AuthUnit>) {
       throw OnboardingSubmissionException(
-        _mapAuthFailureToSubmissionFailure(persistenceResult.failure),
+        OnboardingSubmissionIssue(
+          failure: _mapAuthFailureToSubmissionFailure(persistenceResult.failure),
+        ),
       );
     }
 
     final refreshResult = await _refreshAuthState();
     if (refreshResult is AuthFailureResult<AuthUnit>) {
-      throw OnboardingSubmissionException(
-        _mapAuthFailureToSubmissionFailure(refreshResult.failure),
-      );
+      _markAuthReadyFromCurrentSession();
     }
   }
 
@@ -104,41 +112,55 @@ final class AppOnboardingService implements OnboardingService {
 
       if (!_isSuccessfulSellerSubmitResponse(response.data)) {
         throw const OnboardingSubmissionException(
-          OnboardingSubmissionFailure.unknown,
+          OnboardingSubmissionIssue(
+            failure: OnboardingSubmissionFailure.unknown,
+          ),
         );
       }
 
       final refreshResult = await _refreshAuthState();
       if (refreshResult is AuthFailureResult<AuthUnit>) {
-        throw OnboardingSubmissionException(
-          _mapAuthFailureToSubmissionFailure(refreshResult.failure),
-        );
+        _markAuthReadyFromCurrentSession();
       }
     } on OnboardingSubmissionException {
       rethrow;
     } on FunctionException catch (error) {
+      if (await _isOnboardingAlreadyCompleted()) {
+        _markAuthReadyFromCurrentSession();
+        return;
+      }
       throw OnboardingSubmissionException(
-        _mapFunctionExceptionToSubmissionFailure(error),
+        _buildFunctionSubmissionIssue(error),
       );
     } on TimeoutException {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.network,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.network,
+        ),
       );
     } on SocketException {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.network,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.network,
+        ),
       );
     } on HttpException {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.network,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.network,
+        ),
       );
     } on FileSystemException {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.documentUpload,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.documentUpload,
+        ),
       );
     } catch (_) {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.unknown,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.unknown,
+        ),
       );
     }
   }
@@ -178,14 +200,18 @@ final class AppOnboardingService implements OnboardingService {
     final file = File(inputDocument.localPath);
     if (!await file.exists()) {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.documentUpload,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.documentUpload,
+        ),
       );
     }
 
     final bytes = await file.readAsBytes();
     if (bytes.isEmpty) {
       throw const OnboardingSubmissionException(
-        OnboardingSubmissionFailure.documentUpload,
+        OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.documentUpload,
+        ),
       );
     }
 
@@ -196,28 +222,59 @@ final class AppOnboardingService implements OnboardingService {
     };
   }
 
-  OnboardingSubmissionFailure _mapFunctionExceptionToSubmissionFailure(
+  OnboardingSubmissionIssue _buildFunctionSubmissionIssue(
     FunctionException error,
   ) {
     final errorCode = _extractFunctionErrorCode(error.details);
+    final backendMessage = _extractFunctionErrorMessage(error.details);
+    final failure = _mapFunctionExceptionToSubmissionFailure(errorCode, error.status);
+
+    return OnboardingSubmissionIssue(
+      failure: failure,
+      backendCode: errorCode,
+      backendMessage: backendMessage,
+      httpStatus: error.status,
+    );
+  }
+
+  OnboardingSubmissionFailure _mapFunctionExceptionToSubmissionFailure(
+    String? errorCode,
+    int status,
+  ) {
+    debugPrint(
+      'submitSellerOnboarding FunctionException: status=$status code=${errorCode ?? "n/a"}',
+    );
+
+    if (_isSellerDocumentErrorCode(errorCode)) {
+      return OnboardingSubmissionFailure.documentUpload;
+    }
 
     if (_isSellerValidationErrorCode(errorCode)) {
       return OnboardingSubmissionFailure.validation;
     }
 
-    if (error.status == 400 || error.status == 409 || error.status == 422) {
+    if (status == 400 || status == 409 || status == 422) {
       return OnboardingSubmissionFailure.validation;
     }
 
-    if (error.status == 401 || error.status == 403 || error.status == 404) {
+    if (status == 401 || status == 403 || status == 404) {
       return OnboardingSubmissionFailure.unknown;
     }
 
-    if (error.status >= 500) {
+    if (status >= 500) {
       return OnboardingSubmissionFailure.server;
     }
 
     return OnboardingSubmissionFailure.unknown;
+  }
+
+  Future<bool> _isOnboardingAlreadyCompleted() async {
+    final profileResult = await _profileService.getCurrentUserProfile();
+    if (profileResult is! AuthSuccess<CurrentUserProfile>) {
+      return false;
+    }
+
+    return profileResult.data.onboardingCompleted;
   }
 
   String _contentTypeForFileName(String fileName) {
@@ -273,6 +330,31 @@ final class AppOnboardingService implements OnboardingService {
     return null;
   }
 
+  String? _extractFunctionErrorMessage(Object? details) {
+    if (details is Map) {
+      final message = details['message'];
+      if (message is String && message.trim().isNotEmpty) {
+        return message.trim();
+      }
+    }
+
+    if (details is String && details.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(details);
+        if (decoded is Map) {
+          final message = decoded['message'];
+          if (message is String && message.trim().isNotEmpty) {
+            return message.trim();
+          }
+        }
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
   bool _isSellerValidationErrorCode(String? errorCode) {
     return switch (errorCode) {
       'invalid_json_body' ||
@@ -289,6 +371,14 @@ final class AppOnboardingService implements OnboardingService {
       'invalid_region' ||
       'onboarding_already_completed' ||
       'seller_application_not_allowed' => true,
+      _ => false,
+    };
+  }
+
+  bool _isSellerDocumentErrorCode(String? errorCode) {
+    return switch (errorCode) {
+      'seller_documents_identity_upload_failed' ||
+      'seller_documents_tesserino_upload_failed' => true,
       _ => false,
     };
   }

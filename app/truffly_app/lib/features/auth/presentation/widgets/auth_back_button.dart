@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
-import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_shadows.dart';
 
 class AuthBackButton extends StatelessWidget {
@@ -19,7 +18,7 @@ class AuthBackButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: const BoxDecoration(
           color: AppColors.softGrey,
-          borderRadius: AppRadii.circularBorderRadius,
+          shape: BoxShape.circle,
           boxShadow: AppShadows.authField,
         ),
         child: IconButton(

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:truffly_app/core/providers/app_providers.dart';
 import 'package:truffly_app/features/marketplace/application/marketplace_providers.dart';
 import 'package:truffly_app/features/marketplace/data/marketplace_service.dart';
 import 'package:truffly_app/features/marketplace/domain/truffle_listing_filters.dart';

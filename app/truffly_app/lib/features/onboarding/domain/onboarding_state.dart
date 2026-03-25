@@ -14,13 +14,45 @@ enum OnboardingSubmissionFailure {
   unknown,
 }
 
+final class OnboardingSubmissionIssue {
+  const OnboardingSubmissionIssue({
+    required this.failure,
+    this.backendCode,
+    this.backendMessage,
+    this.httpStatus,
+  });
+
+  final OnboardingSubmissionFailure failure;
+  final String? backendCode;
+  final String? backendMessage;
+  final int? httpStatus;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is OnboardingSubmissionIssue &&
+            other.failure == failure &&
+            other.backendCode == backendCode &&
+            other.backendMessage == backendMessage &&
+            other.httpStatus == httpStatus);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        failure,
+        backendCode,
+        backendMessage,
+        httpStatus,
+      );
+}
+
 final class OnboardingState {
   const OnboardingState({
     this.draft = const OnboardingDraft(),
     this.currentStepIndex = 0,
     this.steps = const [],
     this.isSubmitting = false,
-    this.submissionFailure,
+    this.submissionIssue,
     this.validationFailures = const [],
   });
 
@@ -28,7 +60,7 @@ final class OnboardingState {
   final int currentStepIndex;
   final List<OnboardingStepDefinition> steps;
   final bool isSubmitting;
-  final OnboardingSubmissionFailure? submissionFailure;
+  final OnboardingSubmissionIssue? submissionIssue;
   final List<OnboardingValidationFailure> validationFailures;
 
   OnboardingPath? get path => draft.path;
@@ -48,7 +80,8 @@ final class OnboardingState {
       currentStepIndex >= 0 && currentStepIndex < steps.length - 1;
   bool get isOnLastStep => hasSteps && currentStepIndex == steps.length - 1;
   bool get hasValidationFailures => validationFailures.isNotEmpty;
-  bool get hasSubmissionFailure => submissionFailure != null;
+  bool get hasSubmissionFailure => submissionIssue != null;
+  OnboardingSubmissionFailure? get submissionFailure => submissionIssue?.failure;
   bool get isBuyerFlow => path?.isBuyer ?? false;
   bool get isSellerFlow => path?.isSeller ?? false;
   bool get isCurrentStepProgressTracked =>
@@ -62,7 +95,7 @@ final class OnboardingState {
     int? currentStepIndex,
     List<OnboardingStepDefinition>? steps,
     bool? isSubmitting,
-    Object? submissionFailure = _sentinel,
+    Object? submissionIssue = _sentinel,
     List<OnboardingValidationFailure>? validationFailures,
   }) {
     return OnboardingState(
@@ -70,9 +103,9 @@ final class OnboardingState {
       currentStepIndex: currentStepIndex ?? this.currentStepIndex,
       steps: steps ?? this.steps,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      submissionFailure: identical(submissionFailure, _sentinel)
-          ? this.submissionFailure
-          : submissionFailure as OnboardingSubmissionFailure?,
+      submissionIssue: identical(submissionIssue, _sentinel)
+          ? this.submissionIssue
+          : submissionIssue as OnboardingSubmissionIssue?,
       validationFailures: validationFailures ?? this.validationFailures,
     );
   }
@@ -99,7 +132,7 @@ final class OnboardingState {
             other.currentStepIndex == currentStepIndex &&
             _listEquals(other.steps, steps) &&
             other.isSubmitting == isSubmitting &&
-            other.submissionFailure == submissionFailure &&
+            other.submissionIssue == submissionIssue &&
             _listEquals(other.validationFailures, validationFailures));
   }
 
@@ -109,7 +142,7 @@ final class OnboardingState {
         currentStepIndex,
         Object.hashAll(steps),
         isSubmitting,
-        submissionFailure,
+        submissionIssue,
         Object.hashAll(validationFailures),
       );
 }

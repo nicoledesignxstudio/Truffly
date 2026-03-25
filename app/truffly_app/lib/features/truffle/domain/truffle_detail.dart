@@ -1,4 +1,5 @@
 import 'package:truffly_app/features/truffle/domain/truffle_quality.dart';
+import 'package:truffly_app/features/truffle/domain/truffle_seller_preview.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_type.dart';
 
 final class TruffleDetail {
@@ -16,6 +17,7 @@ final class TruffleDetail {
     required this.createdAt,
     required this.expiresAt,
     required this.imageUrls,
+    required this.seller,
   });
 
   final String id;
@@ -31,4 +33,5 @@ final class TruffleDetail {
   final DateTime createdAt;
   final DateTime expiresAt;
   final List<String> imageUrls;
+  final TruffleSellerPreview seller;
 }

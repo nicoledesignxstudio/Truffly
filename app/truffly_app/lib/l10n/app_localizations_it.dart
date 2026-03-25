@@ -805,10 +805,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get truffleQualityFirst => 'Prima scelta';
 
   @override
-  String get truffleQualitySecond => 'Seconda';
+  String get truffleQualitySecond => 'Seconda scelta';
 
   @override
-  String get truffleQualityThird => 'Terza';
+  String get truffleQualityThird => 'Terza scelta';
 
   @override
   String get truffleTypeMagnatum => 'Bianco pregiato';
@@ -829,10 +829,532 @@ class AppLocalizationsIt extends AppLocalizations {
   String get truffleTypeBrumale => 'Brumale';
 
   @override
+  String get truffleTypeMacrosporum => 'Tartufo Nero Liscio';
+
+  @override
+  String get truffleTypeBrumaleMoschatum => 'Tartufo Brumale Moscato';
+
+  @override
+  String get truffleTypeMesentericum => 'Tartufo Mesenterico';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get homeGreetingPrefix => 'Ciao';
+
+  @override
+  String get homeLoadError => 'Impossibile caricare la home in questo momento.';
+
+  @override
+  String get homeSeasonalSectionTitle => 'In evidenza di stagione';
+
+  @override
+  String get homeSeasonalInSeasonLabel => 'In season';
+
+  @override
+  String get homeSeasonalComingSoonLabel => 'Coming soon';
+
+  @override
+  String get homeSeasonalLoadingLabel => 'Caricamento stagionalità...';
+
+  @override
+  String homeSeasonalCountdownLine(int days, Object truffleName) {
+    return 'Mancano $days giorni all\'inizio della stagione del $truffleName';
+  }
+
+  @override
+  String get homeSeasonalEmptyText =>
+      'Nessuna stagione disponibile al momento.';
+
+  @override
+  String get homeSeasonalErrorText =>
+      'Impossibile caricare le informazioni stagionali.';
+
+  @override
+  String get homeSeasonalRetryLabel => 'Riprova';
+
+  @override
+  String get homeLatestNewsTitle => 'Ultime novità';
+
+  @override
+  String get homeTopSellersTitle => 'Tartufai consigliati';
+
+  @override
+  String get homeSeeAll => 'Vedi tutti';
+
+  @override
+  String get homeLatestNewsEmpty => 'Nessun tartufo disponibile al momento.';
+
+  @override
+  String get homeTopSellersEmpty => 'Nessun tartufaio disponibile al momento.';
+
+  @override
+  String get homeSectionErrorText => 'Impossibile caricare questa sezione ora.';
+
+  @override
+  String get homeSellerOrdersInProgress => 'Ordini in corso';
+
+  @override
+  String get homeSellerActiveTruffles => 'Tartufi attivi';
+
+  @override
+  String get seasonalTruffleNameMagnatum => 'Tartufo Bianco';
+
+  @override
+  String get seasonalTruffleNameMelanosporum => 'Nero Pregiato';
+
+  @override
+  String get seasonalTruffleNameAestivum => 'Scorzone';
+
+  @override
+  String get seasonalTruffleNameUncinatum => 'Uncinato';
+
+  @override
+  String get seasonalTruffleNameBorchii => 'Bianchetto';
+
+  @override
+  String get seasonalTruffleNameBrumale => 'Brumale';
+
+  @override
+  String get seasonalTruffleNameMacrosporum => 'Tartufo Nero Liscio';
+
+  @override
+  String get seasonalTruffleNameBrumaleMoschatum => 'Tartufo Brumale Moscato';
+
+  @override
+  String get seasonalTruffleNameMesentericum => 'Tartufo Mesenterico';
+
+  @override
+  String get guidesPageTitle => 'Guide ai tartufi';
+
+  @override
+  String get guidesLoadError =>
+      'Impossibile caricare le guide in questo momento.';
+
+  @override
+  String get guidesRetry => 'Riprova';
+
+  @override
+  String get guidesEmpty => 'Nessuna guida disponibile al momento.';
+
+  @override
+  String get guidesDescription => 'Descrizione';
+
+  @override
+  String get guidesAroma => 'Aroma';
+
+  @override
+  String get guidesPriceRange => 'Fascia prezzo';
+
+  @override
+  String get guidesRarity => 'Rarita';
+
+  @override
+  String get guidesSymbioticPlants => 'Piante simbionti';
+
+  @override
+  String get guidesSoil => 'Suolo';
+
+  @override
+  String get guidesSoilComposition => 'Composizione';
+
+  @override
+  String get guidesSoilStructure => 'Struttura';
+
+  @override
+  String get guidesSoilPh => 'pH';
+
+  @override
+  String get guidesSoilAltitude => 'Altitudine';
+
+  @override
+  String get guidesSoilHumidity => 'Umidita';
+
+  @override
+  String get guidesSoilHelper =>
+      'Scopri le caratteristiche dell\'ambiente in cui cresce questo tartufo: umidita, altitudine e tipologia di suolo.';
+
+  @override
+  String get guidesHarvestPeriod => 'Periodo di raccolta';
+
+  @override
+  String get guidesTruffleQualityMetric => 'Qualita del tartufo';
+
+  @override
+  String get guidesPriceRangeMetric => 'Fascia di prezzo';
+
+  @override
   String get truffleShippingPlus => '+ spedizione';
 
   @override
   String get truffleShippingItaly => 'Italia';
+
+  @override
+  String get sellerPageTitle => 'Venditori';
+
+  @override
+  String get sellerSearchHint => 'Cerca per nome o cognome';
+
+  @override
+  String get sellerLoadError => 'Impossibile caricare i venditori. Riprova.';
+
+  @override
+  String get sellerEmptyTitle => 'Nessun venditore disponibile al momento';
+
+  @override
+  String get sellerEmptySubtitle =>
+      'Torna più tardi per scoprire nuovi profili verificati.';
+
+  @override
+  String get sellerEmptyFilteredTitle =>
+      'Nessun venditore corrisponde ai filtri attuali';
+
+  @override
+  String get sellerEmptyFilteredSubtitle =>
+      'Prova a rimuovere qualche filtro o a cambiare ricerca.';
+
+  @override
+  String get sellerResetFilters => 'Resetta filtri';
+
+  @override
+  String get sellerFilterRatingTitle => 'Rating';
+
+  @override
+  String get sellerFilterCompletedOrdersTitle => 'Ordini completati';
+
+  @override
+  String get sellerFilterRatingThreePlus => '3+ stelle';
+
+  @override
+  String get sellerFilterRatingFourPlus => '4+ stelle';
+
+  @override
+  String get sellerFilterRatingFive => '5 stelle';
+
+  @override
+  String get sellerFilterCompletedOrdersFivePlus => '5+ ordini';
+
+  @override
+  String get sellerFilterCompletedOrdersTwentyPlus => '20+ ordini';
+
+  @override
+  String get sellerFilterCompletedOrdersFiftyPlus => '50+ ordini';
+
+  @override
+  String get sellerRatingNew => 'Nuovo';
+
+  @override
+  String get sellerRegionUnavailable => 'Regione non disponibile';
+
+  @override
+  String sellerActiveSearchFilter(Object query) {
+    return 'Ricerca: $query';
+  }
+
+  @override
+  String sellerReviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recensioni',
+      one: '1 recensione',
+      zero: 'Nessuna recensione',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sellerCompletedOrdersShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ordini',
+      one: '1 ordine',
+      zero: '0 ordini',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDetailsTitle => 'Dettagli account';
+
+  @override
+  String get accountDetailsSubtitle =>
+      'Mantieni aggiornati i dati del tuo account. Se cambi email dovrai completare una nuova verifica.';
+
+  @override
+  String get accountDetailsSaveCta => 'Salva modifiche';
+
+  @override
+  String get accountDetailsPersonalSectionTitle => 'Dati personali';
+
+  @override
+  String get accountDetailsEmailSectionTitle => 'Email';
+
+  @override
+  String get accountDetailsLocationSectionTitle => 'Località';
+
+  @override
+  String get accountDetailsPhotoSectionTitle => 'Foto profilo';
+
+  @override
+  String get accountDetailsBioSectionTitle => 'Bio';
+
+  @override
+  String get accountDetailsBioPlaceholder =>
+      'Racconta qualcosa in più su di te agli acquirenti';
+
+  @override
+  String get accountDetailsEmailVerified => 'Email verificata';
+
+  @override
+  String get accountDetailsEmailHelper =>
+      'Se cambi email, ti invieremo un nuovo link di verifica e l\'app ti riporterà nella schermata di verifica email.';
+
+  @override
+  String get accountDetailsChangeEmailCta => 'Cambia email';
+
+  @override
+  String get accountDetailsSaveNewEmailCta => 'Salva nuova email';
+
+  @override
+  String get accountDetailsCancelEmailChangeCta => 'Annulla';
+
+  @override
+  String get accountDetailsPhotoHelper =>
+      'Puoi aggiornare l\'avatar del seller da camera o galleria. Se rimuovi la foto esistente, il profilo tornerà alle iniziali.';
+
+  @override
+  String get accountDetailsPhotoPendingHelper =>
+      'Hai selezionato una nuova foto in locale. Il collegamento all\'upload definitivo verrà aggiunto nel prossimo step senza sporcare il modello dati attuale.';
+
+  @override
+  String get accountDetailsChangePhotoCta => 'Cambia foto';
+
+  @override
+  String get accountDetailsRemovePhotoCta => 'Rimuovi foto';
+
+  @override
+  String get accountDetailsTakePhotoOption => 'Scatta foto';
+
+  @override
+  String get accountDetailsChooseFromGalleryOption => 'Scegli dalla galleria';
+
+  @override
+  String get accountDetailsPhotoSourceCancelOption => 'Annulla';
+
+  @override
+  String get accountDetailsPhotoUploadPending =>
+      'La nuova foto è pronta in anteprima locale. Completiamo l\'upload definitivo nel prossimo step tecnico.';
+
+  @override
+  String get accountDetailsSellerCountryLockedHelper =>
+      'Secondo le regole di dominio attuali, gli account seller restano collegati all\'Italia.';
+
+  @override
+  String get accountDetailsRegionHiddenHelper =>
+      'La regione è richiesta solo quando il paese selezionato è Italia. Salvando con un altro paese la regione verrà rimossa.';
+
+  @override
+  String get accountDetailsRequiredFieldError => 'Questo campo è obbligatorio.';
+
+  @override
+  String get accountDetailsSellerCountryError =>
+      'Gli account seller devono mantenere Italia come paese.';
+
+  @override
+  String get accountDetailsInvalidImageUrlError =>
+      'Inserisci un URL immagine valido.';
+
+  @override
+  String get accountDetailsSessionExpired =>
+      'La sessione è scaduta. Accedi di nuovo per continuare.';
+
+  @override
+  String get accountDetailsLoadError =>
+      'Impossibile caricare i dettagli account in questo momento.';
+
+  @override
+  String get accountDetailsSaveError =>
+      'Impossibile salvare i dettagli account in questo momento. Riprova.';
+
+  @override
+  String get accountDetailsSaveSuccess =>
+      'Dettagli account aggiornati correttamente.';
+
+  @override
+  String get accountDetailsEmailVerificationSent =>
+      'Ti abbiamo inviato un link di verifica al nuovo indirizzo email. Verifica l\'email per continuare.';
+
+  @override
+  String get shippingAddressesTitle => 'Indirizzi di spedizione';
+
+  @override
+  String get shippingAddressesSubtitle =>
+      'Scegli quale indirizzo tenere pronto per il checkout e aggiornalo quando cambiano i dettagli di consegna.';
+
+  @override
+  String get shippingAddressesSectionTitle => 'Indirizzi salvati';
+
+  @override
+  String get shippingAddressesAddCta => 'Aggiungi indirizzo';
+
+  @override
+  String get shippingAddressesEmptyTitle => 'Nessun indirizzo salvato';
+
+  @override
+  String get shippingAddressesEmptySubtitle =>
+      'Aggiungi il tuo primo indirizzo di spedizione così sarà pronto da usare durante il checkout.';
+
+  @override
+  String get shippingAddressesDefaultBadge => 'Predefinito';
+
+  @override
+  String get shippingAddressesLoadError =>
+      'Impossibile caricare gli indirizzi di spedizione in questo momento.';
+
+  @override
+  String get shippingAddressesNetworkError =>
+      'Errore di rete durante il caricamento degli indirizzi di spedizione. Riprova.';
+
+  @override
+  String get shippingAddressesUnauthorizedError =>
+      'La sessione è scaduta. Accedi di nuovo per gestire gli indirizzi di spedizione.';
+
+  @override
+  String get shippingAddressesNotFoundError =>
+      'Questo indirizzo di spedizione non è più disponibile.';
+
+  @override
+  String get shippingAddressesValidationError =>
+      'Alcuni dati dell\'indirizzo non sono validi. Controlla il form e riprova.';
+
+  @override
+  String get shippingAddressAddTitle => 'Aggiungi indirizzo';
+
+  @override
+  String get shippingAddressEditTitle => 'Modifica indirizzo';
+
+  @override
+  String get shippingAddressFormSubtitle =>
+      'Usa un indirizzo di spedizione dedicato per le consegne. L\'indirizzo predefinito verrà evidenziato e tenuto pronto per i futuri flow di checkout.';
+
+  @override
+  String get shippingAddressSaveCta => 'Salva indirizzo';
+
+  @override
+  String get shippingAddressDeleteCta => 'Elimina indirizzo';
+
+  @override
+  String get shippingAddressDeleteDialogTitle => 'Eliminare questo indirizzo?';
+
+  @override
+  String get shippingAddressDeleteDialogMessage =>
+      'Questo indirizzo di spedizione verrà rimosso dall\'elenco salvato.';
+
+  @override
+  String get shippingAddressDeleteDialogCancel => 'Annulla';
+
+  @override
+  String get shippingAddressDeleteDialogConfirm => 'Elimina';
+
+  @override
+  String get shippingAddressFullNameLabel => 'Nome completo';
+
+  @override
+  String get shippingAddressFullNamePlaceholder => 'Inserisci nome completo';
+
+  @override
+  String get shippingAddressStreetLabel => 'Via';
+
+  @override
+  String get shippingAddressStreetPlaceholder => 'Via e numero civico';
+
+  @override
+  String get shippingAddressCityLabel => 'Città';
+
+  @override
+  String get shippingAddressCityPlaceholder => 'Inserisci città';
+
+  @override
+  String get shippingAddressPostalCodeLabel => 'CAP';
+
+  @override
+  String get shippingAddressPostalCodePlaceholder => 'Inserisci CAP';
+
+  @override
+  String get shippingAddressCountryLabel => 'Paese';
+
+  @override
+  String get shippingAddressCountryPlaceholder => 'Seleziona un paese';
+
+  @override
+  String get shippingAddressPhoneLabel => 'Telefono';
+
+  @override
+  String get shippingAddressPhonePlaceholder => 'Inserisci numero di telefono';
+
+  @override
+  String get shippingAddressDefaultToggleLabel =>
+      'Imposta come indirizzo predefinito';
+
+  @override
+  String get shippingAddressDefaultToggleHelper =>
+      'Gli indirizzi predefiniti vengono evidenziati nella lista e restano pronti per la selezione nei futuri checkout.';
+
+  @override
+  String get shippingAddressRequiredFieldError =>
+      'Questo campo è obbligatorio.';
+
+  @override
+  String get shippingAddressFullNameRequiredError =>
+      'Il nome completo è obbligatorio.';
+
+  @override
+  String get shippingAddressStreetRequiredError => 'La via è obbligatoria.';
+
+  @override
+  String get shippingAddressCityRequiredError => 'La città è obbligatoria.';
+
+  @override
+  String get shippingAddressCityInvalidError => 'Inserisci una città valida.';
+
+  @override
+  String get shippingAddressPostalCodeRequiredError => 'Il CAP è obbligatorio.';
+
+  @override
+  String get shippingAddressPostalCodeInvalidError =>
+      'Inserisci un CAP valido.';
+
+  @override
+  String get shippingAddressCountryRequiredError => 'Il paese è obbligatorio.';
+
+  @override
+  String get shippingAddressCountryInvalidError => 'Seleziona un paese valido.';
+
+  @override
+  String get shippingAddressPhoneRequiredError => 'Il telefono è obbligatorio.';
+
+  @override
+  String get shippingAddressPhoneInvalidError =>
+      'Inserisci un numero di telefono valido con prefisso.';
+
+  @override
+  String get shippingAddressValidationFallback =>
+      'Controlla questo campo e riprova.';
+
+  @override
+  String get shippingAddressSaveError =>
+      'Impossibile salvare questo indirizzo di spedizione in questo momento. Riprova.';
+
+  @override
+  String get shippingAddressSavedSuccess =>
+      'Indirizzo di spedizione salvato correttamente.';
+
+  @override
+  String get shippingAddressDeletedSuccess =>
+      'Indirizzo di spedizione eliminato correttamente.';
 
   @override
   String get publishTruffleTitle => 'Pubblica tartufo';
@@ -1026,4 +1548,76 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get publishTruffleAccessError =>
       'Impossibile verificare ora i permessi di pubblicazione. Aggiorna la pagina e riprova.';
+
+  @override
+  String get sellerMyTrufflesTitle => 'I miei tartufi';
+
+  @override
+  String get sellerMyTrufflesTabActive => 'Attivi';
+
+  @override
+  String get sellerMyTrufflesTabSold => 'Venduti';
+
+  @override
+  String get sellerMyTrufflesTabExpired => 'Scaduti';
+
+  @override
+  String get sellerMyTrufflesEmptyActiveTitle => 'Nessun tartufo attivo';
+
+  @override
+  String get sellerMyTrufflesEmptyActiveSubtitle =>
+      'Pubblica un tartufo e lo troverai qui finché sarà disponibile.';
+
+  @override
+  String get sellerMyTrufflesEmptySoldTitle => 'Nessun tartufo venduto';
+
+  @override
+  String get sellerMyTrufflesEmptySoldSubtitle =>
+      'Le vendite completate appariranno qui quando un tartufo sarà acquistato.';
+
+  @override
+  String get sellerMyTrufflesEmptyExpiredTitle => 'Nessun tartufo scaduto';
+
+  @override
+  String get sellerMyTrufflesEmptyExpiredSubtitle =>
+      'I tartufi scaduti resteranno visibili qui per una consultazione rapida.';
+
+  @override
+  String get sellerMyTrufflesLoadError =>
+      'Impossibile caricare i tuoi tartufi in questo momento.';
+
+  @override
+  String get sellerMyTrufflesRetry => 'Riprova';
+
+  @override
+  String get sellerMyTrufflesDeleteTitle => 'Eliminare questo tartufo?';
+
+  @override
+  String get sellerMyTrufflesDeleteMessage =>
+      'Questa azione è irreversibile. Il tartufo, le sue immagini e i salvataggi collegati verranno rimossi.';
+
+  @override
+  String get sellerMyTrufflesDeleteCancel => 'Annulla';
+
+  @override
+  String get sellerMyTrufflesDeleteConfirm => 'Elimina';
+
+  @override
+  String get sellerMyTrufflesDeleteSuccess => 'Tartufo eliminato con successo.';
+
+  @override
+  String get sellerMyTrufflesDeleteForbidden =>
+      'Questo tartufo non può più essere eliminato.';
+
+  @override
+  String get sellerMyTrufflesDeleteNetwork =>
+      'Problema di connessione durante l\'eliminazione del tartufo. Riprova.';
+
+  @override
+  String get sellerMyTrufflesDeleteUnauthenticated =>
+      'La sessione è scaduta. Accedi di nuovo prima di eliminare un tartufo.';
+
+  @override
+  String get sellerMyTrufflesDeleteUnknown =>
+      'Impossibile eliminare il tartufo in questo momento.';
 }

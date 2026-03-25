@@ -146,6 +146,26 @@ final class AuthService {
     }
   }
 
+  Future<AuthResult<AuthUnit>> updateEmail({
+    required String email,
+    String? emailRedirectTo,
+  }) async {
+    final normalizedEmail = _normalizeEmail(email);
+
+    try {
+      await _supabaseClient.auth
+          .updateUser(
+            UserAttributes(email: normalizedEmail),
+            emailRedirectTo:
+                emailRedirectTo ?? AuthRedirects.verifyEmailCallbackUri.toString(),
+          )
+          .timeout(_requestTimeout);
+      return const AuthSuccess<AuthUnit>(AuthUnit.value);
+    } catch (error) {
+      return AuthFailureResult<AuthUnit>(_mapAuthError(error));
+    }
+  }
+
   Session? getCurrentSession() {
     return _supabaseClient.auth.currentSession;
   }

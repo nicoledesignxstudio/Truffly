@@ -1,0 +1,1 @@
+enum OrdersScope { purchases, sales }

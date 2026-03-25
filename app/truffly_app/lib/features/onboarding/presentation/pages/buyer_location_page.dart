@@ -76,7 +76,7 @@ class BuyerLocationPage extends ConsumerWidget {
                         for (final option in onboardingCountryOptions)
                           DropdownMenuItem<String>(
                             value: option.code,
-                            child: Text(_countryLabel(l10n, option.localizationKey)),
+                            child: Text(option.localizedName(l10n)),
                           ),
                       ],
                       onChanged: (value) {
@@ -165,18 +165,6 @@ String? _selectedCountryValue(String? value) {
 String? _selectedRegionValue(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   return value;
-}
-
-String _countryLabel(AppLocalizations l10n, String localizationKey) {
-  return switch (localizationKey) {
-    'onboardingCountryItaly' => l10n.onboardingCountryItaly,
-    'onboardingCountryFrance' => l10n.onboardingCountryFrance,
-    'onboardingCountryGermany' => l10n.onboardingCountryGermany,
-    'onboardingCountrySpain' => l10n.onboardingCountrySpain,
-    'onboardingCountryUnitedKingdom' => l10n.onboardingCountryUnitedKingdom,
-    'onboardingCountryUnitedStates' => l10n.onboardingCountryUnitedStates,
-    _ => localizationKey,
-  };
 }
 
 String _regionLabel(AppLocalizations l10n, String localizationKey) {

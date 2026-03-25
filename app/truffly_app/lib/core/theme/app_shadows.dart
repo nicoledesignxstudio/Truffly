@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:truffly_app/core/theme/app_colors.dart';
 
 abstract final class AppShadows {
   static const List<BoxShadow> authField = [
     BoxShadow(
-      color: AppColors.black10,
+      color: Color(0x12151618),
       offset: Offset(0, 2),
       blurRadius: 4,
+      spreadRadius: 0,
+    ),
+  ];
+
+  static const List<BoxShadow> truffleCard = [
+    BoxShadow(
+      color: Color(0x1A151618),
+      offset: Offset(0, 2),
+      blurRadius: 7,
       spreadRadius: 0,
     ),
   ];

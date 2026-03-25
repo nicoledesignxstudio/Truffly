@@ -132,6 +132,11 @@ Deno.serve(async (request) => {
     );
   }
 
+  const runtimeUrlValidationError = validateRuntimeSupabaseUrl(supabaseUrl);
+  if (runtimeUrlValidationError != null) {
+    return runtimeUrlValidationError;
+  }
+
   const authClient = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: { Authorization: authHeader },
@@ -1167,4 +1172,27 @@ function errorMessage(errorCode: PublishErrorCode): string {
     default:
       return validationMessage(errorCode);
   }
+}
+
+function validateRuntimeSupabaseUrl(supabaseUrl: string): Response | null {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(supabaseUrl);
+  } catch {
+    return errorResponse(
+      "publish_unknown_error",
+      "SUPABASE_URL is not a valid URL for the publish function runtime.",
+      500,
+    );
+  }
+
+  if (parsedUrl.hostname === "10.0.2.2") {
+    return errorResponse(
+      "publish_unknown_error",
+      "SUPABASE_URL points to the Android emulator loopback. Edge Functions must not be started with the Flutter app env file.",
+      500,
+    );
+  }
+
+  return null;
 }

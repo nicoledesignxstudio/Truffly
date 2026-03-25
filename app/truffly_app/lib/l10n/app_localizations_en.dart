@@ -798,10 +798,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get truffleQualityFirst => 'First choice';
 
   @override
-  String get truffleQualitySecond => 'Second';
+  String get truffleQualitySecond => 'Second choice';
 
   @override
-  String get truffleQualityThird => 'Third';
+  String get truffleQualityThird => 'Third choice';
 
   @override
   String get truffleTypeMagnatum => 'White truffle';
@@ -822,10 +822,529 @@ class AppLocalizationsEn extends AppLocalizations {
   String get truffleTypeBrumale => 'Brumale';
 
   @override
+  String get truffleTypeMacrosporum => 'Smooth Black Truffle';
+
+  @override
+  String get truffleTypeBrumaleMoschatum => 'Musky Brumal Truffle';
+
+  @override
+  String get truffleTypeMesentericum => 'Mesenteric Truffle';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get homeGreetingPrefix => 'Hello';
+
+  @override
+  String get homeLoadError => 'Unable to load the home screen right now.';
+
+  @override
+  String get homeSeasonalSectionTitle => 'Seasonal Highlight';
+
+  @override
+  String get homeSeasonalInSeasonLabel => 'In season';
+
+  @override
+  String get homeSeasonalComingSoonLabel => 'Coming soon';
+
+  @override
+  String get homeSeasonalLoadingLabel => 'Loading seasonal highlights...';
+
+  @override
+  String homeSeasonalCountdownLine(int days, Object truffleName) {
+    return '$days days left until $truffleName season begins';
+  }
+
+  @override
+  String get homeSeasonalEmptyText =>
+      'No seasonal highlight is available right now.';
+
+  @override
+  String get homeSeasonalErrorText => 'Unable to load seasonal information.';
+
+  @override
+  String get homeSeasonalRetryLabel => 'Retry';
+
+  @override
+  String get homeLatestNewsTitle => 'Latest News';
+
+  @override
+  String get homeTopSellersTitle => 'Top Truffle Hunters';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homeLatestNewsEmpty => 'No truffles are available right now.';
+
+  @override
+  String get homeTopSellersEmpty =>
+      'No truffle hunters are available right now.';
+
+  @override
+  String get homeSectionErrorText => 'Unable to load this section right now.';
+
+  @override
+  String get homeSellerOrdersInProgress => 'Orders in progress';
+
+  @override
+  String get homeSellerActiveTruffles => 'Active truffles';
+
+  @override
+  String get seasonalTruffleNameMagnatum => 'White Truffle';
+
+  @override
+  String get seasonalTruffleNameMelanosporum => 'Black Winter Truffle';
+
+  @override
+  String get seasonalTruffleNameAestivum => 'Summer Truffle';
+
+  @override
+  String get seasonalTruffleNameUncinatum => 'Uncinatum Truffle';
+
+  @override
+  String get seasonalTruffleNameBorchii => 'Bianchetto';
+
+  @override
+  String get seasonalTruffleNameBrumale => 'Brumale';
+
+  @override
+  String get seasonalTruffleNameMacrosporum => 'Smooth Black Truffle';
+
+  @override
+  String get seasonalTruffleNameBrumaleMoschatum => 'Musky Brumal Truffle';
+
+  @override
+  String get seasonalTruffleNameMesentericum => 'Mesenteric Truffle';
+
+  @override
+  String get guidesPageTitle => 'Truffle Guides';
+
+  @override
+  String get guidesLoadError => 'Unable to load guides right now.';
+
+  @override
+  String get guidesRetry => 'Retry';
+
+  @override
+  String get guidesEmpty => 'No guides are available right now.';
+
+  @override
+  String get guidesDescription => 'Description';
+
+  @override
+  String get guidesAroma => 'Aroma';
+
+  @override
+  String get guidesPriceRange => 'Price range';
+
+  @override
+  String get guidesRarity => 'Rarity';
+
+  @override
+  String get guidesSymbioticPlants => 'Symbiotic plants';
+
+  @override
+  String get guidesSoil => 'Soil';
+
+  @override
+  String get guidesSoilComposition => 'Composition';
+
+  @override
+  String get guidesSoilStructure => 'Structure';
+
+  @override
+  String get guidesSoilPh => 'pH';
+
+  @override
+  String get guidesSoilAltitude => 'Altitude';
+
+  @override
+  String get guidesSoilHumidity => 'Humidity';
+
+  @override
+  String get guidesSoilHelper =>
+      'Discover the characteristics of the environment where this truffle grows: humidity, altitude, and soil type.';
+
+  @override
+  String get guidesHarvestPeriod => 'Harvest period';
+
+  @override
+  String get guidesTruffleQualityMetric => 'Truffle quality';
+
+  @override
+  String get guidesPriceRangeMetric => 'Price range';
+
+  @override
   String get truffleShippingPlus => '+ shipping';
 
   @override
   String get truffleShippingItaly => 'Italy';
+
+  @override
+  String get sellerPageTitle => 'Sellers';
+
+  @override
+  String get sellerSearchHint => 'Search by first or last name';
+
+  @override
+  String get sellerLoadError =>
+      'Unable to load sellers right now. Please try again.';
+
+  @override
+  String get sellerEmptyTitle => 'No sellers are available right now';
+
+  @override
+  String get sellerEmptySubtitle =>
+      'Check back later to discover more verified profiles.';
+
+  @override
+  String get sellerEmptyFilteredTitle =>
+      'No sellers match your current filters';
+
+  @override
+  String get sellerEmptyFilteredSubtitle =>
+      'Try removing a filter or changing your search.';
+
+  @override
+  String get sellerResetFilters => 'Reset filters';
+
+  @override
+  String get sellerFilterRatingTitle => 'Rating';
+
+  @override
+  String get sellerFilterCompletedOrdersTitle => 'Completed orders';
+
+  @override
+  String get sellerFilterRatingThreePlus => '3+ stars';
+
+  @override
+  String get sellerFilterRatingFourPlus => '4+ stars';
+
+  @override
+  String get sellerFilterRatingFive => '5 stars';
+
+  @override
+  String get sellerFilterCompletedOrdersFivePlus => '5+ orders';
+
+  @override
+  String get sellerFilterCompletedOrdersTwentyPlus => '20+ orders';
+
+  @override
+  String get sellerFilterCompletedOrdersFiftyPlus => '50+ orders';
+
+  @override
+  String get sellerRatingNew => 'New';
+
+  @override
+  String get sellerRegionUnavailable => 'Region unavailable';
+
+  @override
+  String sellerActiveSearchFilter(Object query) {
+    return 'Search: $query';
+  }
+
+  @override
+  String sellerReviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+      zero: 'No reviews',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sellerCompletedOrdersShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders',
+      one: '1 order',
+      zero: '0 orders',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDetailsTitle => 'Account details';
+
+  @override
+  String get accountDetailsSubtitle =>
+      'Keep your account information up to date. Email changes require a new verification step.';
+
+  @override
+  String get accountDetailsSaveCta => 'Save changes';
+
+  @override
+  String get accountDetailsPersonalSectionTitle => 'Personal details';
+
+  @override
+  String get accountDetailsEmailSectionTitle => 'Email';
+
+  @override
+  String get accountDetailsLocationSectionTitle => 'Location';
+
+  @override
+  String get accountDetailsPhotoSectionTitle => 'Profile image';
+
+  @override
+  String get accountDetailsBioSectionTitle => 'Bio';
+
+  @override
+  String get accountDetailsBioPlaceholder =>
+      'Tell buyers a little more about you';
+
+  @override
+  String get accountDetailsEmailVerified => 'Email verified';
+
+  @override
+  String get accountDetailsEmailHelper =>
+      'If you change your email, we will send a new verification link and the app will bring you back to the email verification screen.';
+
+  @override
+  String get accountDetailsChangeEmailCta => 'Change email';
+
+  @override
+  String get accountDetailsSaveNewEmailCta => 'Save new email';
+
+  @override
+  String get accountDetailsCancelEmailChangeCta => 'Cancel';
+
+  @override
+  String get accountDetailsPhotoHelper =>
+      'You can update the seller avatar from camera or gallery. If you remove the current photo, the profile falls back to initials.';
+
+  @override
+  String get accountDetailsPhotoPendingHelper =>
+      'You selected a new photo locally. The final upload connection will be added in the next step without polluting the current data model.';
+
+  @override
+  String get accountDetailsChangePhotoCta => 'Change photo';
+
+  @override
+  String get accountDetailsRemovePhotoCta => 'Remove photo';
+
+  @override
+  String get accountDetailsTakePhotoOption => 'Take photo';
+
+  @override
+  String get accountDetailsChooseFromGalleryOption => 'Choose from gallery';
+
+  @override
+  String get accountDetailsPhotoSourceCancelOption => 'Cancel';
+
+  @override
+  String get accountDetailsPhotoUploadPending =>
+      'The new photo is ready as a local preview. We will connect the final upload in the next technical step.';
+
+  @override
+  String get accountDetailsSellerCountryLockedHelper =>
+      'Seller accounts stay linked to Italy according to the current domain rules.';
+
+  @override
+  String get accountDetailsRegionHiddenHelper =>
+      'Region is only required when the selected country is Italy. Saving with another country will clear the region.';
+
+  @override
+  String get accountDetailsRequiredFieldError => 'This field is required.';
+
+  @override
+  String get accountDetailsSellerCountryError =>
+      'Seller accounts must keep Italy as country.';
+
+  @override
+  String get accountDetailsInvalidImageUrlError => 'Enter a valid image URL.';
+
+  @override
+  String get accountDetailsSessionExpired =>
+      'Your session expired. Sign in again to continue.';
+
+  @override
+  String get accountDetailsLoadError =>
+      'Unable to load your account details right now.';
+
+  @override
+  String get accountDetailsSaveError =>
+      'Unable to save your account details right now. Please try again.';
+
+  @override
+  String get accountDetailsSaveSuccess =>
+      'Account details updated successfully.';
+
+  @override
+  String get accountDetailsEmailVerificationSent =>
+      'We sent a verification link to your new email address. Verify your email to continue.';
+
+  @override
+  String get shippingAddressesTitle => 'Shipping addresses';
+
+  @override
+  String get shippingAddressesSubtitle =>
+      'Choose which address to keep ready for checkout and update it whenever your delivery details change.';
+
+  @override
+  String get shippingAddressesSectionTitle => 'Saved addresses';
+
+  @override
+  String get shippingAddressesAddCta => 'Add address';
+
+  @override
+  String get shippingAddressesEmptyTitle => 'No saved addresses';
+
+  @override
+  String get shippingAddressesEmptySubtitle =>
+      'Add your first shipping address so it is ready to use during checkout.';
+
+  @override
+  String get shippingAddressesDefaultBadge => 'Default';
+
+  @override
+  String get shippingAddressesLoadError =>
+      'Unable to load your shipping addresses right now.';
+
+  @override
+  String get shippingAddressesNetworkError =>
+      'Network error while loading shipping addresses. Please try again.';
+
+  @override
+  String get shippingAddressesUnauthorizedError =>
+      'Your session expired. Sign in again to manage shipping addresses.';
+
+  @override
+  String get shippingAddressesNotFoundError =>
+      'This shipping address could not be found anymore.';
+
+  @override
+  String get shippingAddressesValidationError =>
+      'Some shipping address data is invalid. Please review the form and try again.';
+
+  @override
+  String get shippingAddressAddTitle => 'Add address';
+
+  @override
+  String get shippingAddressEditTitle => 'Edit address';
+
+  @override
+  String get shippingAddressFormSubtitle =>
+      'Use a dedicated shipping address for deliveries. The default address will be highlighted and ready for future checkout flows.';
+
+  @override
+  String get shippingAddressSaveCta => 'Save address';
+
+  @override
+  String get shippingAddressDeleteCta => 'Delete address';
+
+  @override
+  String get shippingAddressDeleteDialogTitle => 'Delete this address?';
+
+  @override
+  String get shippingAddressDeleteDialogMessage =>
+      'This shipping address will be removed from your saved list.';
+
+  @override
+  String get shippingAddressDeleteDialogCancel => 'Cancel';
+
+  @override
+  String get shippingAddressDeleteDialogConfirm => 'Delete';
+
+  @override
+  String get shippingAddressFullNameLabel => 'Full name';
+
+  @override
+  String get shippingAddressFullNamePlaceholder => 'Enter full name';
+
+  @override
+  String get shippingAddressStreetLabel => 'Street';
+
+  @override
+  String get shippingAddressStreetPlaceholder => 'Street and house number';
+
+  @override
+  String get shippingAddressCityLabel => 'City';
+
+  @override
+  String get shippingAddressCityPlaceholder => 'Enter city';
+
+  @override
+  String get shippingAddressPostalCodeLabel => 'Postal code';
+
+  @override
+  String get shippingAddressPostalCodePlaceholder => 'Enter postal code';
+
+  @override
+  String get shippingAddressCountryLabel => 'Country';
+
+  @override
+  String get shippingAddressCountryPlaceholder => 'Select a country';
+
+  @override
+  String get shippingAddressPhoneLabel => 'Phone';
+
+  @override
+  String get shippingAddressPhonePlaceholder => 'Enter phone number';
+
+  @override
+  String get shippingAddressDefaultToggleLabel => 'Set as default address';
+
+  @override
+  String get shippingAddressDefaultToggleHelper =>
+      'Default addresses are highlighted in your list and ready for future checkout selection.';
+
+  @override
+  String get shippingAddressRequiredFieldError => 'This field is required.';
+
+  @override
+  String get shippingAddressFullNameRequiredError => 'Full name is required.';
+
+  @override
+  String get shippingAddressStreetRequiredError => 'Street is required.';
+
+  @override
+  String get shippingAddressCityRequiredError => 'City is required.';
+
+  @override
+  String get shippingAddressCityInvalidError => 'Enter a valid city name.';
+
+  @override
+  String get shippingAddressPostalCodeRequiredError =>
+      'Postal code is required.';
+
+  @override
+  String get shippingAddressPostalCodeInvalidError =>
+      'Enter a valid postal code.';
+
+  @override
+  String get shippingAddressCountryRequiredError => 'Country is required.';
+
+  @override
+  String get shippingAddressCountryInvalidError => 'Select a valid country.';
+
+  @override
+  String get shippingAddressPhoneRequiredError => 'Phone is required.';
+
+  @override
+  String get shippingAddressPhoneInvalidError =>
+      'Enter a valid phone number with prefix.';
+
+  @override
+  String get shippingAddressValidationFallback =>
+      'Review this field and try again.';
+
+  @override
+  String get shippingAddressSaveError =>
+      'Unable to save this shipping address right now. Please try again.';
+
+  @override
+  String get shippingAddressSavedSuccess =>
+      'Shipping address saved successfully.';
+
+  @override
+  String get shippingAddressDeletedSuccess =>
+      'Shipping address deleted successfully.';
 
   @override
   String get publishTruffleTitle => 'Publish truffle';
@@ -1017,4 +1536,76 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get publishTruffleAccessError =>
       'Unable to verify publish permissions right now. Pull to refresh and try again.';
+
+  @override
+  String get sellerMyTrufflesTitle => 'My truffles';
+
+  @override
+  String get sellerMyTrufflesTabActive => 'Active';
+
+  @override
+  String get sellerMyTrufflesTabSold => 'Sold';
+
+  @override
+  String get sellerMyTrufflesTabExpired => 'Expired';
+
+  @override
+  String get sellerMyTrufflesEmptyActiveTitle => 'No active truffles';
+
+  @override
+  String get sellerMyTrufflesEmptyActiveSubtitle =>
+      'Publish a truffle and it will appear here while it is available.';
+
+  @override
+  String get sellerMyTrufflesEmptySoldTitle => 'No sold truffles';
+
+  @override
+  String get sellerMyTrufflesEmptySoldSubtitle =>
+      'Completed sales will appear here once a truffle has been purchased.';
+
+  @override
+  String get sellerMyTrufflesEmptyExpiredTitle => 'No expired truffles';
+
+  @override
+  String get sellerMyTrufflesEmptyExpiredSubtitle =>
+      'Expired truffles will remain visible here for quick reference.';
+
+  @override
+  String get sellerMyTrufflesLoadError =>
+      'Unable to load your truffles right now.';
+
+  @override
+  String get sellerMyTrufflesRetry => 'Retry';
+
+  @override
+  String get sellerMyTrufflesDeleteTitle => 'Delete this truffle?';
+
+  @override
+  String get sellerMyTrufflesDeleteMessage =>
+      'This action is irreversible. The truffle, its images, and related saves will be removed.';
+
+  @override
+  String get sellerMyTrufflesDeleteCancel => 'Cancel';
+
+  @override
+  String get sellerMyTrufflesDeleteConfirm => 'Delete';
+
+  @override
+  String get sellerMyTrufflesDeleteSuccess => 'Truffle deleted successfully.';
+
+  @override
+  String get sellerMyTrufflesDeleteForbidden =>
+      'This truffle can no longer be deleted.';
+
+  @override
+  String get sellerMyTrufflesDeleteNetwork =>
+      'Connection issue while deleting the truffle. Please try again.';
+
+  @override
+  String get sellerMyTrufflesDeleteUnauthenticated =>
+      'Your session expired. Sign in again before deleting a truffle.';
+
+  @override
+  String get sellerMyTrufflesDeleteUnknown =>
+      'Unable to delete the truffle right now.';
 }

@@ -92,7 +92,14 @@ class OnboardingDropdownField<T> extends StatefulWidget {
 
 class _OnboardingDropdownFieldState<T> extends State<OnboardingDropdownField<T>> {
   final MenuController _menuController = MenuController();
+  final ScrollController _scrollController = ScrollController();
   bool _isOpen = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +140,12 @@ class _OnboardingDropdownFieldState<T> extends State<OnboardingDropdownField<T>>
                 child: ClipRRect(
                   borderRadius: AppRadii.authBorderRadius,
                   child: Scrollbar(
+                    controller: _scrollController,
                     thumbVisibility: true,
                     trackVisibility: true,
                     child: SingleChildScrollView(
+                      controller: _scrollController,
+                      primary: false,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [

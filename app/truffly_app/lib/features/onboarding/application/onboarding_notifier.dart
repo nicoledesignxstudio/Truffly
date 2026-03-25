@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:truffly_app/core/support/european_countries.dart';
 import 'package:truffly_app/features/onboarding/application/onboarding_providers.dart';
 import 'package:truffly_app/features/onboarding/data/models/complete_buyer_onboarding_input.dart';
 import 'package:truffly_app/features/onboarding/data/models/notification_permission_result.dart';
@@ -39,7 +40,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(
       currentStepIndex: state.currentStepIndex + 1,
       validationFailures: const [],
-      submissionFailure: null,
+      submissionIssue: null,
     );
     return true;
   }
@@ -50,7 +51,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(
       currentStepIndex: state.currentStepIndex - 1,
       validationFailures: const [],
-      submissionFailure: null,
+      submissionIssue: null,
     );
     return true;
   }
@@ -64,7 +65,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(
       currentStepIndex: index,
       validationFailures: const [],
-      submissionFailure: null,
+      submissionIssue: null,
     );
     return true;
   }
@@ -150,11 +151,13 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
       setNotificationPermissionStatus(status);
       return status;
     } on OnboardingSubmissionException catch (error) {
-      state = state.copyWith(submissionFailure: error.failure);
+      state = state.copyWith(submissionIssue: error.issue);
       return null;
     } catch (_) {
       state = state.copyWith(
-        submissionFailure: OnboardingSubmissionFailure.unknown,
+        submissionIssue: const OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.unknown,
+        ),
       );
       return null;
     }
@@ -229,7 +232,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
   }) async {
     state = state.copyWith(
       isSubmitting: true,
-      submissionFailure: null,
+      submissionIssue: null,
       validationFailures: const [],
     );
 
@@ -237,19 +240,21 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
       await submission();
       state = state.copyWith(
         isSubmitting: false,
-        submissionFailure: null,
+        submissionIssue: null,
       );
       return true;
     } on OnboardingSubmissionException catch (error) {
       state = state.copyWith(
         isSubmitting: false,
-        submissionFailure: error.failure,
+        submissionIssue: error.issue,
       );
       return false;
     } catch (_) {
       state = state.copyWith(
         isSubmitting: false,
-        submissionFailure: OnboardingSubmissionFailure.unknown,
+        submissionIssue: const OnboardingSubmissionIssue(
+          failure: OnboardingSubmissionFailure.unknown,
+        ),
       );
       return false;
     }
@@ -351,14 +356,14 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(
       draft: draft,
       validationFailures: const [],
-      submissionFailure: null,
+      submissionIssue: null,
     );
   }
 
   void _setValidationFailures(List<OnboardingValidationFailure> failures) {
     state = state.copyWith(
       validationFailures: failures,
-      submissionFailure: null,
+      submissionIssue: null,
     );
   }
 
@@ -374,8 +379,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
   }
 
   bool _isValidCountryCode(String value) {
-    final countryCodePattern = RegExp(r'^[A-Z]{2}$');
-    return countryCodePattern.hasMatch(value);
+    return isSupportedEuropeanCountryCode(value);
   }
 
   List<OnboardingValidationFailure> _dedupeFailures(

@@ -89,7 +89,7 @@ class _OnboardingInfoIllustration extends StatelessWidget {
           width: double.infinity,
           height: 260,
           child: Image.asset(
-            'assets/onboarding/$assetName.png',
+            'assets/images/onboarding/$assetName.webp',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) => _FallbackIllustration(
               icon: fallbackIcon,

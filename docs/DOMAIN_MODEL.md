@@ -50,6 +50,9 @@ All business logic enforced server-side.
 - TUBER_UNCINATUM         (Uncinato)
 - TUBER_BORCHII           (Bianchetto)
 - TUBER_BRUMALE           (Brumale)
+- TUBER_MACROSPORUM       (Smooth Black Truffle)
+- TUBER_BRUMALE_MOSCHATUM (Musky Brumal Truffle)
+- TUBER_MESENTERICUM      (Mesenteric Truffle)
 
 App layer handles translation:
 - Latin label always stored (enum)

@@ -25,6 +25,9 @@ String _italianLabel(TruffleType type) => switch (type) {
       TruffleType.tuberUncinatum => 'Uncinato',
       TruffleType.tuberBorchii => 'Bianchetto',
       TruffleType.tuberBrumale => 'Brumale',
+      TruffleType.tuberMacrosporum => 'Tartufo Nero Liscio',
+      TruffleType.tuberBrumaleMoschatum => 'Tartufo Brumale Moscato',
+      TruffleType.tuberMesentericum => 'Tartufo Mesenterico',
     };
 
 String _englishLabel(TruffleType type) => switch (type) {
@@ -34,4 +37,7 @@ String _englishLabel(TruffleType type) => switch (type) {
       TruffleType.tuberUncinatum => 'Uncinato',
       TruffleType.tuberBorchii => 'Bianchetto',
       TruffleType.tuberBrumale => 'Brumale',
+      TruffleType.tuberMacrosporum => 'Smooth Black Truffle',
+      TruffleType.tuberBrumaleMoschatum => 'Musky Brumal Truffle',
+      TruffleType.tuberMesentericum => 'Mesenteric Truffle',
     };
