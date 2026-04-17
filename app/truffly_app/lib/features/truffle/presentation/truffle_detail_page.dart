@@ -165,13 +165,8 @@ class TruffleDetailPage extends ConsumerWidget {
                 alignment: Alignment.bottomCenter,
                 child: TruffleStickyBuyBar(
                   buttonLabel: _buyCtaLabel(context),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_buyComingSoonMessage(context)),
-                      ),
-                    );
-                  },
+                  onPressed: () =>
+                      context.push(AppRoutes.checkoutPath(detail.id)),
                 ),
               ),
             ],
@@ -237,13 +232,6 @@ class TruffleDetailPage extends ConsumerWidget {
   String _buyCtaLabel(BuildContext context) {
     final isItalian = Localizations.localeOf(context).languageCode == 'it';
     return isItalian ? 'Acquista' : 'Buy now';
-  }
-
-  String _buyComingSoonMessage(BuildContext context) {
-    final isItalian = Localizations.localeOf(context).languageCode == 'it';
-    return isItalian
-        ? 'Il checkout arriver\u00e0 presto.'
-        : 'Checkout is coming soon.';
   }
 }
 

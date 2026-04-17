@@ -22,12 +22,24 @@ type SubmitSellerApplicationPayload = {
   tesserino_document: SellerDocumentPayload;
 };
 
+type AllowedDocumentType = {
+  extension: ".pdf" | ".png" | ".jpg" | ".jpeg";
+  mimeType: "application/pdf" | "image/png" | "image/jpeg";
+  detectedType: "pdf" | "png" | "jpeg";
+};
+
+const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+const MAX_REQUEST_BYTES = 15 * 1024 * 1024;
+const MAX_SUBMISSION_ATTEMPTS_PER_WINDOW = 5;
+const SUBMISSION_RATE_WINDOW_MINUTES = 15;
+const DOCUMENT_SIGNED_URL_EXPIRY_SECONDS = 60;
+
 class SubmitSellerApplicationError extends Error {
   constructor(
     readonly appCode: string,
     readonly status: number,
     message: string,
-    readonly cause?: unknown,
+    override readonly cause?: unknown,
   ) {
     super(message);
     this.name = "SubmitSellerApplicationError";
@@ -35,12 +47,19 @@ class SubmitSellerApplicationError extends Error {
 }
 
 Deno.serve(async (request) => {
+  const requestId = getRequestId(request);
+
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   if (request.method !== "POST") {
-    return jsonResponse({ error: "method_not_allowed" }, 405);
+    return jsonResponse({ error: "method_not_allowed" }, 405, requestId);
+  }
+
+  const contentLength = parseContentLength(request.headers.get("content-length"));
+  if (contentLength != null && contentLength > MAX_REQUEST_BYTES) {
+    return jsonResponse({ error: "request_payload_too_large" }, 413, requestId);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -51,12 +70,12 @@ Deno.serve(async (request) => {
   if (
     !supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey || !authHeader
   ) {
-    return jsonResponse({ error: "missing_runtime_configuration" }, 500);
+    return jsonResponse({ error: "missing_runtime_configuration" }, 500, requestId);
   }
 
   const runtimeUrlValidationError = validateRuntimeSupabaseUrl(supabaseUrl);
   if (runtimeUrlValidationError != null) {
-    return jsonResponse(runtimeUrlValidationError, 500);
+    return jsonResponse(runtimeUrlValidationError, 500, requestId);
   }
 
   const authClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -71,7 +90,7 @@ Deno.serve(async (request) => {
   } = await authClient.auth.getUser();
 
   if (authError || !user) {
-    return jsonResponse({ error: "unauthorized" }, 401);
+    return jsonResponse({ error: "unauthorized" }, 401, requestId);
   }
 
   const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
@@ -88,34 +107,43 @@ Deno.serve(async (request) => {
     .single();
 
   if (currentUserError || !currentUser) {
-    return jsonResponse({ error: "user_not_found" }, 404);
+    return jsonResponse({ error: "user_not_found" }, 404, requestId);
   }
 
   if (!currentUser.is_active) {
-    return jsonResponse({ error: "inactive_account" }, 403);
+    return jsonResponse({ error: "inactive_account" }, 403, requestId);
   }
 
   if (currentUser.onboarding_completed === true) {
-    return jsonResponse({ error: "onboarding_already_completed" }, 409);
+    return jsonResponse({ error: "onboarding_already_completed" }, 409, requestId);
   }
 
   if (
     currentUser.seller_status !== "not_requested" &&
     currentUser.seller_status !== "rejected"
   ) {
-    return jsonResponse({ error: "seller_application_not_allowed" }, 409);
+    return jsonResponse({ error: "seller_application_not_allowed" }, 409, requestId);
   }
 
   let payload: SubmitSellerApplicationPayload;
   try {
     payload = await request.json();
   } catch {
-    return jsonResponse({ error: "invalid_json_body" }, 400);
+    return jsonResponse({ error: "invalid_json_body" }, 400, requestId);
   }
 
   const validationError = validatePayload(payload);
   if (validationError != null) {
-    return jsonResponse({ error: validationError }, 400);
+    return jsonResponse({ error: validationError }, 400, requestId);
+  }
+
+  const submissionRateLimitError = await enforceSubmissionRateLimit(
+    adminClient,
+    user.id,
+    requestId,
+  );
+  if (submissionRateLimitError != null) {
+    return jsonResponse({ error: submissionRateLimitError }, 429, requestId);
   }
 
   const {
@@ -128,7 +156,7 @@ Deno.serve(async (request) => {
     .maybeSingle();
 
   if (previousSellerDocumentsError) {
-    return jsonResponse({ error: "seller_documents_lookup_failed" }, 500);
+    return jsonResponse({ error: "seller_documents_lookup_failed" }, 500, requestId);
   }
 
   const identityBytes = decodeBase64(payload.identity_document.content_base64);
@@ -137,18 +165,49 @@ Deno.serve(async (request) => {
   );
 
   if (identityBytes == null || tesserinoBytes == null) {
-    return jsonResponse({ error: "invalid_document_encoding" }, 400);
+    return jsonResponse({ error: "invalid_document_encoding" }, 400, requestId);
+  }
+
+  const identityValidationError = validateDecodedDocument(
+    payload.identity_document,
+    identityBytes,
+  );
+  if (identityValidationError != null) {
+    return jsonResponse({ error: identityValidationError }, 400, requestId);
+  }
+
+  const tesserinoValidationError = validateDecodedDocument(
+    payload.tesserino_document,
+    tesserinoBytes,
+  );
+  if (tesserinoValidationError != null) {
+    return jsonResponse({ error: tesserinoValidationError }, 400, requestId);
+  }
+
+  const identityDocumentType = resolveAllowedDocumentType(
+    payload.identity_document.file_name,
+    payload.identity_document.content_type,
+    identityBytes,
+  );
+  const tesserinoDocumentType = resolveAllowedDocumentType(
+    payload.tesserino_document.file_name,
+    payload.tesserino_document.content_type,
+    tesserinoBytes,
+  );
+
+  if (identityDocumentType == null || tesserinoDocumentType == null) {
+    return jsonResponse({ error: "document_type_mismatch" }, 400, requestId);
   }
 
   const identityPath = buildStoragePath(
     user.id,
     "identity_document",
-    payload.identity_document.file_name,
+    identityDocumentType.extension,
   );
   const tesserinoPath = buildStoragePath(
     user.id,
     "tesserino_document",
-    payload.tesserino_document.file_name,
+    tesserinoDocumentType.extension,
   );
 
   const uploadedPaths: string[] = [];
@@ -161,7 +220,7 @@ Deno.serve(async (request) => {
     // `users` and `seller_documents` metadata.
     const identityUpload = await adminClient.storage.from("seller_documents")
       .upload(identityPath, identityBytes, {
-        contentType: payload.identity_document.content_type,
+        contentType: identityDocumentType.mimeType,
         upsert: false,
       });
     if (identityUpload.error) {
@@ -176,7 +235,7 @@ Deno.serve(async (request) => {
 
     const tesserinoUpload = await adminClient.storage.from("seller_documents")
       .upload(tesserinoPath, tesserinoBytes, {
-        contentType: payload.tesserino_document.content_type,
+        contentType: tesserinoDocumentType.mimeType,
         upsert: false,
       });
     if (tesserinoUpload.error) {
@@ -239,36 +298,37 @@ Deno.serve(async (request) => {
         message: "Your seller application has been submitted and is pending review.",
       });
     if (notificationInsert.error) {
-      console.error(
-        "submit_seller_application notification insert failed",
-        notificationInsert.error,
-      );
+      console.error("submit_seller_application notification insert failed", {
+        request_id: requestId,
+        code: readErrorCode(notificationInsert.error),
+        message: readErrorMessage(notificationInsert.error),
+      });
     }
 
-    const auditInsert = await adminClient.from("audit_logs").insert({
-      entity_type: "seller_application",
-      entity_id: user.id,
+    await insertAuditLog(adminClient, {
+      entityType: "seller_application",
+      entityId: user.id,
       action: "submitted",
-      performed_by: user.id,
+      performedBy: user.id,
       metadata: {
+        action: "submitted",
+        request_id: requestId,
+        result: "succeeded",
         seller_status: "pending",
         storage_bucket: "seller_documents",
-        identity_document_path: identityPath,
-        tesserino_document_path: tesserinoPath,
+        document_access_mode: "signed_url_only",
+        document_url_ttl_seconds: DOCUMENT_SIGNED_URL_EXPIRY_SECONDS,
       },
+      logLabel: "submit_seller_application audit insert failed",
+      requestId,
     });
-    if (auditInsert.error) {
-      console.error(
-        "submit_seller_application audit insert failed",
-        auditInsert.error,
-      );
-    }
 
     return jsonResponse({
       success: true,
       seller_status: "pending",
       onboarding_completed: true,
       country_code: "IT",
+      request_id: requestId,
     }, 200);
   } catch (error) {
     if (userUpdated) {
@@ -300,8 +360,26 @@ Deno.serve(async (request) => {
       await adminClient.storage.from("seller_documents").remove(uploadedPaths);
     }
 
-    console.error("submit_seller_application failed", normalizeErrorForLogging(error));
-    return toErrorResponse(error);
+    await insertAuditLog(adminClient, {
+      entityType: "seller_application",
+      entityId: user.id,
+      action: "submit_failed",
+      performedBy: user.id,
+      metadata: {
+        action: "submit_failed",
+        request_id: requestId,
+        result: "failed",
+        error_code: resolveAuditFailureCode(error),
+      },
+      logLabel: "submit_seller_application failure audit insert failed",
+      requestId,
+    });
+
+    console.error("submit_seller_application failed", {
+      request_id: requestId,
+      ...normalizeErrorForLogging(error),
+    });
+    return toErrorResponse(error, requestId);
   }
 });
 
@@ -331,6 +409,21 @@ function validatePayload(payload: SubmitSellerApplicationPayload): string | null
   if (!isValidDocumentPayload(payload.tesserino_document)) {
     return "invalid_tesserino_document";
   }
+  if (
+    estimatedDecodedBytes(payload.identity_document.content_base64) >
+      MAX_DOCUMENT_BYTES ||
+    estimatedDecodedBytes(payload.tesserino_document.content_base64) >
+      MAX_DOCUMENT_BYTES
+  ) {
+    return "document_too_large";
+  }
+  if (
+    estimatedDecodedBytes(payload.identity_document.content_base64) +
+        estimatedDecodedBytes(payload.tesserino_document.content_base64) >
+      MAX_REQUEST_BYTES
+  ) {
+    return "request_payload_too_large";
+  }
 
   return null;
 }
@@ -340,6 +433,73 @@ function isValidDocumentPayload(payload: SellerDocumentPayload): boolean {
     isNonEmptyString(payload.file_name) &&
     isNonEmptyString(payload.content_base64) &&
     isNonEmptyString(payload.content_type);
+}
+
+async function enforceSubmissionRateLimit(
+  adminClient: any,
+  userId: string,
+  requestId: string,
+): Promise<string | null> {
+  const windowStart = new Date(
+    Date.now() - SUBMISSION_RATE_WINDOW_MINUTES * 60 * 1000,
+  ).toISOString();
+
+  const attemptsLookup = await adminClient
+    .from("audit_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("entity_type", "seller_application")
+    .eq("entity_id", userId)
+    .eq("action", "submit_attempt")
+    .gte("created_at", windowStart);
+
+  if (attemptsLookup.error) {
+    console.error(
+      "submit_seller_application rate limit lookup failed",
+      attemptsLookup.error,
+    );
+    return "seller_submission_rate_limit_lookup_failed";
+  }
+
+  const attemptsInWindow = attemptsLookup.count ?? 0;
+  if (attemptsInWindow >= MAX_SUBMISSION_ATTEMPTS_PER_WINDOW) {
+    await insertAuditLog(adminClient, {
+      entityType: "seller_application",
+      entityId: userId,
+      action: "submit_rejected",
+      performedBy: userId,
+      metadata: {
+        action: "submit_rejected",
+        request_id: requestId,
+        result: "rate_limited",
+        rate_window_minutes: SUBMISSION_RATE_WINDOW_MINUTES,
+      },
+      logLabel: "submit_seller_application rate limit reject audit insert failed",
+      requestId,
+    });
+    return "seller_submission_rate_limited";
+  }
+
+  const auditInsertError = await insertAuditLog(adminClient, {
+    entityType: "seller_application",
+    entityId: userId,
+    action: "submit_attempt",
+    performedBy: userId,
+    metadata: {
+      action: "submit_attempt",
+      request_id: requestId,
+      result: "attempted",
+      rate_window_minutes: SUBMISSION_RATE_WINDOW_MINUTES,
+    },
+    logLabel: "submit_seller_application rate limit audit insert failed",
+    swallowError: true,
+    requestId,
+  });
+
+  if (auditInsertError) {
+    return "seller_submission_rate_limit_audit_failed";
+  }
+
+  return null;
 }
 
 function isNonEmptyString(value: unknown): value is string {
@@ -359,26 +519,152 @@ function decodeBase64(value: string): Uint8Array | null {
   }
 }
 
+function estimatedDecodedBytes(base64Value: string): number {
+  const normalized = base64Value.replace(/\s/g, "");
+  if (normalized.length === 0) {
+    return 0;
+  }
+
+  let padding = 0;
+  if (normalized.endsWith("==")) {
+    padding = 2;
+  } else if (normalized.endsWith("=")) {
+    padding = 1;
+  }
+
+  return Math.floor((normalized.length * 3) / 4) - padding;
+}
+
 function buildStoragePath(
   userId: string,
   documentPrefix: string,
-  fileName: string,
+  extension: AllowedDocumentType["extension"],
 ): string {
-  const extension = extractExtension(fileName);
-  return `${userId}/${documentPrefix}_${Date.now()}${extension}`;
+  return `${userId}/${documentPrefix}_${Date.now()}_${crypto.randomUUID()}${extension}`;
 }
 
-function extractExtension(fileName: string): string {
+function extractExtension(
+  fileName: string,
+): AllowedDocumentType["extension"] | null {
   const sanitized = fileName.trim().toLowerCase();
   if (sanitized.endsWith(".pdf")) return ".pdf";
   if (sanitized.endsWith(".png")) return ".png";
   if (sanitized.endsWith(".jpg")) return ".jpg";
   if (sanitized.endsWith(".jpeg")) return ".jpeg";
-  return ".bin";
+  return null;
 }
 
-function jsonResponse(body: Record<string, unknown>, status: number): Response {
-  return new Response(JSON.stringify(body), {
+function normalizeContentType(contentType: string): string {
+  return contentType.trim().toLowerCase().split(";")[0] ?? "";
+}
+
+function validateDecodedDocument(
+  payload: SellerDocumentPayload,
+  bytes: Uint8Array,
+): string | null {
+  if (bytes.length === 0) {
+    return "invalid_document_content";
+  }
+
+  if (bytes.length > MAX_DOCUMENT_BYTES) {
+    return "document_too_large";
+  }
+
+  const documentType = resolveAllowedDocumentType(
+    payload.file_name,
+    payload.content_type,
+    bytes,
+  );
+
+  if (documentType == null) {
+    return "document_type_mismatch";
+  }
+
+  return null;
+}
+
+function resolveAllowedDocumentType(
+  fileName: string,
+  contentType: string,
+  bytes: Uint8Array,
+): AllowedDocumentType | null {
+  const extension = extractExtension(fileName);
+  if (extension == null) {
+    return null;
+  }
+
+  const normalizedContentType = normalizeContentType(contentType);
+  const detectedType = detectDocumentType(bytes);
+  if (detectedType == null) {
+    return null;
+  }
+
+  return allowedDocumentTypes.find((documentType) =>
+    documentType.extension === extension &&
+    documentType.mimeType === normalizedContentType &&
+    documentType.detectedType === detectedType
+  ) ?? null;
+}
+
+function detectDocumentType(
+  bytes: Uint8Array,
+): AllowedDocumentType["detectedType"] | null {
+  if (
+    bytes.length >= 5 &&
+    bytes[0] === 0x25 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x44 &&
+    bytes[3] === 0x46 &&
+    bytes[4] === 0x2D
+  ) {
+    return "pdf";
+  }
+
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4E &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0D &&
+    bytes[5] === 0x0A &&
+    bytes[6] === 0x1A &&
+    bytes[7] === 0x0A
+  ) {
+    return "png";
+  }
+
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xFF &&
+    bytes[1] === 0xD8 &&
+    bytes[2] === 0xFF
+  ) {
+    return "jpeg";
+  }
+
+  return null;
+}
+
+function parseContentLength(headerValue: string | null): number | null {
+  if (headerValue == null || headerValue.trim().length === 0) {
+    return null;
+  }
+
+  const parsed = Number.parseInt(headerValue, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function jsonResponse(
+  body: Record<string, unknown>,
+  status: number,
+  requestId?: string,
+): Response {
+  const responseBody = requestId == null
+    ? body
+    : { ...body, request_id: requestId };
+
+  return new Response(JSON.stringify(responseBody), {
     status,
     headers: {
       ...corsHeaders,
@@ -387,12 +673,13 @@ function jsonResponse(body: Record<string, unknown>, status: number): Response {
   });
 }
 
-function toErrorResponse(error: unknown): Response {
+function toErrorResponse(error: unknown, requestId?: string): Response {
   if (error instanceof SubmitSellerApplicationError) {
     return jsonResponse(
       {
         error: error.appCode,
         message: error.message,
+        ...(requestId ? { request_id: requestId } : {}),
       },
       error.status,
     );
@@ -402,7 +689,7 @@ function toErrorResponse(error: unknown): Response {
   const message = readErrorMessage(error);
 
   if (code === "23505" && message.includes("tesserino_number")) {
-    return jsonResponse({ error: "duplicate_tesserino_number" }, 409);
+    return jsonResponse({ error: "duplicate_tesserino_number" }, 409, requestId);
   }
 
   if (
@@ -411,13 +698,14 @@ function toErrorResponse(error: unknown): Response {
     message.includes("region_enum") ||
     message.includes("users_country_region_chk")
   ) {
-    return jsonResponse({ error: "invalid_region" }, 400);
+    return jsonResponse({ error: "invalid_region" }, 400, requestId);
   }
 
   return jsonResponse(
     {
       error: "seller_submit_failed",
       message: "Unexpected seller onboarding failure.",
+      ...(requestId ? { request_id: requestId } : {}),
     },
     500,
   );
@@ -485,3 +773,83 @@ function validateRuntimeSupabaseUrl(
 
   return null;
 }
+
+async function insertAuditLog(
+  adminClient: any,
+  args: {
+    entityType: string;
+    entityId: string;
+    action: string;
+    performedBy: string;
+    metadata: Record<string, unknown>;
+    logLabel: string;
+    swallowError?: boolean;
+    requestId?: string;
+  },
+): Promise<unknown | null> {
+  const auditInsert = await adminClient.from("audit_logs").insert({
+    entity_type: args.entityType,
+    entity_id: args.entityId,
+    action: args.action,
+    performed_by: args.performedBy,
+    metadata: args.metadata,
+  });
+
+  if (auditInsert.error) {
+    console.error(args.logLabel, {
+      request_id: args.requestId,
+      code: readErrorCode(auditInsert.error),
+      message: readErrorMessage(auditInsert.error),
+    });
+    return auditInsert.error;
+  }
+
+  return null;
+}
+
+function resolveAuditFailureCode(error: unknown): string {
+  if (error instanceof SubmitSellerApplicationError) {
+    return error.appCode;
+  }
+
+  return readErrorCode(error) || "seller_submit_failed";
+}
+
+function getRequestId(request: Request): string {
+  const headerValue = request.headers.get("x-request-id") ??
+    request.headers.get("x-correlation-id");
+  const normalized = normalizeOptionalString(headerValue);
+  return normalized ?? crypto.randomUUID();
+}
+
+function normalizeOptionalString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
+}
+
+const allowedDocumentTypes: AllowedDocumentType[] = [
+  {
+    extension: ".pdf",
+    mimeType: "application/pdf",
+    detectedType: "pdf",
+  },
+  {
+    extension: ".png",
+    mimeType: "image/png",
+    detectedType: "png",
+  },
+  {
+    extension: ".jpg",
+    mimeType: "image/jpeg",
+    detectedType: "jpeg",
+  },
+  {
+    extension: ".jpeg",
+    mimeType: "image/jpeg",
+    detectedType: "jpeg",
+  },
+];

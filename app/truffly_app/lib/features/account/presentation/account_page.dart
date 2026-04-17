@@ -131,6 +131,15 @@ class _AccountContent extends StatelessWidget {
                   context.push(AppRoutes.sellerProfilePath(profile.userId)),
             ),
             _AccountDestination(
+              label: _text(
+                context,
+                it: 'Stripe onboarding',
+                en: 'Stripe onboarding',
+              ),
+              icon: Icons.account_balance_wallet_outlined,
+              onTap: () => context.push(AppRoutes.accountBecomeSeller),
+            ),
+            _AccountDestination(
               label: _text(context, it: 'I miei ordini', en: 'My orders'),
               icon: Icons.receipt_long_outlined,
               onTap: () => context.push(AppRoutes.accountOrders),

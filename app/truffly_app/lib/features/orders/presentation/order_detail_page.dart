@@ -215,6 +215,23 @@ class OrderDetailPage extends ConsumerWidget {
                   ],
                   const SizedBox(height: AppSpacing.spacingM),
                   OrderSectionCard(
+                    title: financialStatusTitle(context),
+                    child: Text(
+                      financialStatusCopy(
+                        context,
+                        status: order.status,
+                        isSellerView: isSellerSalesView,
+                        payoutStatus: order.payoutStatus,
+                        refundStatus: order.refundStatus,
+                      ),
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.black80,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingM),
+                  OrderSectionCard(
                     title: supportTitle(context),
                     onTap: () => context.push(AppRoutes.accountSupport),
                     child: Row(
@@ -387,6 +404,11 @@ class OrderDetailPage extends ConsumerWidget {
   String _errorText(BuildContext context, OrdersServiceException error) {
     if (error.code == 'invalid_tracking_code') {
       return trackingRequired(context);
+    }
+    if (error.code == 'refund_failed') {
+      return isItalianOrders(context)
+          ? 'Il rimborso non e disponibile in questo momento. Riprova tra poco.'
+          : 'Refund is not available right now. Please try again soon.';
     }
     if (error.failure == OrdersFailure.notFound) {
       return isItalianOrders(context)

@@ -22,7 +22,10 @@ class AppRoutes {
   static const accountGuide = '/account/guide';
   static const accountSupport = '/account/support';
   static const accountSettings = '/account/settings';
+  static const accountPrivacyPolicy = '/account/settings/privacy-policy';
+  static const accountTerms = '/account/settings/terms';
   static const truffles = '/truffles';
+  static const checkout = '/checkout/:truffleId';
   static const sellers = '/sellers';
   static const guides = '/guides';
   static const truffleDetail = '/truffles/:truffleId';
@@ -37,6 +40,10 @@ class AppRoutes {
 
   static String truffleDetailPath(String truffleId) {
     return '/truffles/$truffleId';
+  }
+
+  static String checkoutPath(String truffleId) {
+    return '/checkout/$truffleId';
   }
 
   static String sellerProfilePath(String sellerId) {

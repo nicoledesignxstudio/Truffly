@@ -2768,6 +2768,12 @@ abstract class AppLocalizations {
   /// **'Only approved sellers with Stripe onboarding completed can publish truffles.'**
   String get publishTruffleSubmitNotAllowed;
 
+  /// No description provided for @publishTruffleSubmitInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'A publish request for this truffle is already in progress. Please wait a few seconds and try again.'**
+  String get publishTruffleSubmitInProgress;
+
   /// No description provided for @publishTruffleSubmitValidation.
   ///
   /// In en, this message translates to:
@@ -2810,11 +2816,23 @@ abstract class AppLocalizations {
   /// **'My truffles'**
   String get sellerMyTrufflesTitle;
 
+  /// No description provided for @sellerMyTrufflesTabPublishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing'**
+  String get sellerMyTrufflesTabPublishing;
+
   /// No description provided for @sellerMyTrufflesTabActive.
   ///
   /// In en, this message translates to:
   /// **'Active'**
   String get sellerMyTrufflesTabActive;
+
+  /// No description provided for @sellerMyTrufflesTabReserved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved'**
+  String get sellerMyTrufflesTabReserved;
 
   /// No description provided for @sellerMyTrufflesTabSold.
   ///
@@ -2828,6 +2846,30 @@ abstract class AppLocalizations {
   /// **'Expired'**
   String get sellerMyTrufflesTabExpired;
 
+  /// No description provided for @sellerMyTrufflesStatusPublishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing'**
+  String get sellerMyTrufflesStatusPublishing;
+
+  /// No description provided for @sellerMyTrufflesStatusReserved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved'**
+  String get sellerMyTrufflesStatusReserved;
+
+  /// No description provided for @sellerMyTrufflesEmptyPublishingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No truffles are publishing'**
+  String get sellerMyTrufflesEmptyPublishingTitle;
+
+  /// No description provided for @sellerMyTrufflesEmptyPublishingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing listings appear here until they are ready to become visible to buyers.'**
+  String get sellerMyTrufflesEmptyPublishingSubtitle;
+
   /// No description provided for @sellerMyTrufflesEmptyActiveTitle.
   ///
   /// In en, this message translates to:
@@ -2839,6 +2881,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Publish a truffle and it will appear here while it is available.'**
   String get sellerMyTrufflesEmptyActiveSubtitle;
+
+  /// No description provided for @sellerMyTrufflesEmptyReservedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No reserved truffles'**
+  String get sellerMyTrufflesEmptyReservedTitle;
+
+  /// No description provided for @sellerMyTrufflesEmptyReservedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffles with an open order in progress appear here until the sale is completed or cancelled.'**
+  String get sellerMyTrufflesEmptyReservedSubtitle;
 
   /// No description provided for @sellerMyTrufflesEmptySoldTitle.
   ///
@@ -2929,6 +2983,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to delete the truffle right now.'**
   String get sellerMyTrufflesDeleteUnknown;
+
+  /// No description provided for @accountLanguageItalian.
+  ///
+  /// In en, this message translates to:
+  /// **'Italiano'**
+  String get accountLanguageItalian;
+
+  /// No description provided for @accountLanguageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get accountLanguageEnglish;
+
+  /// No description provided for @accountSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get accountSupportTitle;
+
+  /// No description provided for @accountSupportIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Find quick answers about orders, shipping, and delivery support.'**
+  String get accountSupportIntro;
+
+  /// No description provided for @accountSupportFaqSection.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQ'**
+  String get accountSupportFaqSection;
+
+  /// No description provided for @accountSupportFaqOrderFlowQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How does an order work on Truffly?'**
+  String get accountSupportFaqOrderFlowQuestion;
+
+  /// No description provided for @accountSupportFaqOrderFlowAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your truffle, confirm the order, and we will keep you updated until delivery.'**
+  String get accountSupportFaqOrderFlowAnswer;
+
+  /// No description provided for @accountSupportFaqShippingTimingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'When is the truffle shipped?'**
+  String get accountSupportFaqShippingTimingQuestion;
+
+  /// No description provided for @accountSupportFaqShippingTimingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh truffles are prepared and shipped as quickly as possible after order confirmation.'**
+  String get accountSupportFaqShippingTimingAnswer;
+
+  /// No description provided for @accountSupportFaqOrderTrackingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I follow my order status?'**
+  String get accountSupportFaqOrderTrackingQuestion;
+
+  /// No description provided for @accountSupportFaqOrderTrackingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'You can check the latest order status from the My orders section in your account.'**
+  String get accountSupportFaqOrderTrackingAnswer;
+
+  /// No description provided for @accountSupportFaqCancellationQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I cancel an order?'**
+  String get accountSupportFaqCancellationQuestion;
+
+  /// No description provided for @accountSupportFaqCancellationAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'If you need to cancel an order, contact support as soon as possible and we will review the request.'**
+  String get accountSupportFaqCancellationAnswer;
+
+  /// No description provided for @accountSupportFaqDeliveryIssueQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens if there is a delivery problem?'**
+  String get accountSupportFaqDeliveryIssueQuestion;
+
+  /// No description provided for @accountSupportFaqDeliveryIssueAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to support with your order details and we will help you resolve the issue quickly.'**
+  String get accountSupportFaqDeliveryIssueAnswer;
+
+  /// No description provided for @accountSupportFaqContactQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I contact support?'**
+  String get accountSupportFaqContactQuestion;
+
+  /// No description provided for @accountSupportFaqContactAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the email below to contact the Truffly team directly.'**
+  String get accountSupportFaqContactAnswer;
+
+  /// No description provided for @accountSupportContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get accountSupportContactTitle;
+
+  /// No description provided for @accountSupportContactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you need help with an order or delivery, write to us and include the main details.'**
+  String get accountSupportContactBody;
+
+  /// No description provided for @accountSupportContactCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to support'**
+  String get accountSupportContactCta;
+
+  /// No description provided for @accountSupportEmailLaunchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open your email app right now.'**
+  String get accountSupportEmailLaunchError;
+
+  /// No description provided for @accountSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get accountSettingsTitle;
+
+  /// No description provided for @accountSettingsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage language, notifications, and account information from one place.'**
+  String get accountSettingsIntro;
+
+  /// No description provided for @accountSettingsPreferencesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get accountSettingsPreferencesSection;
+
+  /// No description provided for @accountSettingsLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get accountSettingsLanguageLabel;
+
+  /// No description provided for @accountSettingsNotificationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get accountSettingsNotificationsLabel;
+
+  /// No description provided for @accountSettingsLanguageSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a language'**
+  String get accountSettingsLanguageSheetTitle;
+
+  /// No description provided for @accountSettingsLanguageSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This updates the language used across the app.'**
+  String get accountSettingsLanguageSheetBody;
+
+  /// No description provided for @accountSettingsLegalSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get accountSettingsLegalSection;
+
+  /// No description provided for @accountSettingsPrivacyPolicyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get accountSettingsPrivacyPolicyLabel;
+
+  /// No description provided for @accountSettingsTermsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get accountSettingsTermsLabel;
+
+  /// No description provided for @accountSettingsAccountSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountSettingsAccountSection;
+
+  /// No description provided for @accountSettingsDeleteAccountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get accountSettingsDeleteAccountLabel;
+
+  /// No description provided for @accountSettingsDeleteAccountDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get accountSettingsDeleteAccountDialogTitle;
+
+  /// No description provided for @accountSettingsDeleteAccountDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is not available yet from the app. Confirm only if you want to continue as soon as the flow is ready.'**
+  String get accountSettingsDeleteAccountDialogBody;
+
+  /// No description provided for @accountSettingsDeleteAccountDialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get accountSettingsDeleteAccountDialogCancel;
+
+  /// No description provided for @accountSettingsDeleteAccountDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get accountSettingsDeleteAccountDialogConfirm;
+
+  /// No description provided for @accountSettingsDeleteAccountPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion is not available in-app yet. Contact support if you need immediate help.'**
+  String get accountSettingsDeleteAccountPendingMessage;
+
+  /// No description provided for @accountPrivacyPolicyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get accountPrivacyPolicyTitle;
+
+  /// No description provided for @accountPrivacyPolicyLeadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your privacy on Truffly'**
+  String get accountPrivacyPolicyLeadTitle;
+
+  /// No description provided for @accountPrivacyPolicyLeadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This summary explains how Truffly handles the information used to create your account, manage orders, and support your activity in the app.'**
+  String get accountPrivacyPolicyLeadBody;
+
+  /// No description provided for @accountPrivacyPolicySectionDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What data we collect'**
+  String get accountPrivacyPolicySectionDataTitle;
+
+  /// No description provided for @accountPrivacyPolicySectionDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We may collect profile details, shipping information, order references, and messages you send to support so we can provide the service.'**
+  String get accountPrivacyPolicySectionDataBody;
+
+  /// No description provided for @accountPrivacyPolicySectionUsageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How we use it'**
+  String get accountPrivacyPolicySectionUsageTitle;
+
+  /// No description provided for @accountPrivacyPolicySectionUsageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We use this information to manage your account, process orders, improve the marketplace experience, and communicate important updates.'**
+  String get accountPrivacyPolicySectionUsageBody;
+
+  /// No description provided for @accountPrivacyPolicySectionSharingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When data can be shared'**
+  String get accountPrivacyPolicySectionSharingTitle;
+
+  /// No description provided for @accountPrivacyPolicySectionSharingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Information is shared only when necessary to complete your order, operate the platform, comply with legal obligations, or assist you with support requests.'**
+  String get accountPrivacyPolicySectionSharingBody;
+
+  /// No description provided for @accountPrivacyPolicySectionRightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choices'**
+  String get accountPrivacyPolicySectionRightsTitle;
+
+  /// No description provided for @accountPrivacyPolicySectionRightsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can review and update the account information available in the app. Future versions will include more tools to manage privacy requests directly.'**
+  String get accountPrivacyPolicySectionRightsBody;
+
+  /// No description provided for @accountTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get accountTermsTitle;
+
+  /// No description provided for @accountTermsLeadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Using the Truffly app'**
+  String get accountTermsLeadTitle;
+
+  /// No description provided for @accountTermsLeadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These terms summarize the basic rules for browsing the marketplace, placing orders, and interacting with sellers through Truffly.'**
+  String get accountTermsLeadBody;
+
+  /// No description provided for @accountTermsSectionOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders and availability'**
+  String get accountTermsSectionOrdersTitle;
+
+  /// No description provided for @accountTermsSectionOrdersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Product availability can change quickly because fresh truffles are seasonal. Order confirmation depends on availability and final seller validation.'**
+  String get accountTermsSectionOrdersBody;
+
+  /// No description provided for @accountTermsSectionShippingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping and delivery'**
+  String get accountTermsSectionShippingTitle;
+
+  /// No description provided for @accountTermsSectionShippingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping timelines may vary based on destination, freshness requirements, and courier operations. We will share relevant updates in your order flow whenever possible.'**
+  String get accountTermsSectionShippingBody;
+
+  /// No description provided for @accountTermsSectionSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support and issues'**
+  String get accountTermsSectionSupportTitle;
+
+  /// No description provided for @accountTermsSectionSupportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If there is an issue with an order or delivery, contact support promptly so the team can review the situation and guide you on the next steps.'**
+  String get accountTermsSectionSupportBody;
+
+  /// No description provided for @accountTermsSectionUpdatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Future updates'**
+  String get accountTermsSectionUpdatesTitle;
+
+  /// No description provided for @accountTermsSectionUpdatesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These texts are an MVP version and may be updated as Truffly expands its legal and operational flows.'**
+  String get accountTermsSectionUpdatesBody;
 }
 
 class _AppLocalizationsDelegate

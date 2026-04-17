@@ -149,7 +149,7 @@ Users must be authenticated to access any content.
 Users WITHOUT:
 - Orders
 - Reviews
-- Sold truffles
+- Reserved or sold truffles
 
 → Can be permanently deleted (hard delete)  
 All related data removed:
@@ -205,13 +205,14 @@ Shipping data is copied into the order at purchase time (snapshot model).
 - shipping_price_abroad
 - status:
   - active
+  - reserved
   - sold
   - expired
 - created_at
 
 Rules:
 - No modification after publication
-- Hard delete allowed only if not sold
+- Hard delete allowed only if not reserved and not sold
 - Auto-expire after 5 days
 
 ---
@@ -258,6 +259,10 @@ Rules:
 - Order created only via Edge Function after Stripe confirmation
 - All status transitions server-side
 - No direct client updates
+- Financial operations tracked separately from order status:
+  - payment
+  - refund
+  - seller payout transfer
 
 ---
 
@@ -372,6 +377,7 @@ If buyer does not respond:
 Seller cannot publish without:
 - seller_status = approved
 - stripe_account_id not null
+- server-side verified Stripe readiness
 
 ---
 

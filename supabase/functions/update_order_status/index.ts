@@ -1,4 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
+import {
+  createStripeOrderFinancialGateway,
+  createSupabaseOrderFinancialStore,
+  OrderFinancialActionError,
+  refundOrderPayment,
+  releaseFundsForCompletedOrder,
+} from "../_shared/order_financials.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,11 +14,18 @@ const corsHeaders = {
 };
 
 type OrderAction = "confirm_receipt" | "mark_shipped" | "cancel_order";
+type OrderStatus = "paid" | "shipped" | "completed" | "cancelled";
 
 type UpdateOrderPayload = {
   action?: OrderAction;
   order_id?: string;
   tracking_code?: string;
+};
+
+type UpdateOrderRpcResult = {
+  order_id: string;
+  resulting_status: OrderStatus;
+  idempotent: boolean;
 };
 
 const maxTrackingCodeLength = 120;
@@ -28,6 +42,7 @@ type UpdateOrderErrorCode =
   | "order_not_found"
   | "order_not_accessible"
   | "invalid_order_transition"
+  | "refund_failed"
   | "update_order_unknown_error";
 
 class UpdateOrderFlowError extends Error {
@@ -35,7 +50,7 @@ class UpdateOrderFlowError extends Error {
     readonly code: UpdateOrderErrorCode,
     readonly status: number,
     message: string,
-    readonly cause?: unknown,
+    override readonly cause?: unknown,
   ) {
     super(message);
     this.name = "UpdateOrderFlowError";
@@ -43,6 +58,8 @@ class UpdateOrderFlowError extends Error {
 }
 
 Deno.serve(async (request) => {
+  const requestId = getRequestId(request);
+
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -52,12 +69,14 @@ Deno.serve(async (request) => {
       "method_not_allowed",
       "Only POST requests are supported.",
       405,
+      requestId,
     );
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
   const authHeader = request.headers.get("Authorization");
 
   if (
@@ -67,6 +86,7 @@ Deno.serve(async (request) => {
       "update_order_unknown_error",
       "Missing runtime configuration.",
       500,
+      requestId,
     );
   }
 
@@ -82,10 +102,19 @@ Deno.serve(async (request) => {
   } = await authClient.auth.getUser();
 
   if (authError || !user) {
-    return errorResponse("unauthorized", "Authentication is required.", 401);
+    return errorResponse(
+      "unauthorized",
+      "Authentication is required.",
+      401,
+      requestId,
+    );
   }
 
   const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
+  const financialStore = createSupabaseOrderFinancialStore(adminClient);
+  const financialGateway = stripeSecretKey == null
+    ? null
+    : createStripeOrderFinancialGateway(fetch, stripeSecretKey);
 
   const { data: currentUser, error: currentUserError } = await adminClient
     .from("users")
@@ -98,6 +127,7 @@ Deno.serve(async (request) => {
       "user_not_found",
       "Authenticated user profile was not found.",
       404,
+      requestId,
     );
   }
 
@@ -106,6 +136,7 @@ Deno.serve(async (request) => {
       "inactive_account",
       "The authenticated account is inactive.",
       403,
+      requestId,
     );
   }
 
@@ -117,17 +148,28 @@ Deno.serve(async (request) => {
       "invalid_json_body",
       "Request body must be valid JSON.",
       400,
+      requestId,
     );
   }
 
   const action = normalizeAction(payload.action);
   if (action == null) {
-    return errorResponse("invalid_action", "A valid action is required.", 400);
+    return errorResponse(
+      "invalid_action",
+      "A valid action is required.",
+      400,
+      requestId,
+    );
   }
 
   const orderId = normalizeRequiredString(payload.order_id);
   if (orderId == null) {
-    return errorResponse("invalid_order_id", "A valid order id is required.", 400);
+    return errorResponse(
+      "invalid_order_id",
+      "A valid order id is required.",
+      400,
+      requestId,
+    );
   }
 
   const trackingCode = normalizeOptionalString(payload.tracking_code);
@@ -136,6 +178,7 @@ Deno.serve(async (request) => {
       "invalid_tracking_code",
       "Tracking code is required when marking an order as shipped.",
       400,
+      requestId,
     );
   }
   if (trackingCode != null && trackingCode.length > maxTrackingCodeLength) {
@@ -143,191 +186,111 @@ Deno.serve(async (request) => {
       "invalid_tracking_code",
       "Tracking code is too long.",
       400,
+      requestId,
     );
   }
 
   try {
-    const { data: order, error: orderError } = await adminClient
-      .from("orders")
-      .select("id, truffle_id, buyer_id, seller_id, status")
-      .eq("id", orderId)
-      .maybeSingle();
-
-    if (orderError) {
-      throw new UpdateOrderFlowError(
-        "update_order_unknown_error",
-        500,
-        "Failed to load the order.",
-        orderError,
-      );
-    }
-
-    if (!order) {
-      throw new UpdateOrderFlowError(
-        "order_not_found",
-        404,
-        "The requested order was not found.",
-      );
-    }
-
-    const isBuyer = order.buyer_id === user.id;
-    const isSeller = order.seller_id === user.id;
-
-    if (!isBuyer && !isSeller) {
-      throw new UpdateOrderFlowError(
-        "order_not_accessible",
-        403,
-        "You cannot update this order.",
-      );
-    }
-
-    const updatePayload: Record<string, unknown> = {};
-    let expectedStatus = "";
-    let ownershipColumn: "buyer_id" | "seller_id" = "seller_id";
-    let notificationUserId: string | null = null;
-    let notificationType = "";
-    let notificationMessage = "";
-    let auditAction = "";
-
-    switch (action) {
-      case "confirm_receipt":
-        if (!isBuyer || order.status !== "shipped") {
-          throw new UpdateOrderFlowError(
-            "invalid_order_transition",
-            409,
-            "Only the buyer can confirm receipt for a shipped order.",
-          );
-        }
-        expectedStatus = "shipped";
-        ownershipColumn = "buyer_id";
-        updatePayload.status = "completed";
-        notificationUserId = order.seller_id;
-        notificationType = "order_completed";
-        notificationMessage = "A buyer confirmed receipt for one of your orders.";
-        auditAction = "completed";
-        break;
-      case "mark_shipped":
-        if (!isSeller || order.status !== "paid") {
-          throw new UpdateOrderFlowError(
-            "invalid_order_transition",
-            409,
-            "Only the seller can mark a paid order as shipped.",
-          );
-        }
-        expectedStatus = "paid";
-        ownershipColumn = "seller_id";
-        updatePayload.status = "shipped";
-        updatePayload.tracking_code = trackingCode;
-        notificationUserId = order.buyer_id;
-        notificationType = "order_shipped";
-        notificationMessage = "Your order has been marked as shipped.";
-        auditAction = "shipped";
-        break;
-      case "cancel_order":
-        if (!isSeller || order.status !== "paid") {
-          throw new UpdateOrderFlowError(
-            "invalid_order_transition",
-            409,
-            "Only the seller can cancel a paid order.",
-          );
-        }
-        expectedStatus = "paid";
-        ownershipColumn = "seller_id";
-        updatePayload.status = "cancelled";
-        notificationUserId = order.buyer_id;
-        notificationType = "order_cancelled";
-        notificationMessage = "Your order has been cancelled.";
-        auditAction = "cancelled";
-        break;
-    }
-
-    const updateQuery = adminClient
-      .from("orders")
-      .update(updatePayload)
-      .eq("id", orderId)
-      .eq("status", expectedStatus)
-      .eq(ownershipColumn, user.id)
-      .select("id")
-      .maybeSingle();
-
-    const { data: updatedOrder, error: updateError } = await updateQuery;
-
-    if (updateError) {
-      throw new UpdateOrderFlowError(
-        "update_order_unknown_error",
-        500,
-        "Failed to update the order.",
-        updateError,
-      );
-    }
-
-    if (!updatedOrder) {
-      throw new UpdateOrderFlowError(
-        "invalid_order_transition",
-        409,
-        "The order state changed before this action could be applied.",
-      );
-    }
-
     if (action === "cancel_order") {
-      const { error: truffleUpdateError } = await adminClient
-        .from("truffles")
-        .update({ status: "active" })
-        .eq("id", order.truffle_id);
-
-      if (truffleUpdateError) {
-        await adminClient
-          .from("orders")
-          .update({ status: "paid" })
-          .eq("id", orderId)
-          .eq("seller_id", user.id)
-          .eq("status", "cancelled");
+      const existingOrder = await financialStore.getOrderForFinancialAction(
+        orderId,
+      );
+      if (financialGateway == null) {
         throw new UpdateOrderFlowError(
           "update_order_unknown_error",
           500,
-          "Failed to reactivate the linked truffle.",
-          truffleUpdateError,
+          "Missing Stripe runtime configuration for refunds.",
         );
       }
-    }
 
-    if (notificationUserId) {
-      const { error: notificationError } = await adminClient
-        .from("notifications")
-        .insert({
-          user_id: notificationUserId,
-          type: notificationType,
-          message: notificationMessage,
+      if (existingOrder?.status !== "cancelled") {
+        await refundOrderPayment({
+          orderId,
+          requestId,
+          triggerSource: "seller_cancel_order",
+          triggeredBy: user.id,
+          refundReason: "seller_cancelled_before_shipment",
+          store: financialStore,
+          stripeGateway: financialGateway,
         });
-
-      if (notificationError) {
-        console.error("update_order_status notification insert failed", notificationError);
       }
     }
 
-    const { error: auditError } = await adminClient.from("audit_logs").insert({
-      entity_type: "order",
-      entity_id: orderId,
-      action: auditAction,
-      performed_by: user.id,
-      metadata: {
-        order_id: orderId,
-        action,
-      },
-    });
+    const { data, error } = await adminClient.rpc("update_order_status_atomic", {
+      p_order_id: orderId,
+      p_actor_user_id: user.id,
+      p_action: action,
+      p_tracking_code: trackingCode,
+      p_request_id: requestId,
+    }).single();
 
-    if (auditError) {
-      console.error("update_order_status audit insert failed", auditError);
+    if (error) {
+      throw mapRpcError(error);
     }
 
-    return jsonResponse({ success: true, order_id: orderId, action }, 200);
+    const result = data as UpdateOrderRpcResult | null;
+    if (!result) {
+      throw new UpdateOrderFlowError(
+        "update_order_unknown_error",
+        500,
+        "The order update did not return a result.",
+      );
+    }
+
+    let payoutStatus: "not_applicable" | "released" | "retry_required" =
+      "not_applicable";
+
+    if (
+      action === "confirm_receipt" &&
+      result.resulting_status === "completed"
+    ) {
+      if (financialGateway == null) {
+        payoutStatus = "retry_required";
+      } else {
+        try {
+          const payoutResult = await releaseFundsForCompletedOrder({
+            orderId: result.order_id,
+            requestId,
+            triggerSource: "buyer_confirm_delivery",
+            triggeredBy: user.id,
+            store: financialStore,
+            stripeGateway: financialGateway,
+          });
+          payoutStatus = payoutResult.idempotent ? "released" : "released";
+        } catch (error) {
+          payoutStatus = "retry_required";
+          console.error("update_order_status payout release failed", {
+            request_id: requestId,
+            order_id: result.order_id,
+            message: readErrorMessage(error),
+            code: readErrorCode(error),
+          });
+        }
+      }
+    }
+
+    return jsonResponse({
+      success: true,
+      order_id: result.order_id,
+      action,
+      status: result.resulting_status,
+      idempotent: result.idempotent,
+      payout_status: payoutStatus,
+      request_id: requestId,
+    }, 200);
   } catch (error) {
     const normalizedError = normalizeUnhandledError(error);
-    console.error("update_order_status failed", error);
+    console.error("update_order_status failed", {
+      request_id: requestId,
+      code: normalizedError.code,
+      status: normalizedError.status,
+      message: normalizedError.message,
+    });
     return errorResponse(
       normalizedError.code,
       normalizedError.message,
       normalizedError.status,
+      requestId,
     );
   }
 });
@@ -360,12 +323,116 @@ function normalizeUnhandledError(error: unknown): UpdateOrderFlowError {
     return error;
   }
 
+  if (error instanceof OrderFinancialActionError) {
+    if (error.code === "order_not_found") {
+      return new UpdateOrderFlowError(
+        "order_not_found",
+        404,
+        "The requested order was not found.",
+        error,
+      );
+    }
+
+    if (error.code === "order_not_paid") {
+      return new UpdateOrderFlowError(
+        "invalid_order_transition",
+        409,
+        "Only paid orders can be refunded in the current state.",
+        error,
+      );
+    }
+
+    return new UpdateOrderFlowError(
+      "refund_failed",
+      503,
+      error.message,
+      error,
+    );
+  }
+
   return new UpdateOrderFlowError(
     "update_order_unknown_error",
     500,
     "An unexpected error occurred while updating the order.",
     error,
   );
+}
+
+function mapRpcError(error: unknown): UpdateOrderFlowError {
+  if (isOrderStateInvariantViolation(error)) {
+    return new UpdateOrderFlowError(
+      "invalid_order_transition",
+      409,
+      "The requested order transition violates database invariants.",
+      error,
+    );
+  }
+
+  const message = readErrorMessage(error);
+  switch (message) {
+    case "order_not_found":
+      return new UpdateOrderFlowError(
+        "order_not_found",
+        404,
+        "The requested order was not found.",
+        error,
+      );
+    case "order_not_accessible":
+      return new UpdateOrderFlowError(
+        "order_not_accessible",
+        403,
+        "You cannot update this order.",
+        error,
+      );
+    case "invalid_order_transition":
+      return new UpdateOrderFlowError(
+        "invalid_order_transition",
+        409,
+        "The requested transition is not valid for the current order state.",
+        error,
+      );
+    case "invalid_tracking_code":
+      return new UpdateOrderFlowError(
+        "invalid_tracking_code",
+        400,
+        "Tracking code is invalid.",
+        error,
+      );
+    default:
+      return new UpdateOrderFlowError(
+        "update_order_unknown_error",
+        500,
+        "Failed to update the order.",
+        error,
+      );
+  }
+}
+
+function isOrderStateInvariantViolation(error: unknown): boolean {
+  const code = readErrorCode(error);
+  return code === "23505" || code === "23514";
+}
+
+function readErrorCode(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const value = Reflect.get(error, "code");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function readErrorMessage(error: unknown): string {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const value = Reflect.get(error, "message");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
 }
 
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
@@ -382,6 +449,17 @@ function errorResponse(
   error: UpdateOrderErrorCode,
   message: string,
   status: number,
+  requestId?: string,
 ): Response {
-  return jsonResponse({ error, message }, status);
+  return jsonResponse(
+    requestId ? { error, message, request_id: requestId } : { error, message },
+    status,
+  );
+}
+
+function getRequestId(request: Request): string {
+  const headerValue = request.headers.get("x-request-id") ??
+    request.headers.get("x-correlation-id");
+  const normalized = normalizeOptionalString(headerValue);
+  return normalized ?? crypto.randomUUID();
 }

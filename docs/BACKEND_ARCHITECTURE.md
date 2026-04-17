@@ -179,7 +179,7 @@ Server Logic:
 - Create order record:
   - status = paid
   - snapshot shipping address copied
-- Mark truffle status = sold
+- Truffle transitions to `reserved` while an open order exists (`paid` / `shipped`)
 - Write audit log
 
 ---
@@ -210,7 +210,8 @@ Server Logic:
 - Verify buyer ownership
 - Verify status = shipped
 - status = completed
-- Trigger Stripe transfer to seller
+- Trigger payout orchestration server-side
+- Record payout financial operation separately from the order business state
 - Write audit log
 
 ---
@@ -223,8 +224,8 @@ Input:
 Server Logic:
 - Verify seller ownership
 - Verify status = paid
-- Trigger Stripe refund
-- status = cancelled
+- Trigger Stripe refund server-side
+- Only after refund succeeds: status = cancelled
 - Reactivate truffle
 - Write audit log
 
@@ -245,6 +246,7 @@ Action:
 - status = cancelled
 - Reactivate truffle
 - Audit log entry
+- Replay-safe via financial operation logical keys
 
 ---
 
@@ -259,8 +261,9 @@ Step 1:
 
 After 48h:
 - status = completed
-- Stripe transfer seller
+- Stripe transfer to seller
 - Audit log entry
+- Replay-safe via financial operation logical keys
 
 ---
 
@@ -283,6 +286,10 @@ If approved:
 Seller cannot publish truffles without:
 - seller_status = approved
 - stripe_account_id != null
+- server-side Stripe refresh confirms:
+  - details submitted
+  - payouts enabled
+  - no blocking requirements pending
 
 ---
 
@@ -295,6 +302,11 @@ shipped → auto-completed
 No other transitions allowed.
 
 All transitions enforced server-side.
+
+Financial operations are tracked separately:
+- payment operation created when order is created from the Stripe webhook
+- refund operation created before an order is cancelled
+- transfer operation created after an order becomes completed
 
 ---
 

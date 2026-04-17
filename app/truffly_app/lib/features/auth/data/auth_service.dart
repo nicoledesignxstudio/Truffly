@@ -71,6 +71,13 @@ final class AuthService {
     final normalizedEmail = _normalizeEmail(email);
 
     try {
+      final currentUser = _supabaseClient.auth.currentUser;
+      final currentEmail = _normalizeOptionalEmail(currentUser?.email);
+      if (currentEmail != null && currentEmail != normalizedEmail) {
+        // Replace the previous session before attempting an account switch.
+        await _supabaseClient.auth.signOut().timeout(_requestTimeout);
+      }
+
       await _supabaseClient.auth
           .signInWithPassword(email: normalizedEmail, password: password)
           .timeout(_requestTimeout);
@@ -188,6 +195,12 @@ final class AuthService {
 
   String _normalizeEmail(String email) {
     return email.trim().toLowerCase();
+  }
+
+  String? _normalizeOptionalEmail(String? email) {
+    final trimmed = email?.trim().toLowerCase();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
   }
 
   AuthUserSnapshot _toUserSnapshot(User user) {

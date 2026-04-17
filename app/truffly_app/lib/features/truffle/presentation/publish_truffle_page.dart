@@ -668,6 +668,8 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
         l10n.publishTruffleSubmitUnauthenticated,
       PublishTruffleSubmissionFailure.notAllowed =>
         l10n.publishTruffleSubmitNotAllowed,
+      PublishTruffleSubmissionFailure.inProgress =>
+        l10n.publishTruffleSubmitInProgress,
       PublishTruffleSubmissionFailure.validation =>
         l10n.publishTruffleSubmitValidation,
       PublishTruffleSubmissionFailure.invalidImage =>

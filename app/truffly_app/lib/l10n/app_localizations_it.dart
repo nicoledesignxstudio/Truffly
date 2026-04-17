@@ -1526,6 +1526,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Solo i seller approvati con onboarding Stripe completato possono pubblicare tartufi.';
 
   @override
+  String get publishTruffleSubmitInProgress =>
+      'Una richiesta di pubblicazione per questo tartufo è già in corso. Attendi qualche secondo e riprova.';
+
+  @override
   String get publishTruffleSubmitValidation =>
       'Alcuni dati del prodotto non sono validi. Controlla il form e riprova.';
 
@@ -1553,7 +1557,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sellerMyTrufflesTitle => 'I miei tartufi';
 
   @override
+  String get sellerMyTrufflesTabPublishing => 'Pubblicazione';
+
+  @override
   String get sellerMyTrufflesTabActive => 'Attivi';
+
+  @override
+  String get sellerMyTrufflesTabReserved => 'Riservati';
 
   @override
   String get sellerMyTrufflesTabSold => 'Venduti';
@@ -1562,11 +1572,32 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sellerMyTrufflesTabExpired => 'Scaduti';
 
   @override
+  String get sellerMyTrufflesStatusPublishing => 'Pubblicazione';
+
+  @override
+  String get sellerMyTrufflesStatusReserved => 'Riservato';
+
+  @override
+  String get sellerMyTrufflesEmptyPublishingTitle =>
+      'Nessun tartufo in pubblicazione';
+
+  @override
+  String get sellerMyTrufflesEmptyPublishingSubtitle =>
+      'Qui vedrai i tartufi che stanno completando la pubblicazione e non sono ancora visibili ai buyer.';
+
+  @override
   String get sellerMyTrufflesEmptyActiveTitle => 'Nessun tartufo attivo';
 
   @override
   String get sellerMyTrufflesEmptyActiveSubtitle =>
       'Pubblica un tartufo e lo troverai qui finché sarà disponibile.';
+
+  @override
+  String get sellerMyTrufflesEmptyReservedTitle => 'Nessun tartufo riservato';
+
+  @override
+  String get sellerMyTrufflesEmptyReservedSubtitle =>
+      'I tartufi con un ordine aperto in corso appariranno qui finché la vendita non sarà completata o annullata.';
 
   @override
   String get sellerMyTrufflesEmptySoldTitle => 'Nessun tartufo venduto';
@@ -1620,4 +1651,215 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get sellerMyTrufflesDeleteUnknown =>
       'Impossibile eliminare il tartufo in questo momento.';
+
+  @override
+  String get accountLanguageItalian => 'Italiano';
+
+  @override
+  String get accountLanguageEnglish => 'English';
+
+  @override
+  String get accountSupportTitle => 'Supporto';
+
+  @override
+  String get accountSupportIntro =>
+      'Trova risposte rapide su ordini, spedizioni e assistenza alla consegna.';
+
+  @override
+  String get accountSupportFaqSection => 'FAQ';
+
+  @override
+  String get accountSupportFaqOrderFlowQuestion =>
+      'Come funziona un ordine su Truffly?';
+
+  @override
+  String get accountSupportFaqOrderFlowAnswer =>
+      'Scegli il tartufo, conferma l\'ordine e ti aggiorneremo fino alla consegna.';
+
+  @override
+  String get accountSupportFaqShippingTimingQuestion =>
+      'Quando viene spedito il tartufo?';
+
+  @override
+  String get accountSupportFaqShippingTimingAnswer =>
+      'I tartufi freschi vengono preparati e spediti il prima possibile dopo la conferma dell\'ordine.';
+
+  @override
+  String get accountSupportFaqOrderTrackingQuestion =>
+      'Come posso seguire lo stato del mio ordine?';
+
+  @override
+  String get accountSupportFaqOrderTrackingAnswer =>
+      'Puoi controllare l\'ultimo aggiornamento dalla sezione I miei ordini del tuo account.';
+
+  @override
+  String get accountSupportFaqCancellationQuestion =>
+      'Posso annullare un ordine?';
+
+  @override
+  String get accountSupportFaqCancellationAnswer =>
+      'Se hai bisogno di annullare un ordine, contatta il supporto il prima possibile e valuteremo la richiesta.';
+
+  @override
+  String get accountSupportFaqDeliveryIssueQuestion =>
+      'Cosa succede se c\'è un problema con la consegna?';
+
+  @override
+  String get accountSupportFaqDeliveryIssueAnswer =>
+      'Scrivi al supporto con i dettagli dell\'ordine e ti aiuteremo a risolvere il problema rapidamente.';
+
+  @override
+  String get accountSupportFaqContactQuestion =>
+      'Come posso contattare l\'assistenza?';
+
+  @override
+  String get accountSupportFaqContactAnswer =>
+      'Usa l\'email qui sotto per contattare direttamente il team Truffly.';
+
+  @override
+  String get accountSupportContactTitle => 'Contatta il supporto';
+
+  @override
+  String get accountSupportContactBody =>
+      'Se hai bisogno di aiuto con un ordine o una consegna, scrivici includendo i dettagli principali.';
+
+  @override
+  String get accountSupportContactCta => 'Scrivi al supporto';
+
+  @override
+  String get accountSupportEmailLaunchError =>
+      'Impossibile aprire il client email in questo momento.';
+
+  @override
+  String get accountSettingsTitle => 'Impostazioni';
+
+  @override
+  String get accountSettingsIntro =>
+      'Gestisci lingua, notifiche e informazioni account da un unico punto.';
+
+  @override
+  String get accountSettingsPreferencesSection => 'Preferenze';
+
+  @override
+  String get accountSettingsLanguageLabel => 'Lingua';
+
+  @override
+  String get accountSettingsNotificationsLabel => 'Notifiche';
+
+  @override
+  String get accountSettingsLanguageSheetTitle => 'Scegli una lingua';
+
+  @override
+  String get accountSettingsLanguageSheetBody =>
+      'Questo aggiorna la lingua usata in tutta l\'app.';
+
+  @override
+  String get accountSettingsLegalSection => 'Legale';
+
+  @override
+  String get accountSettingsPrivacyPolicyLabel => 'Privacy Policy';
+
+  @override
+  String get accountSettingsTermsLabel => 'Termini e Condizioni';
+
+  @override
+  String get accountSettingsAccountSection => 'Account';
+
+  @override
+  String get accountSettingsDeleteAccountLabel => 'Elimina account';
+
+  @override
+  String get accountSettingsDeleteAccountDialogTitle =>
+      'Eliminare il tuo account?';
+
+  @override
+  String get accountSettingsDeleteAccountDialogBody =>
+      'Questa azione non è ancora disponibile dall\'app. Conferma solo se vuoi proseguire non appena il flusso sarà pronto.';
+
+  @override
+  String get accountSettingsDeleteAccountDialogCancel => 'Annulla';
+
+  @override
+  String get accountSettingsDeleteAccountDialogConfirm => 'Conferma';
+
+  @override
+  String get accountSettingsDeleteAccountPendingMessage =>
+      'La cancellazione account non è ancora disponibile in-app. Contatta il supporto se hai bisogno di aiuto immediato.';
+
+  @override
+  String get accountPrivacyPolicyTitle => 'Privacy Policy';
+
+  @override
+  String get accountPrivacyPolicyLeadTitle => 'La tua privacy su Truffly';
+
+  @override
+  String get accountPrivacyPolicyLeadBody =>
+      'Questa sintesi spiega come Truffly gestisce le informazioni usate per creare l\'account, gestire gli ordini e supportare la tua attivita nell\'app.';
+
+  @override
+  String get accountPrivacyPolicySectionDataTitle => 'Quali dati raccogliamo';
+
+  @override
+  String get accountPrivacyPolicySectionDataBody =>
+      'Possiamo raccogliere dati profilo, informazioni di spedizione, riferimenti ordine e messaggi inviati al supporto per erogare il servizio.';
+
+  @override
+  String get accountPrivacyPolicySectionUsageTitle => 'Come li usiamo';
+
+  @override
+  String get accountPrivacyPolicySectionUsageBody =>
+      'Usiamo queste informazioni per gestire il tuo account, elaborare gli ordini, migliorare l\'esperienza marketplace e comunicare aggiornamenti importanti.';
+
+  @override
+  String get accountPrivacyPolicySectionSharingTitle =>
+      'Quando i dati possono essere condivisi';
+
+  @override
+  String get accountPrivacyPolicySectionSharingBody =>
+      'Le informazioni vengono condivise solo quando necessario per completare un ordine, gestire la piattaforma, rispettare obblighi legali o assisterti nelle richieste di supporto.';
+
+  @override
+  String get accountPrivacyPolicySectionRightsTitle => 'Le tue scelte';
+
+  @override
+  String get accountPrivacyPolicySectionRightsBody =>
+      'Puoi rivedere e aggiornare le informazioni account disponibili nell\'app. Nelle prossime versioni aggiungeremo strumenti dedicati per le richieste privacy.';
+
+  @override
+  String get accountTermsTitle => 'Termini e Condizioni';
+
+  @override
+  String get accountTermsLeadTitle => 'Uso dell\'app Truffly';
+
+  @override
+  String get accountTermsLeadBody =>
+      'Questi termini riassumono le regole base per esplorare il marketplace, effettuare ordini e interagire con i seller tramite Truffly.';
+
+  @override
+  String get accountTermsSectionOrdersTitle => 'Ordini e disponibilita';
+
+  @override
+  String get accountTermsSectionOrdersBody =>
+      'La disponibilita dei prodotti puo cambiare rapidamente perche i tartufi freschi sono stagionali. La conferma ordine dipende dalla disponibilita e dalla validazione finale del seller.';
+
+  @override
+  String get accountTermsSectionShippingTitle => 'Spedizione e consegna';
+
+  @override
+  String get accountTermsSectionShippingBody =>
+      'Le tempistiche di spedizione possono variare in base alla destinazione, ai requisiti di freschezza e all\'operativita del corriere. Quando possibile condividiamo gli aggiornamenti nel flusso ordine.';
+
+  @override
+  String get accountTermsSectionSupportTitle => 'Supporto e problemi';
+
+  @override
+  String get accountTermsSectionSupportBody =>
+      'Se c\'e un problema con un ordine o con la consegna, contatta rapidamente il supporto cosi il team potra valutare la situazione e indicarti i prossimi passi.';
+
+  @override
+  String get accountTermsSectionUpdatesTitle => 'Aggiornamenti futuri';
+
+  @override
+  String get accountTermsSectionUpdatesBody =>
+      'Questi testi sono una versione MVP e potranno essere aggiornati man mano che Truffly estendera i propri flussi legali e operativi.';
 }

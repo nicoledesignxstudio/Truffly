@@ -12,9 +12,6 @@ final onboardingServiceProvider = Provider<OnboardingService>((ref) {
     refreshAuthState: () {
       return ref.read(authNotifierProvider.notifier).refreshAuthState();
     },
-    markAuthReadyFromCurrentSession: () {
-      ref.read(authNotifierProvider.notifier).markReadyFromCurrentSession();
-    },
   );
 });
 

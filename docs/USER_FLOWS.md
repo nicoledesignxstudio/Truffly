@@ -211,7 +211,8 @@ Flow:
 
 On success:
 - Save stripe_account_id
-- Seller can publish truffles
+- Refresh seller Stripe status server-side
+- Seller can publish truffles only when Stripe status is really ready
 
 ---
 
@@ -293,6 +294,7 @@ If no tracking inserted in 48h:
 - Order cancelled
 - Full refund
 - Truffle reactivated
+- Refund and cancellation stay replay-safe server-side
 
 ---
 
@@ -314,7 +316,8 @@ Buyer can:
 
 On confirm:
 - status = completed
-- Release funds (90% seller / 10% platform)
+- Trigger payout release flow server-side (90% seller / 10% platform)
+- Keep payout tracking separate from order business state
 
 ---
 
@@ -323,8 +326,9 @@ On confirm:
 If buyer silent:
 - Send reminder
 - After 48h:
-  - Automatic fund release
   - status = completed
+  - Automatic fund release
+  - server-side payout tracking updated
 
 ---
 

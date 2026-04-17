@@ -35,7 +35,11 @@ final class PublishTruffleService {
     try {
       final row = await _supabaseClient
           .from('users')
-          .select('role, seller_status, stripe_account_id, region')
+          .select(
+            'role, seller_status, stripe_account_id, stripe_details_submitted, '
+            'stripe_charges_enabled, stripe_payouts_enabled, '
+            'stripe_requirements_pending, stripe_ready_at, region',
+          )
           .eq('id', authUser.id)
           .maybeSingle()
           .timeout(_requestTimeout);
@@ -50,6 +54,11 @@ final class PublishTruffleService {
         role: (row['role'] as String? ?? '').trim().toLowerCase(),
         sellerStatus: (row['seller_status'] as String? ?? '').trim().toLowerCase(),
         stripeAccountId: row['stripe_account_id'] as String?,
+        stripeDetailsSubmitted: row['stripe_details_submitted'] == true,
+        stripeChargesEnabled: row['stripe_charges_enabled'] == true,
+        stripePayoutsEnabled: row['stripe_payouts_enabled'] == true,
+        stripeRequirementsPending: row['stripe_requirements_pending'] != false,
+        stripeReadyAt: _parseIsoDate(row['stripe_ready_at']),
         region: row['region'] as String?,
       );
     } on PublishTruffleServiceException {
@@ -330,7 +339,7 @@ final class PublishTruffleService {
     }
 
     if (errorCode == 'publish_request_in_progress') {
-      return PublishTruffleSubmissionFailure.network;
+      return PublishTruffleSubmissionFailure.inProgress;
     }
 
     if (_isValidationErrorCode(errorCode)) {
@@ -339,6 +348,10 @@ final class PublishTruffleService {
 
     if (_isNotAllowedErrorCode(errorCode)) {
       return PublishTruffleSubmissionFailure.notAllowed;
+    }
+
+    if (errorCode == 'seller_stripe_verification_unavailable') {
+      return PublishTruffleSubmissionFailure.network;
     }
 
     if (error.status == 400 || error.status == 409 || error.status == 422) {
@@ -441,6 +454,13 @@ final class PublishTruffleService {
     final month = normalized.month.toString().padLeft(2, '0');
     final day = normalized.day.toString().padLeft(2, '0');
     return '$year-$month-$day';
+  }
+
+  DateTime? _parseIsoDate(Object? value) {
+    if (value is! String) return null;
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    return DateTime.tryParse(trimmed);
   }
 }
 

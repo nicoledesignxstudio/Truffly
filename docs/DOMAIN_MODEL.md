@@ -103,6 +103,12 @@ Buyer onboarding:
 - seller_status (seller_status_enum)
 - stripe_account_id (nullable)
 - stripe_customer_id (nullable)
+- stripe_details_submitted (boolean, server-verified)
+- stripe_charges_enabled (boolean, server-verified)
+- stripe_payouts_enabled (boolean, server-verified)
+- stripe_requirements_pending (boolean, server-verified)
+- stripe_onboarding_completed_at (nullable)
+- stripe_ready_at (nullable)
 - first_name
 - last_name
 - bio (nullable)
@@ -155,7 +161,7 @@ Private table.
 - shipping_price_abroad (decimal)
 - region (region_enum)  ← region of harvest (Italy)
 - harvest_date (date, no future dates)
-- status (active / sold / expired)
+- status (active / reserved / sold / expired)
 - expires_at (timestamp)
 - created_at
 
@@ -198,11 +204,48 @@ Financial fields:
 - commission_amount (decimal)
 - seller_amount (decimal)
 - stripe_payment_intent_id
+- paid_at
+- shipped_at (nullable)
+- completed_at (nullable)
+- cancelled_at (nullable)
+- buyer_delivery_reminder_sent_at (nullable)
 - created_at
 
 Constraints:
 - buyer_id != seller_id
 - commission = 10% (server enforced)
+
+---
+
+## order_financial_operations
+
+- id (uuid, PK)
+- order_id (FK → orders.id)
+- kind (payment / refund / transfer)
+- logical_key (unique)
+- idempotency_key (unique)
+- status (pending / processing / succeeded / failed)
+- amount (decimal)
+- currency (char(3))
+- stripe_payment_intent_id (nullable)
+- stripe_refund_id (nullable, unique when present)
+- stripe_transfer_id (nullable, unique when present)
+- source_charge_id (nullable)
+- destination_account_id (nullable)
+- request_id (nullable)
+- triggered_by (nullable FK → users.id)
+- trigger_source
+- failure_code (nullable)
+- failure_message (nullable)
+- metadata (jsonb)
+- processed_at (nullable)
+- created_at
+- updated_at
+
+Purpose:
+- keep payment / refund / payout tracking separate from order business status
+- guarantee replay-safe refund and transfer orchestration
+- provide minimal reconciliation support for MVP
 
 ---
 

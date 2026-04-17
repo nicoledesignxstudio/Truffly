@@ -489,13 +489,19 @@ where id='11111111-1111-1111-1111-111111111111';
 -- ENRICH MAIN TEST ACCOUNTS
 
 update public.users set
+  role = 'buyer',
+  seller_status = 'not_requested',
+  stripe_account_id = null,
   first_name = 'Nicole',
   last_name = 'Test',
+  bio = null,
   profile_image_url = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
   country_code = 'IT',
   region = 'TOSCANA',
   is_active = true,
   onboarding_completed = true,
+  seller_review_count = 0,
+  seller_rating_avg = 0.0,
   created_at = timezone('utc', now()) - interval '45 days'
 where id = '11111111-1111-1111-1111-111111111111';
 
@@ -613,37 +619,37 @@ insert into public.truffles (
 )
 values
 -- seller1 Marco Bianchi -> strong seller, mixed inventory
-('a1111111-1111-1111-1111-111111111111','22222222-2222-2222-2222-222222222222','TUBER_MELANOSPORUM','FIRST',55,145,8,20,'PIEMONTE',current_date-1,'active',now()+interval '4 days', now()-interval '1 day'),
-('a1111111-1111-1111-1111-111111111112','22222222-2222-2222-2222-222222222222','TUBER_AESTIVUM','SECOND',95,68,6,15,'PIEMONTE',current_date-4,'active',now()+interval '2 days', now()-interval '3 days'),
-('a1111111-1111-1111-1111-111111111113','22222222-2222-2222-2222-222222222222','TUBER_BRUMALE','SECOND',70,79,7,18,'PIEMONTE',current_date-10,'sold',now()+interval '1 day', now()-interval '9 days'),
+('a1111111-1111-1111-1111-111111111111','22222222-2222-2222-2222-222222222222','TUBER_MELANOSPORUM','FIRST',55,145,8,20,'PIEMONTE',current_date-1,'publishing',now()+interval '4 days', now()-interval '1 day'),
+('a1111111-1111-1111-1111-111111111112','22222222-2222-2222-2222-222222222222','TUBER_AESTIVUM','SECOND',95,68,6,15,'PIEMONTE',current_date-4,'publishing',now()+interval '2 days', now()-interval '3 days'),
+('a1111111-1111-1111-1111-111111111113','22222222-2222-2222-2222-222222222222','TUBER_BRUMALE','SECOND',70,79,7,18,'PIEMONTE',current_date-10,'publishing',now()+interval '1 day', now()-interval '9 days'),
 ('a1111111-1111-1111-1111-111111111114','22222222-2222-2222-2222-222222222222','TUBER_UNCINATUM','FIRST',80,118,7,18,'PIEMONTE',current_date-14,'expired',now()-interval '2 days', now()-interval '10 days'),
 
 -- seller2 Giulia Rossi -> new seller, no reviews yet
-('a2222222-2222-2222-2222-222222222221','33333333-3333-3333-3333-333333333333','TUBER_UNCINATUM','FIRST',72,92,7,18,'TOSCANA',current_date-1,'active',now()+interval '5 days', now()-interval '12 hours'),
-('a2222222-2222-2222-2222-222222222222','33333333-3333-3333-3333-333333333333','TUBER_BORCHII','FIRST',38,112,7,18,'TOSCANA',current_date-2,'active',now()+interval '4 days', now()-interval '1 day'),
+('a2222222-2222-2222-2222-222222222221','33333333-3333-3333-3333-333333333333','TUBER_UNCINATUM','FIRST',72,92,7,18,'TOSCANA',current_date-1,'publishing',now()+interval '5 days', now()-interval '12 hours'),
+('a2222222-2222-2222-2222-222222222222','33333333-3333-3333-3333-333333333333','TUBER_BORCHII','FIRST',38,112,7,18,'TOSCANA',current_date-2,'publishing',now()+interval '4 days', now()-interval '1 day'),
 
 -- seller3 Andrea Neri -> reviewed and premium
-('a3333333-3333-3333-3333-333333333331','44444444-4444-4444-4444-444444444444','TUBER_MAGNATUM','FIRST',42,290,10,25,'UMBRIA',current_date-1,'active',now()+interval '5 days', now()-interval '8 hours'),
-('a3333333-3333-3333-3333-333333333332','44444444-4444-4444-4444-444444444444','TUBER_BRUMALE','SECOND',60,74,7,18,'UMBRIA',current_date-6,'sold',now()+interval '1 day', now()-interval '5 days'),
-('a3333333-3333-3333-3333-333333333333','44444444-4444-4444-4444-444444444444','TUBER_MELANOSPORUM','FIRST',50,152,8,20,'UMBRIA',current_date-3,'active',now()+interval '3 days', now()-interval '2 days'),
+('a3333333-3333-3333-3333-333333333331','44444444-4444-4444-4444-444444444444','TUBER_MAGNATUM','FIRST',42,290,10,25,'UMBRIA',current_date-1,'publishing',now()+interval '5 days', now()-interval '8 hours'),
+('a3333333-3333-3333-3333-333333333332','44444444-4444-4444-4444-444444444444','TUBER_BRUMALE','SECOND',60,74,7,18,'UMBRIA',current_date-6,'publishing',now()+interval '1 day', now()-interval '5 days'),
+('a3333333-3333-3333-3333-333333333333','44444444-4444-4444-4444-444444444444','TUBER_MELANOSPORUM','FIRST',50,152,8,20,'UMBRIA',current_date-3,'publishing',now()+interval '3 days', now()-interval '2 days'),
 
 -- seller4 Paolo Conti -> average rating, some cancelled history
-('a4444444-4444-4444-4444-444444444441','55555555-5555-5555-5555-555555555555','TUBER_MAGNATUM','SECOND',30,195,10,25,'MARCHE',current_date-2,'active',now()+interval '5 days', now()-interval '1 day'),
-('a4444444-4444-4444-4444-444444444442','55555555-5555-5555-5555-555555555555','TUBER_BORCHII','FIRST',45,118,7,18,'MARCHE',current_date-8,'sold',now()+interval '1 day', now()-interval '7 days'),
+('a4444444-4444-4444-4444-444444444441','55555555-5555-5555-5555-555555555555','TUBER_MAGNATUM','SECOND',30,195,10,25,'MARCHE',current_date-2,'publishing',now()+interval '5 days', now()-interval '1 day'),
+('a4444444-4444-4444-4444-444444444442','55555555-5555-5555-5555-555555555555','TUBER_BORCHII','FIRST',45,118,7,18,'MARCHE',current_date-8,'publishing',now()+interval '1 day', now()-interval '7 days'),
 ('a4444444-4444-4444-4444-444444444443','55555555-5555-5555-5555-555555555555','TUBER_AESTIVUM','THIRD',110,52,6,15,'MARCHE',current_date-12,'expired',now()-interval '1 day', now()-interval '8 days'),
 
 -- seller5 Francesca Moretti -> excellent seller
-('a5555555-5555-5555-5555-555555555551','66666666-6666-6666-6666-666666666666','TUBER_MELANOSPORUM','FIRST',48,142,8,20,'LAZIO',current_date-1,'active',now()+interval '5 days', now()-interval '5 hours'),
-('a5555555-5555-5555-5555-555555555552','66666666-6666-6666-6666-666666666666','TUBER_MELANOSPORUM','THIRD',88,82,8,20,'LAZIO',current_date-9,'sold',now()+interval '1 day', now()-interval '8 days'),
-('a5555555-5555-5555-5555-555555555553','66666666-6666-6666-6666-666666666666','TUBER_AESTIVUM','SECOND',120,66,6,15,'LAZIO',current_date-2,'active',now()+interval '5 days', now()-interval '1 day'),
+('a5555555-5555-5555-5555-555555555551','66666666-6666-6666-6666-666666666666','TUBER_MELANOSPORUM','FIRST',48,142,8,20,'LAZIO',current_date-1,'publishing',now()+interval '5 days', now()-interval '5 hours'),
+('a5555555-5555-5555-5555-555555555552','66666666-6666-6666-6666-666666666666','TUBER_MELANOSPORUM','THIRD',88,82,8,20,'LAZIO',current_date-9,'publishing',now()+interval '1 day', now()-interval '8 days'),
+('a5555555-5555-5555-5555-555555555553','66666666-6666-6666-6666-666666666666','TUBER_AESTIVUM','SECOND',120,66,6,15,'LAZIO',current_date-2,'publishing',now()+interval '5 days', now()-interval '1 day'),
 
 -- seller6 Luca Ferrari -> active order in progress
-('a6666666-6666-6666-6666-666666666661','77777777-7777-7777-7777-777777777777','TUBER_MELANOSPORUM','SECOND',62,124,8,20,'LOMBARDIA',current_date-2,'sold',now()+interval '2 days', now()-interval '2 days'),
-('a6666666-6666-6666-6666-666666666662','77777777-7777-7777-7777-777777777777','TUBER_AESTIVUM','SECOND',125,64,6,15,'LOMBARDIA',current_date-2,'active',now()+interval '4 days', now()-interval '1 day'),
+('a6666666-6666-6666-6666-666666666661','77777777-7777-7777-7777-777777777777','TUBER_MELANOSPORUM','SECOND',62,124,8,20,'LOMBARDIA',current_date-2,'publishing',now()+interval '2 days', now()-interval '2 days'),
+('a6666666-6666-6666-6666-666666666662','77777777-7777-7777-7777-777777777777','TUBER_AESTIVUM','SECOND',125,64,6,15,'LOMBARDIA',current_date-2,'publishing',now()+interval '4 days', now()-interval '1 day'),
 
 -- seller7 Sara Romano -> very polished profile, few but strong sales
-('a7777777-7777-7777-7777-777777777771','88888888-8888-8888-8888-888888888888','TUBER_AESTIVUM','FIRST',82,72,6,15,'VENETO',current_date-1,'active',now()+interval '5 days', now()-interval '6 hours'),
-('a7777777-7777-7777-7777-777777777772','88888888-8888-8888-8888-888888888888','TUBER_MAGNATUM','SECOND',34,210,10,25,'VENETO',current_date-5,'sold',now()+interval '2 days', now()-interval '4 days'),
+('a7777777-7777-7777-7777-777777777771','88888888-8888-8888-8888-888888888888','TUBER_AESTIVUM','FIRST',82,72,6,15,'VENETO',current_date-1,'publishing',now()+interval '5 days', now()-interval '6 hours'),
+('a7777777-7777-7777-7777-777777777772','88888888-8888-8888-8888-888888888888','TUBER_MAGNATUM','SECOND',34,210,10,25,'VENETO',current_date-5,'publishing',now()+interval '2 days', now()-interval '4 days'),
 ('a7777777-7777-7777-7777-777777777773','88888888-8888-8888-8888-888888888888','TUBER_BRUMALE','SECOND',66,78,7,18,'VENETO',current_date-11,'expired',now()-interval '2 days', now()-interval '9 days');
 
 -- =====================================================
@@ -682,6 +688,13 @@ values
 (gen_random_uuid(),'a7777777-7777-7777-7777-777777777772','https://images.unsplash.com/photo-1603048297172-c92544798d5a?auto=format&fit=crop&w=1200&q=80',1),
 (gen_random_uuid(),'a7777777-7777-7777-7777-777777777773','https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=1200&q=80',1);
 
+update public.truffles
+set status = case
+  when expires_at <= timezone('utc', now()) then 'expired'::public.truffle_status_enum
+  else 'active'::public.truffle_status_enum
+end
+where status = 'publishing';
+
 insert into public.shipping_addresses (
   id, user_id, full_name, street, city, postal_code, country_code, phone, is_default, created_at
 )
@@ -709,22 +722,300 @@ insert into public.orders (
   commission_amount,
   seller_amount,
   stripe_payment_intent_id,
-  created_at
+  created_at,
+  paid_at
 )
 values
--- buyer main test account: one completed, one in progress (paid)
-('b1111111-1111-1111-1111-111111111111','a1111111-1111-1111-1111-111111111113','11111111-1111-1111-1111-111111111111','22222222-2222-2222-2222-222222222222','completed','TRK-PIE-001','Nicole Test','Via delle Colline 12','Firenze','50121','IT','3331111111',79,7.90,71.10,'pi_test_completed_1', now()-interval '7 days'),
-('b1111111-1111-1111-1111-111111111112','a6666666-6666-6666-6666-666666666661','11111111-1111-1111-1111-111111111111','77777777-7777-7777-7777-777777777777','paid',null,'Nicole Test','Via delle Colline 12','Firenze','50121','IT','3331111111',124,12.40,111.60,'pi_test_paid_1', now()-interval '8 hours'),
+(
+  'b1111111-1111-1111-1111-111111111111',
+  'a1111111-1111-1111-1111-111111111113',
+  '11111111-1111-1111-1111-111111111111',
+  '22222222-2222-2222-2222-222222222222',
+  'paid',
+  null,
+  'Nicole Test',
+  'Via delle Colline 12',
+  'Firenze',
+  '50121',
+  'IT',
+  '3331111111',
+  79,
+  7.90,
+  71.10,
+  'pi_test_completed_1',
+  now()-interval '7 days',
+  now()-interval '7 days'
+);
 
--- buyer2: one completed, one cancelled
-('b2222222-2222-2222-2222-222222222221','a3333333-3333-3333-3333-333333333332','99999999-9999-9999-9999-999999999991','44444444-4444-4444-4444-444444444444','completed','TRK-UMB-002','Elena Marini','Via Appia 41','Roma','00183','IT','3332222222',74,7.40,66.60,'pi_test_completed_2', now()-interval '5 days'),
-('b2222222-2222-2222-2222-222222222222','a4444444-4444-4444-4444-444444444442','99999999-9999-9999-9999-999999999991','55555555-5555-5555-5555-555555555555','cancelled',null,'Elena Marini','Via Appia 41','Roma','00183','IT','3332222222',118,11.80,106.20,'pi_test_cancelled_1', now()-interval '3 days'),
+insert into public.orders (
+  id,
+  truffle_id,
+  buyer_id,
+  seller_id,
+  status,
+  tracking_code,
+  shipping_full_name,
+  shipping_street,
+  shipping_city,
+  shipping_postal_code,
+  shipping_country_code,
+  shipping_phone,
+  total_price,
+  commission_amount,
+  seller_amount,
+  stripe_payment_intent_id,
+  created_at,
+  paid_at
+)
+values
+(
+  'b1111111-1111-1111-1111-111111111112',
+  'a6666666-6666-6666-6666-666666666661',
+  '11111111-1111-1111-1111-111111111111',
+  '77777777-7777-7777-7777-777777777777',
+  'paid',
+  null,
+  'Nicole Test',
+  'Via delle Colline 12',
+  'Firenze',
+  '50121',
+  'IT',
+  '3331111111',
+  124,
+  12.40,
+  111.60,
+  'pi_test_paid_1',
+  now()-interval '8 hours',
+  now()-interval '8 hours'
+);
 
--- buyer3: one shipped in progress
-('b3333333-3333-3333-3333-333333333331','a7777777-7777-7777-7777-777777777772','99999999-9999-9999-9999-999999999992','88888888-8888-8888-8888-888888888888','shipped','TRK-VEN-003','Davide Greco','Via Torino 8','Milano','20123','IT','3333333333',210,21.00,189.00,'pi_test_shipped_1', now()-interval '2 days'),
+insert into public.orders (
+  id,
+  truffle_id,
+  buyer_id,
+  seller_id,
+  status,
+  tracking_code,
+  shipping_full_name,
+  shipping_street,
+  shipping_city,
+  shipping_postal_code,
+  shipping_country_code,
+  shipping_phone,
+  total_price,
+  commission_amount,
+  seller_amount,
+  stripe_payment_intent_id,
+  created_at,
+  paid_at
+)
+values
+(
+  'b2222222-2222-2222-2222-222222222221',
+  'a3333333-3333-3333-3333-333333333332',
+  '99999999-9999-9999-9999-999999999991',
+  '44444444-4444-4444-4444-444444444444',
+  'paid',
+  null,
+  'Elena Marini',
+  'Via Appia 41',
+  'Roma',
+  '00183',
+  'IT',
+  '3332222222',
+  74,
+  7.40,
+  66.60,
+  'pi_test_completed_2',
+  now()-interval '5 days',
+  now()-interval '5 days'
+);
 
--- buyer4 international: one completed, useful for abroad shipping scenarios
-('b4444444-4444-4444-4444-444444444441','a5555555-5555-5555-5555-555555555552','99999999-9999-9999-9999-999999999993','66666666-6666-6666-6666-666666666666','completed','TRK-LAZ-004','Chiara Villa','10 Rue Victor Hugo','Lyon','69002','FR','+33612345678',82,8.20,73.80,'pi_test_completed_3', now()-interval '6 days');
+insert into public.orders (
+  id,
+  truffle_id,
+  buyer_id,
+  seller_id,
+  status,
+  tracking_code,
+  shipping_full_name,
+  shipping_street,
+  shipping_city,
+  shipping_postal_code,
+  shipping_country_code,
+  shipping_phone,
+  total_price,
+  commission_amount,
+  seller_amount,
+  stripe_payment_intent_id,
+  created_at,
+  paid_at
+)
+values
+(
+  'b2222222-2222-2222-2222-222222222222',
+  'a4444444-4444-4444-4444-444444444442',
+  '99999999-9999-9999-9999-999999999991',
+  '55555555-5555-5555-5555-555555555555',
+  'paid',
+  null,
+  'Elena Marini',
+  'Via Appia 41',
+  'Roma',
+  '00183',
+  'IT',
+  '3332222222',
+  118,
+  11.80,
+  106.20,
+  'pi_test_cancelled_1',
+  now()-interval '3 days',
+  now()-interval '3 days'
+);
+
+insert into public.orders (
+  id,
+  truffle_id,
+  buyer_id,
+  seller_id,
+  status,
+  tracking_code,
+  shipping_full_name,
+  shipping_street,
+  shipping_city,
+  shipping_postal_code,
+  shipping_country_code,
+  shipping_phone,
+  total_price,
+  commission_amount,
+  seller_amount,
+  stripe_payment_intent_id,
+  created_at,
+  paid_at
+)
+values
+(
+  'b3333333-3333-3333-3333-333333333331',
+  'a7777777-7777-7777-7777-777777777772',
+  '99999999-9999-9999-9999-999999999992',
+  '88888888-8888-8888-8888-888888888888',
+  'paid',
+  null,
+  'Davide Greco',
+  'Via Torino 8',
+  'Milano',
+  '20123',
+  'IT',
+  '3333333333',
+  210,
+  21.00,
+  189.00,
+  'pi_test_shipped_1',
+  now()-interval '2 days',
+  now()-interval '2 days'
+);
+
+insert into public.orders (
+  id,
+  truffle_id,
+  buyer_id,
+  seller_id,
+  status,
+  tracking_code,
+  shipping_full_name,
+  shipping_street,
+  shipping_city,
+  shipping_postal_code,
+  shipping_country_code,
+  shipping_phone,
+  total_price,
+  commission_amount,
+  seller_amount,
+  stripe_payment_intent_id,
+  created_at,
+  paid_at
+)
+values
+(
+  'b4444444-4444-4444-4444-444444444441',
+  'a5555555-5555-5555-5555-555555555552',
+  '99999999-9999-9999-9999-999999999993',
+  '66666666-6666-6666-6666-666666666666',
+  'paid',
+  null,
+  'Chiara Villa',
+  '10 Rue Victor Hugo',
+  'Lyon',
+  '69002',
+  'FR',
+  '+33612345678',
+  82,
+  8.20,
+  73.80,
+  'pi_test_completed_3',
+  now()-interval '6 days',
+  now()-interval '6 days'
+);
+
+update public.orders
+set
+  status = 'shipped',
+  tracking_code = 'TRK-PIE-001',
+  shipped_at = coalesce(shipped_at, now()-interval '6 days')
+where id = 'b1111111-1111-1111-1111-111111111111'
+  and status = 'paid';
+
+update public.orders
+set
+  status = 'completed',
+  completed_at = coalesce(completed_at, now()-interval '5 days')
+where id = 'b1111111-1111-1111-1111-111111111111'
+  and status = 'shipped';
+
+update public.orders
+set
+  status = 'shipped',
+  tracking_code = 'TRK-UMB-002',
+  shipped_at = coalesce(shipped_at, now()-interval '4 days')
+where id = 'b2222222-2222-2222-2222-222222222221'
+  and status = 'paid';
+
+update public.orders
+set
+  status = 'completed',
+  completed_at = coalesce(completed_at, now()-interval '3 days')
+where id = 'b2222222-2222-2222-2222-222222222221'
+  and status = 'shipped';
+
+update public.orders
+set
+  status = 'cancelled',
+  cancelled_at = coalesce(cancelled_at, now()-interval '2 days')
+where id = 'b2222222-2222-2222-2222-222222222222'
+  and status = 'paid';
+
+update public.orders
+set
+  status = 'shipped',
+  tracking_code = 'TRK-VEN-003',
+  shipped_at = coalesce(shipped_at, now()-interval '1 day')
+where id = 'b3333333-3333-3333-3333-333333333331'
+  and status = 'paid';
+
+update public.orders
+set
+  status = 'shipped',
+  tracking_code = 'TRK-LAZ-004',
+  shipped_at = coalesce(shipped_at, now()-interval '5 days')
+where id = 'b4444444-4444-4444-4444-444444444441'
+  and status = 'paid';
+
+update public.orders
+set
+  status = 'completed',
+  completed_at = coalesce(completed_at, now()-interval '4 days')
+where id = 'b4444444-4444-4444-4444-444444444441'
+  and status = 'shipped';
 
 insert into public.reviews (
   id,

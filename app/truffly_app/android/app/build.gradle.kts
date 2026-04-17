@@ -5,6 +5,11 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val authRedirectHost = (project.findProperty("authRedirectHost") as String?)
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
+    ?: "auth.truffly.invalid"
+
 android {
     namespace = "com.example.truffly_app"
     compileSdk = flutter.compileSdkVersion
@@ -28,6 +33,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["authRedirectHost"] = authRedirectHost
     }
 
     buildTypes {

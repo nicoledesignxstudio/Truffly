@@ -53,11 +53,31 @@ final class TruffleService {
         throw const TruffleServiceException(TruffleDetailFailure.notFound);
       }
 
-      final imageRows = await _supabaseClient
-          .from('truffle_images')
-          .select('image_url, order_index')
-          .eq('truffle_id', normalizedTruffleId)
-          .order('order_index', ascending: true) as List<dynamic>;
+      List<dynamic> imageRows = const [];
+      try {
+        imageRows = await _supabaseClient
+            .from('truffle_images')
+            .select('image_url, order_index')
+            .eq('truffle_id', normalizedTruffleId)
+            .order('order_index', ascending: true) as List<dynamic>;
+      } on PostgrestException catch (error) {
+        _debugLog(
+          'PostgrestException on truffle images '
+          'truffleId=$normalizedTruffleId '
+          'code=${error.code} message=${error.message} '
+          'details=${error.details} hint=${error.hint}',
+        );
+      } on SocketException {
+        _debugLog(
+          'SocketException on truffle images '
+          'truffleId=$normalizedTruffleId',
+        );
+      } catch (error) {
+        _debugLog(
+          'Unknown truffle image error '
+          'truffleId=$normalizedTruffleId type=${error.runtimeType}',
+        );
+      }
 
       _debugLog(
         'detail loaded for truffleId=$normalizedTruffleId '

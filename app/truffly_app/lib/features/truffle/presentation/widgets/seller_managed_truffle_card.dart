@@ -4,11 +4,11 @@ import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
+import 'package:truffly_app/features/truffle/domain/italian_region.dart';
 import 'package:truffly_app/features/truffle/domain/seller_managed_truffle_item.dart';
 import 'package:truffly_app/features/truffle/domain/seller_managed_truffle_status.dart';
 import 'package:truffly_app/features/truffle/presentation/widgets/truffle_quality_badge.dart';
 import 'package:truffly_app/features/truffle/presentation/widgets/truffle_ui_formatters.dart';
-import 'package:truffly_app/features/truffle/domain/italian_region.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class SellerManagedTruffleCard extends StatelessWidget {
@@ -160,12 +160,21 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
     final (label, backgroundColor, textColor) = switch (status) {
+      SellerManagedTruffleStatus.publishing => (
+          l10n.sellerMyTrufflesStatusPublishing,
+          const Color(0xFFEAF2FF),
+          const Color(0xFF2457A5),
+        ),
       SellerManagedTruffleStatus.active => (
           l10n.sellerMyTrufflesTabActive,
           const Color(0xFFFFEEE8),
           AppColors.accent,
+        ),
+      SellerManagedTruffleStatus.reserved => (
+          l10n.sellerMyTrufflesStatusReserved,
+          const Color(0xFFFFF4D6),
+          const Color(0xFF8A5A00),
         ),
       SellerManagedTruffleStatus.sold => (
           l10n.sellerMyTrufflesTabSold,

@@ -22,7 +22,8 @@ class SellerMyTrufflesPage extends ConsumerStatefulWidget {
   const SellerMyTrufflesPage({super.key});
 
   @override
-  ConsumerState<SellerMyTrufflesPage> createState() => _SellerMyTrufflesPageState();
+  ConsumerState<SellerMyTrufflesPage> createState() =>
+      _SellerMyTrufflesPageState();
 }
 
 class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
@@ -33,14 +34,17 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
     final l10n = AppLocalizations.of(context)!;
     final selectedTab = ref.watch(sellerManagedTruffleTabProvider);
     final trufflesAsync = ref.watch(sellerManagedTrufflesProvider);
-    final allItems = trufflesAsync.valueOrNull ?? const <SellerManagedTruffleItem>[];
+    final allItems =
+        trufflesAsync.valueOrNull ?? const <SellerManagedTruffleItem>[];
     final filteredItems = allItems
         .where(
           (item) =>
-              item.status == selectedTab && !_optimisticallyRemovedIds.contains(item.id),
+              item.status == selectedTab &&
+              !_optimisticallyRemovedIds.contains(item.id),
         )
         .toList(growable: false);
-    final isInitialLoading = trufflesAsync.isLoading && trufflesAsync.valueOrNull == null;
+    final isInitialLoading =
+        trufflesAsync.isLoading && trufflesAsync.valueOrNull == null;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -83,7 +87,8 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
             _StatusTabs(
               selectedTab: selectedTab,
               onSelected: (value) {
-                ref.read(sellerManagedTruffleTabProvider.notifier).state = value;
+                ref.read(sellerManagedTruffleTabProvider.notifier).state =
+                    value;
               },
             ),
             const SizedBox(height: AppSpacing.spacingM),
@@ -112,7 +117,7 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
                   final item = filteredItems[index];
                   return _SellerManagedTruffleGridCard(
                     item: item,
-                    onDeleteTap: item.status == SellerManagedTruffleStatus.active
+                    onDeleteTap: item.status.isInteractive
                         ? () => _confirmDelete(context, ref, item)
                         : null,
                   );
@@ -154,8 +159,8 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
 
     try {
       await ref.read(sellerManagedTruffleDeleteProvider.notifier).deleteTruffle(
-        item.id,
-      );
+            item.id,
+          );
       if (mounted) {
         setState(() {
           _optimisticallyRemovedIds.add(item.id);
@@ -181,7 +186,8 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
     try {
       await ref.read(sellerManagedTrufflesProvider.future);
       if (!mounted) return;
-      final freshIds = (ref.read(sellerManagedTrufflesProvider).valueOrNull ?? const <SellerManagedTruffleItem>[])
+      final freshIds = (ref.read(sellerManagedTrufflesProvider).valueOrNull ??
+              const <SellerManagedTruffleItem>[])
           .map((item) => item.id)
           .toSet();
       setState(() {
@@ -196,7 +202,8 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
     AppLocalizations l10n,
     SellerManagedTruffleDeleteException error,
   ) {
-    if (error.code == 'truffle_has_orders' || error.code == 'truffle_not_active') {
+    if (error.code == 'truffle_has_orders' ||
+        error.code == 'truffle_not_active') {
       return l10n.sellerMyTrufflesDeleteForbidden;
     }
 
@@ -224,14 +231,15 @@ class _SellerManagedTruffleGridCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDeletePending = ref.watch(
-      sellerManagedTruffleDeleteProvider.select((pending) => pending.contains(item.id)),
+      sellerManagedTruffleDeleteProvider.select(
+        (pending) => pending.contains(item.id),
+      ),
     );
 
     return SellerManagedTruffleCard(
       item: item,
-      onTap: item.status == SellerManagedTruffleStatus.active
-          ? () => context.push(AppRoutes.truffleDetailPath(item.id))
-          : null,
+      onTap:
+          item.status.isInteractive ? () => context.push(AppRoutes.truffleDetailPath(item.id)) : null,
       isDeletePending: isDeletePending,
       onDeleteTap: onDeleteTap,
     );
@@ -249,20 +257,19 @@ class _StatusTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          for (var index = 0; index < SellerManagedTruffleStatus.values.length; index++) ...[
+          for (var index = 0;
+              index < SellerManagedTruffleStatus.values.length;
+              index++) ...[
             if (index > 0) const SizedBox(width: AppSpacing.spacingXS),
             _StatusChip(
-              label: switch (SellerManagedTruffleStatus.values[index]) {
-                SellerManagedTruffleStatus.active => l10n.sellerMyTrufflesTabActive,
-                SellerManagedTruffleStatus.sold => l10n.sellerMyTrufflesTabSold,
-                SellerManagedTruffleStatus.expired => l10n.sellerMyTrufflesTabExpired,
-              },
+              label: _labelForStatus(
+                context,
+                SellerManagedTruffleStatus.values[index],
+              ),
               selected: selectedTab == SellerManagedTruffleStatus.values[index],
               onTap: () => onSelected(SellerManagedTruffleStatus.values[index]),
             ),
@@ -331,20 +338,12 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final (title, subtitle) = switch (status) {
-      SellerManagedTruffleStatus.active => (
-          l10n.sellerMyTrufflesEmptyActiveTitle,
-          l10n.sellerMyTrufflesEmptyActiveSubtitle,
-        ),
-      SellerManagedTruffleStatus.sold => (
-          l10n.sellerMyTrufflesEmptySoldTitle,
-          l10n.sellerMyTrufflesEmptySoldSubtitle,
-        ),
-      SellerManagedTruffleStatus.expired => (
-          l10n.sellerMyTrufflesEmptyExpiredTitle,
-          l10n.sellerMyTrufflesEmptyExpiredSubtitle,
-        ),
+      SellerManagedTruffleStatus.publishing => _copyForPublishing(context),
+      SellerManagedTruffleStatus.active => _copyForActive(context),
+      SellerManagedTruffleStatus.reserved => _copyForReserved(context),
+      SellerManagedTruffleStatus.sold => _copyForSold(context),
+      SellerManagedTruffleStatus.expired => _copyForExpired(context),
     };
 
     return Padding(
@@ -403,4 +402,56 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
+}
+
+String _labelForStatus(BuildContext context, SellerManagedTruffleStatus status) {
+  final l10n = AppLocalizations.of(context)!;
+
+  return switch (status) {
+    SellerManagedTruffleStatus.publishing => l10n.sellerMyTrufflesTabPublishing,
+    SellerManagedTruffleStatus.active => l10n.sellerMyTrufflesTabActive,
+    SellerManagedTruffleStatus.reserved => l10n.sellerMyTrufflesTabReserved,
+    SellerManagedTruffleStatus.sold => l10n.sellerMyTrufflesTabSold,
+    SellerManagedTruffleStatus.expired => l10n.sellerMyTrufflesTabExpired,
+  };
+}
+
+(String, String) _copyForPublishing(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return (
+    l10n.sellerMyTrufflesEmptyPublishingTitle,
+    l10n.sellerMyTrufflesEmptyPublishingSubtitle,
+  );
+}
+
+(String, String) _copyForActive(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return (
+    l10n.sellerMyTrufflesEmptyActiveTitle,
+    l10n.sellerMyTrufflesEmptyActiveSubtitle,
+  );
+}
+
+(String, String) _copyForReserved(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return (
+    l10n.sellerMyTrufflesEmptyReservedTitle,
+    l10n.sellerMyTrufflesEmptyReservedSubtitle,
+  );
+}
+
+(String, String) _copyForSold(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return (
+    l10n.sellerMyTrufflesEmptySoldTitle,
+    l10n.sellerMyTrufflesEmptySoldSubtitle,
+  );
+}
+
+(String, String) _copyForExpired(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return (
+    l10n.sellerMyTrufflesEmptyExpiredTitle,
+    l10n.sellerMyTrufflesEmptyExpiredSubtitle,
+  );
 }

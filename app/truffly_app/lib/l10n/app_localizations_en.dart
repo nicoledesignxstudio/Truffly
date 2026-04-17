@@ -1514,6 +1514,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only approved sellers with Stripe onboarding completed can publish truffles.';
 
   @override
+  String get publishTruffleSubmitInProgress =>
+      'A publish request for this truffle is already in progress. Please wait a few seconds and try again.';
+
+  @override
   String get publishTruffleSubmitValidation =>
       'Some product data is invalid. Review the form and try again.';
 
@@ -1541,7 +1545,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellerMyTrufflesTitle => 'My truffles';
 
   @override
+  String get sellerMyTrufflesTabPublishing => 'Publishing';
+
+  @override
   String get sellerMyTrufflesTabActive => 'Active';
+
+  @override
+  String get sellerMyTrufflesTabReserved => 'Reserved';
 
   @override
   String get sellerMyTrufflesTabSold => 'Sold';
@@ -1550,11 +1560,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellerMyTrufflesTabExpired => 'Expired';
 
   @override
+  String get sellerMyTrufflesStatusPublishing => 'Publishing';
+
+  @override
+  String get sellerMyTrufflesStatusReserved => 'Reserved';
+
+  @override
+  String get sellerMyTrufflesEmptyPublishingTitle =>
+      'No truffles are publishing';
+
+  @override
+  String get sellerMyTrufflesEmptyPublishingSubtitle =>
+      'Publishing listings appear here until they are ready to become visible to buyers.';
+
+  @override
   String get sellerMyTrufflesEmptyActiveTitle => 'No active truffles';
 
   @override
   String get sellerMyTrufflesEmptyActiveSubtitle =>
       'Publish a truffle and it will appear here while it is available.';
+
+  @override
+  String get sellerMyTrufflesEmptyReservedTitle => 'No reserved truffles';
+
+  @override
+  String get sellerMyTrufflesEmptyReservedSubtitle =>
+      'Truffles with an open order in progress appear here until the sale is completed or cancelled.';
 
   @override
   String get sellerMyTrufflesEmptySoldTitle => 'No sold truffles';
@@ -1608,4 +1639,212 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sellerMyTrufflesDeleteUnknown =>
       'Unable to delete the truffle right now.';
+
+  @override
+  String get accountLanguageItalian => 'Italiano';
+
+  @override
+  String get accountLanguageEnglish => 'English';
+
+  @override
+  String get accountSupportTitle => 'Support';
+
+  @override
+  String get accountSupportIntro =>
+      'Find quick answers about orders, shipping, and delivery support.';
+
+  @override
+  String get accountSupportFaqSection => 'FAQ';
+
+  @override
+  String get accountSupportFaqOrderFlowQuestion =>
+      'How does an order work on Truffly?';
+
+  @override
+  String get accountSupportFaqOrderFlowAnswer =>
+      'Choose your truffle, confirm the order, and we will keep you updated until delivery.';
+
+  @override
+  String get accountSupportFaqShippingTimingQuestion =>
+      'When is the truffle shipped?';
+
+  @override
+  String get accountSupportFaqShippingTimingAnswer =>
+      'Fresh truffles are prepared and shipped as quickly as possible after order confirmation.';
+
+  @override
+  String get accountSupportFaqOrderTrackingQuestion =>
+      'How can I follow my order status?';
+
+  @override
+  String get accountSupportFaqOrderTrackingAnswer =>
+      'You can check the latest order status from the My orders section in your account.';
+
+  @override
+  String get accountSupportFaqCancellationQuestion => 'Can I cancel an order?';
+
+  @override
+  String get accountSupportFaqCancellationAnswer =>
+      'If you need to cancel an order, contact support as soon as possible and we will review the request.';
+
+  @override
+  String get accountSupportFaqDeliveryIssueQuestion =>
+      'What happens if there is a delivery problem?';
+
+  @override
+  String get accountSupportFaqDeliveryIssueAnswer =>
+      'Write to support with your order details and we will help you resolve the issue quickly.';
+
+  @override
+  String get accountSupportFaqContactQuestion => 'How can I contact support?';
+
+  @override
+  String get accountSupportFaqContactAnswer =>
+      'Use the email below to contact the Truffly team directly.';
+
+  @override
+  String get accountSupportContactTitle => 'Contact support';
+
+  @override
+  String get accountSupportContactBody =>
+      'If you need help with an order or delivery, write to us and include the main details.';
+
+  @override
+  String get accountSupportContactCta => 'Write to support';
+
+  @override
+  String get accountSupportEmailLaunchError =>
+      'Unable to open your email app right now.';
+
+  @override
+  String get accountSettingsTitle => 'Settings';
+
+  @override
+  String get accountSettingsIntro =>
+      'Manage language, notifications, and account information from one place.';
+
+  @override
+  String get accountSettingsPreferencesSection => 'Preferences';
+
+  @override
+  String get accountSettingsLanguageLabel => 'Language';
+
+  @override
+  String get accountSettingsNotificationsLabel => 'Notifications';
+
+  @override
+  String get accountSettingsLanguageSheetTitle => 'Choose a language';
+
+  @override
+  String get accountSettingsLanguageSheetBody =>
+      'This updates the language used across the app.';
+
+  @override
+  String get accountSettingsLegalSection => 'Legal';
+
+  @override
+  String get accountSettingsPrivacyPolicyLabel => 'Privacy Policy';
+
+  @override
+  String get accountSettingsTermsLabel => 'Terms & Conditions';
+
+  @override
+  String get accountSettingsAccountSection => 'Account';
+
+  @override
+  String get accountSettingsDeleteAccountLabel => 'Delete account';
+
+  @override
+  String get accountSettingsDeleteAccountDialogTitle => 'Delete your account?';
+
+  @override
+  String get accountSettingsDeleteAccountDialogBody =>
+      'This action is not available yet from the app. Confirm only if you want to continue as soon as the flow is ready.';
+
+  @override
+  String get accountSettingsDeleteAccountDialogCancel => 'Cancel';
+
+  @override
+  String get accountSettingsDeleteAccountDialogConfirm => 'Confirm';
+
+  @override
+  String get accountSettingsDeleteAccountPendingMessage =>
+      'Account deletion is not available in-app yet. Contact support if you need immediate help.';
+
+  @override
+  String get accountPrivacyPolicyTitle => 'Privacy Policy';
+
+  @override
+  String get accountPrivacyPolicyLeadTitle => 'Your privacy on Truffly';
+
+  @override
+  String get accountPrivacyPolicyLeadBody =>
+      'This summary explains how Truffly handles the information used to create your account, manage orders, and support your activity in the app.';
+
+  @override
+  String get accountPrivacyPolicySectionDataTitle => 'What data we collect';
+
+  @override
+  String get accountPrivacyPolicySectionDataBody =>
+      'We may collect profile details, shipping information, order references, and messages you send to support so we can provide the service.';
+
+  @override
+  String get accountPrivacyPolicySectionUsageTitle => 'How we use it';
+
+  @override
+  String get accountPrivacyPolicySectionUsageBody =>
+      'We use this information to manage your account, process orders, improve the marketplace experience, and communicate important updates.';
+
+  @override
+  String get accountPrivacyPolicySectionSharingTitle =>
+      'When data can be shared';
+
+  @override
+  String get accountPrivacyPolicySectionSharingBody =>
+      'Information is shared only when necessary to complete your order, operate the platform, comply with legal obligations, or assist you with support requests.';
+
+  @override
+  String get accountPrivacyPolicySectionRightsTitle => 'Your choices';
+
+  @override
+  String get accountPrivacyPolicySectionRightsBody =>
+      'You can review and update the account information available in the app. Future versions will include more tools to manage privacy requests directly.';
+
+  @override
+  String get accountTermsTitle => 'Terms & Conditions';
+
+  @override
+  String get accountTermsLeadTitle => 'Using the Truffly app';
+
+  @override
+  String get accountTermsLeadBody =>
+      'These terms summarize the basic rules for browsing the marketplace, placing orders, and interacting with sellers through Truffly.';
+
+  @override
+  String get accountTermsSectionOrdersTitle => 'Orders and availability';
+
+  @override
+  String get accountTermsSectionOrdersBody =>
+      'Product availability can change quickly because fresh truffles are seasonal. Order confirmation depends on availability and final seller validation.';
+
+  @override
+  String get accountTermsSectionShippingTitle => 'Shipping and delivery';
+
+  @override
+  String get accountTermsSectionShippingBody =>
+      'Shipping timelines may vary based on destination, freshness requirements, and courier operations. We will share relevant updates in your order flow whenever possible.';
+
+  @override
+  String get accountTermsSectionSupportTitle => 'Support and issues';
+
+  @override
+  String get accountTermsSectionSupportBody =>
+      'If there is an issue with an order or delivery, contact support promptly so the team can review the situation and guide you on the next steps.';
+
+  @override
+  String get accountTermsSectionUpdatesTitle => 'Future updates';
+
+  @override
+  String get accountTermsSectionUpdatesBody =>
+      'These texts are an MVP version and may be updated as Truffly expands its legal and operational flows.';
 }

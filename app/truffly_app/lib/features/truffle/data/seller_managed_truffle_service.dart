@@ -55,12 +55,11 @@ final class SellerManagedTruffleService {
       final items = <SellerManagedTruffleItem>[];
       for (var index = 0; index < typedRows.length; index++) {
         final row = typedRows[index];
+        final rawStatus = row['status'] as String? ?? '';
         items.add(
           SellerManagedTruffleItem(
             id: row['id'] as String,
-            status: SellerManagedTruffleStatus.fromDbValue(
-              row['status'] as String? ?? 'active',
-            ),
+            status: SellerManagedTruffleStatus.fromDbValue(rawStatus),
             type: TruffleType.fromDbValue(row['truffle_type'] as String),
             quality: TruffleQuality.fromDbValue(row['quality'] as String),
             weightGrams: row['weight_grams'] as int,
@@ -84,6 +83,10 @@ final class SellerManagedTruffleService {
     } on SocketException {
       throw const SellerManagedTruffleServiceException(
         SellerManagedTruffleFailure.network,
+      );
+    } on FormatException {
+      throw const SellerManagedTruffleServiceException(
+        SellerManagedTruffleFailure.unknown,
       );
     } on PostgrestException catch (error) {
       if (error.code == '42501') {

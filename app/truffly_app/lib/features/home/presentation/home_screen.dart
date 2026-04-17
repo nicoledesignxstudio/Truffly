@@ -184,28 +184,33 @@ class _BuyerGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final greetingStyle = AppTextStyles.bodyLarge.copyWith(
+      fontSize: 34,
+      fontWeight: FontWeight.w400,
+      color: AppColors.black80,
+      height: 1.05,
+    );
+    final nameStyle = AppTextStyles.authScreenTitle.copyWith(
+      fontSize: 34,
+      fontWeight: FontWeight.w500,
+      height: 1.05,
+    );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${l10n.homeGreetingPrefix},',
-          style: AppTextStyles.bodyLarge.copyWith(
-            fontSize: 34,
-            fontWeight: FontWeight.w400,
-            color: AppColors.black80,
-            height: 1.05,
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '${l10n.homeGreetingPrefix}, ',
+            style: greetingStyle,
           ),
-        ),
-        Text(
-          _firstNameOrDisplay(profile),
-          style: AppTextStyles.authScreenTitle.copyWith(
-            fontSize: 34,
-            fontWeight: FontWeight.w500,
-            height: 1.05,
+          TextSpan(
+            text: _firstNameOrDisplay(profile),
+            style: nameStyle,
           ),
-        ),
-      ],
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

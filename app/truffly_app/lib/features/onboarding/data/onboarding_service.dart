@@ -59,18 +59,15 @@ final class AppOnboardingService implements OnboardingService {
     required SupabaseClient supabaseClient,
     required ProfileService profileService,
     required Future<AuthResult<AuthUnit>> Function() refreshAuthState,
-    required void Function() markAuthReadyFromCurrentSession,
   }) : _supabaseClient = supabaseClient,
        _profileService = profileService,
-       _refreshAuthState = refreshAuthState,
-       _markAuthReadyFromCurrentSession = markAuthReadyFromCurrentSession;
+       _refreshAuthState = refreshAuthState;
 
   static const _submitSellerApplicationFunction = 'submit_seller_application';
 
   final SupabaseClient _supabaseClient;
   final ProfileService _profileService;
   final Future<AuthResult<AuthUnit>> Function() _refreshAuthState;
-  final void Function() _markAuthReadyFromCurrentSession;
 
   @override
   Future<void> completeBuyerOnboarding(CompleteBuyerOnboardingInput input) async {
@@ -90,9 +87,7 @@ final class AppOnboardingService implements OnboardingService {
     }
 
     final refreshResult = await _refreshAuthState();
-    if (refreshResult is AuthFailureResult<AuthUnit>) {
-      _markAuthReadyFromCurrentSession();
-    }
+    if (refreshResult is AuthFailureResult<AuthUnit>) return;
   }
 
   @override
@@ -119,14 +114,11 @@ final class AppOnboardingService implements OnboardingService {
       }
 
       final refreshResult = await _refreshAuthState();
-      if (refreshResult is AuthFailureResult<AuthUnit>) {
-        _markAuthReadyFromCurrentSession();
-      }
+      if (refreshResult is AuthFailureResult<AuthUnit>) return;
     } on OnboardingSubmissionException {
       rethrow;
     } on FunctionException catch (error) {
       if (await _isOnboardingAlreadyCompleted()) {
-        _markAuthReadyFromCurrentSession();
         return;
       }
       throw OnboardingSubmissionException(
@@ -253,7 +245,7 @@ final class AppOnboardingService implements OnboardingService {
       return OnboardingSubmissionFailure.validation;
     }
 
-    if (status == 400 || status == 409 || status == 422) {
+    if (status == 400 || status == 409 || status == 413 || status == 422 || status == 429) {
       return OnboardingSubmissionFailure.validation;
     }
 
@@ -367,6 +359,9 @@ final class AppOnboardingService implements OnboardingService {
       'invalid_identity_document' ||
       'invalid_tesserino_document' ||
       'invalid_document_encoding' ||
+      'request_payload_too_large' ||
+      'seller_submission_rate_limited' ||
+      'document_type_mismatch' ||
       'duplicate_tesserino_number' ||
       'invalid_region' ||
       'onboarding_already_completed' ||
@@ -378,7 +373,9 @@ final class AppOnboardingService implements OnboardingService {
   bool _isSellerDocumentErrorCode(String? errorCode) {
     return switch (errorCode) {
       'seller_documents_identity_upload_failed' ||
-      'seller_documents_tesserino_upload_failed' => true,
+      'seller_documents_tesserino_upload_failed' ||
+      'document_too_large' ||
+      'invalid_document_content' => true,
       _ => false,
     };
   }

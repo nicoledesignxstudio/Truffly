@@ -116,7 +116,7 @@ INSERT:
 - auth.uid() = seller_id
 - role = seller
 - seller_status = approved
-- stripe_account_id IS NOT NULL
+- server-side Stripe readiness already verified
 - is_active = true
 
 UPDATE:

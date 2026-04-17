@@ -1,4 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  createStripeConnectGateway,
+  createSupabaseSellerStripeStore,
+  isSellerStripeReady,
+  refreshSellerStripeStatusForPublish,
+} from "../_shared/stripe_connect.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +70,7 @@ type PublishErrorCode =
   | "user_not_found"
   | "inactive_account"
   | "seller_not_allowed"
+  | "seller_stripe_verification_unavailable"
   | "invalid_json_body"
   | "invalid_payload"
   | "missing_publish_request_id"
@@ -97,7 +104,7 @@ class PublishFlowError extends Error {
     readonly code: PublishErrorCode,
     readonly status: number,
     message: string,
-    readonly cause?: unknown,
+    override readonly cause?: unknown,
   ) {
     super(message);
     this.name = "PublishFlowError";
@@ -105,6 +112,8 @@ class PublishFlowError extends Error {
 }
 
 Deno.serve(async (request) => {
+  const requestId = getRequestId(request);
+
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -114,25 +123,32 @@ Deno.serve(async (request) => {
       "method_not_allowed",
       "Only POST requests are supported.",
       405,
+      requestId,
     );
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
   const authHeader = request.headers.get("Authorization");
 
   if (
-    !supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey || !authHeader
+    !supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey ||
+    !stripeSecretKey || !authHeader
   ) {
     return errorResponse(
       "publish_unknown_error",
       "Missing runtime configuration.",
       500,
+      requestId,
     );
   }
 
-  const runtimeUrlValidationError = validateRuntimeSupabaseUrl(supabaseUrl);
+  const runtimeUrlValidationError = validateRuntimeSupabaseUrl(
+    supabaseUrl,
+    requestId,
+  );
   if (runtimeUrlValidationError != null) {
     return runtimeUrlValidationError;
   }
@@ -153,14 +169,22 @@ Deno.serve(async (request) => {
       "unauthorized",
       "Authentication is required.",
       401,
+      requestId,
     );
   }
 
   const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
+  const sellerStripeStore = createSupabaseSellerStripeStore(adminClient);
+  const stripeConnectGateway = createStripeConnectGateway(
+    fetch,
+    stripeSecretKey,
+  );
 
   const { data: currentUser, error: currentUserError } = await adminClient
     .from("users")
-    .select("id, role, seller_status, stripe_account_id, is_active")
+    .select(
+      "id, role, seller_status, stripe_account_id, is_active, stripe_details_submitted, stripe_charges_enabled, stripe_payouts_enabled, stripe_requirements_pending, stripe_onboarding_completed_at, stripe_ready_at, country_code",
+    )
     .eq("id", user.id)
     .single();
 
@@ -169,6 +193,7 @@ Deno.serve(async (request) => {
       "user_not_found",
       "Authenticated user profile was not found.",
       404,
+      requestId,
     );
   }
 
@@ -177,19 +202,86 @@ Deno.serve(async (request) => {
       "inactive_account",
       "The authenticated account is inactive.",
       403,
+      requestId,
     );
   }
 
   if (
     currentUser.role !== "seller" ||
-    currentUser.seller_status !== "approved" ||
+    currentUser.seller_status !== "approved"
+  ) {
+    return errorResponse(
+      "seller_not_allowed",
+      "Only approved sellers with verified Stripe onboarding can publish truffles.",
+      403,
+      requestId,
+    );
+  }
+
+  if (
     currentUser.stripe_account_id == null ||
     `${currentUser.stripe_account_id}`.trim() === ""
   ) {
     return errorResponse(
       "seller_not_allowed",
-      "Only approved sellers with Stripe onboarding completed can publish truffles.",
+      "A verified Stripe seller account is required before publishing truffles.",
       403,
+      requestId,
+    );
+  }
+
+  let refreshedStripeStatus;
+  try {
+    refreshedStripeStatus = await refreshSellerStripeStatusForPublish({
+      user: {
+        id: currentUser.id as string,
+        role: `${currentUser.role ?? ""}`.trim().toLowerCase(),
+        sellerStatus: `${currentUser.seller_status ?? ""}`.trim().toLowerCase(),
+        isActive: currentUser.is_active === true,
+        stripeAccountId: typeof currentUser.stripe_account_id === "string"
+          ? currentUser.stripe_account_id
+          : null,
+        stripeDetailsSubmitted: currentUser.stripe_details_submitted === true,
+        stripeChargesEnabled: currentUser.stripe_charges_enabled === true,
+        stripePayoutsEnabled: currentUser.stripe_payouts_enabled === true,
+        stripeRequirementsPending:
+          currentUser.stripe_requirements_pending !== false,
+        stripeOnboardingCompletedAt:
+          typeof currentUser.stripe_onboarding_completed_at === "string"
+            ? currentUser.stripe_onboarding_completed_at
+            : null,
+        stripeReadyAt: typeof currentUser.stripe_ready_at === "string"
+          ? currentUser.stripe_ready_at
+          : null,
+        countryCode: typeof currentUser.country_code === "string"
+          ? currentUser.country_code
+          : null,
+      },
+      requestId,
+      now: new Date(),
+      store: sellerStripeStore,
+      stripeGateway: stripeConnectGateway,
+    });
+  } catch (error) {
+    console.error("publish_truffle stripe readiness refresh failed", {
+      request_id: requestId,
+      code: readErrorCode(error),
+      message: readErrorMessage(error),
+    });
+    return errorResponse(
+      "seller_stripe_verification_unavailable",
+      "Seller Stripe readiness could not be verified right now.",
+      503,
+      requestId,
+    );
+  }
+
+  if (!isSellerStripeReady(refreshedStripeStatus)) {
+    return errorResponse(
+      "seller_not_allowed",
+      "Only approved sellers with verified Stripe onboarding can publish truffles.",
+      403,
+      requestId,
     );
   }
 
@@ -201,15 +293,19 @@ Deno.serve(async (request) => {
       "invalid_json_body",
       "Request body must be valid JSON.",
       400,
+      requestId,
     );
   }
 
-  const publishRequestId = normalizePublishRequestId(payload.publish_request_id);
+  const publishRequestId = normalizePublishRequestId(
+    payload.publish_request_id,
+  );
   if (publishRequestId == null) {
     return errorResponse(
       "missing_publish_request_id",
       "Publish request id is required.",
       400,
+      requestId,
     );
   }
 
@@ -222,7 +318,11 @@ Deno.serve(async (request) => {
   });
 
   if (!requestRegistration.isNew) {
-    return resolveExistingRequest(requestRegistration.row, requestFingerprint);
+    return resolveExistingRequest(
+      requestRegistration.row,
+      requestFingerprint,
+      requestId,
+    );
   }
 
   const stagedPathsForCleanup = collectStagedPaths(payload);
@@ -300,16 +400,21 @@ Deno.serve(async (request) => {
     for (let index = 0; index < validatedImages.length; index++) {
       const image = validatedImages[index];
       const orderIndex = index + 1;
-      const storagePath = buildStoragePath(truffleId, orderIndex, image.extension);
-
-      const uploadResult = await adminClient.storage.from(finalImagesBucket).upload(
-        storagePath,
-        image.bytes,
-        {
-          contentType: image.contentType,
-          upsert: false,
-        },
+      const storagePath = buildStoragePath(
+        truffleId as string,
+        orderIndex,
+        image.extension,
       );
+
+      const uploadResult = await adminClient.storage.from(finalImagesBucket)
+        .upload(
+          storagePath,
+          image.bytes,
+          {
+            contentType: image.contentType,
+            upsert: false,
+          },
+        );
 
       if (uploadResult.error) {
         throw new PublishFlowError(
@@ -328,7 +433,9 @@ Deno.serve(async (request) => {
       });
     }
 
-    const imageInsert = await adminClient.from("truffle_images").insert(imageRows);
+    const imageInsert = await adminClient.from("truffle_images").insert(
+      imageRows,
+    );
     if (imageInsert.error) {
       throw mapDatabaseError(
         imageInsert.error,
@@ -355,6 +462,9 @@ Deno.serve(async (request) => {
       action: "published",
       performed_by: user.id,
       metadata: {
+        action: "published",
+        request_id: requestId,
+        result: "succeeded",
         image_count: validatedImages.length,
         storage_bucket: finalImagesBucket,
         publish_request_id: publishRequestId,
@@ -362,24 +472,33 @@ Deno.serve(async (request) => {
     });
 
     if (auditInsert.error) {
-      console.error("publish_truffle audit insert failed", auditInsert.error);
+      console.error("publish_truffle audit insert failed", {
+        request_id: requestId,
+        code: readErrorCode(auditInsert.error),
+        message: readErrorMessage(auditInsert.error),
+      });
     }
 
     await markPublishRequestSucceeded({
       adminClient,
       userId: user.id,
       requestId: publishRequestId,
-      truffleId,
+      truffleId: truffleId as string,
     });
 
     if (remainingStagedPaths.size > 0) {
-      const stagingCleanup = await adminClient.storage.from(stagingBucket).remove(
-        [...remainingStagedPaths],
-      );
+      const stagingCleanup = await adminClient.storage.from(stagingBucket)
+        .remove(
+          [...remainingStagedPaths],
+        );
       if (stagingCleanup.error) {
         console.error(
           "publish_truffle success-path staged cleanup failed",
-          stagingCleanup.error,
+          {
+            request_id: requestId,
+            code: readErrorCode(stagingCleanup.error),
+            message: readErrorMessage(stagingCleanup.error),
+          },
         );
       }
     }
@@ -388,31 +507,42 @@ Deno.serve(async (request) => {
       success: true,
       truffle_id: truffleId,
       status: "active",
+      request_id: requestId,
     }, 200);
   } catch (error) {
     let cleanupFailed = false;
 
     if (finalizedPaths.length > 0) {
-      const finalizedCleanup = await adminClient.storage.from(finalImagesBucket).remove(
-        finalizedPaths,
-      );
+      const finalizedCleanup = await adminClient.storage.from(finalImagesBucket)
+        .remove(
+          finalizedPaths,
+        );
       if (finalizedCleanup.error) {
         console.error(
           "publish_truffle cleanup finalized images failed",
-          finalizedCleanup.error,
+          {
+            request_id: requestId,
+            code: readErrorCode(finalizedCleanup.error),
+            message: readErrorMessage(finalizedCleanup.error),
+          },
         );
         cleanupFailed = true;
       }
     }
 
     if (remainingStagedPaths.size > 0) {
-      const stagingCleanup = await adminClient.storage.from(stagingBucket).remove(
-        [...remainingStagedPaths],
-      );
+      const stagingCleanup = await adminClient.storage.from(stagingBucket)
+        .remove(
+          [...remainingStagedPaths],
+        );
       if (stagingCleanup.error) {
         console.error(
           "publish_truffle cleanup staged images failed",
-          stagingCleanup.error,
+          {
+            request_id: requestId,
+            code: readErrorCode(stagingCleanup.error),
+            message: readErrorMessage(stagingCleanup.error),
+          },
         );
         cleanupFailed = true;
       }
@@ -426,15 +556,25 @@ Deno.serve(async (request) => {
       if (deleteResult.error) {
         console.error(
           "publish_truffle cleanup truffle delete failed",
-          deleteResult.error,
+          {
+            request_id: requestId,
+            code: readErrorCode(deleteResult.error),
+            message: readErrorMessage(deleteResult.error),
+          },
         );
         cleanupFailed = true;
       }
     }
 
-    console.error("publish_truffle failed", error);
-
     const normalizedError = normalizeUnhandledError(error);
+    console.error("publish_truffle failed", {
+      request_id: requestId,
+      code: normalizedError.code,
+      status: normalizedError.status,
+      message: normalizedError.message,
+      cause_code: readErrorCode(normalizedError.cause),
+      cause_message: readErrorMessage(normalizedError.cause),
+    });
     const finalError = cleanupFailed
       ? new PublishFlowError(
         "publish_image_cleanup_failed",
@@ -449,9 +589,15 @@ Deno.serve(async (request) => {
       userId: user.id,
       requestId: publishRequestId,
       error: finalError,
+      edgeRequestId: requestId,
     });
 
-    return errorResponse(finalError.code, finalError.message, finalError.status);
+    return errorResponse(
+      finalError.code,
+      finalError.message,
+      finalError.status,
+      requestId,
+    );
   }
 });
 
@@ -529,7 +675,7 @@ function validatePayload(
 }
 
 async function loadPublishAllowedValues(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: SupabaseClient,
 ): Promise<PublishAllowedValues> {
   const [truffleTypes, qualities, regions] = await Promise.all([
     loadEnumValues(adminClient, "truffle_type_enum"),
@@ -545,26 +691,28 @@ async function loadPublishAllowedValues(
 }
 
 async function loadEnumValues(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: SupabaseClient,
   enumName: "truffle_type_enum" | "truffle_quality_enum" | "region_enum",
 ): Promise<Set<string>> {
   const { data, error } = await adminClient.rpc("get_enum_values", {
     p_enum_name: enumName,
-  });
+  } as never);
 
   if (error) {
     throw error;
   }
 
-  if (!Array.isArray(data) || data.length === 0) {
+  const values = Array.isArray(data) ? data : [];
+
+  if (values.length === 0) {
     throw new Error(`Enum ${enumName} returned no values.`);
   }
 
   return new Set(
-    data
-      .filter((value): value is string => typeof value === "string")
-      .map((value) => value.trim().toUpperCase())
-      .filter((value) => value.length > 0),
+    values
+      .filter((value: unknown): value is string => typeof value === "string")
+      .map((value: string) => value.trim().toUpperCase())
+      .filter((value: string) => value.length > 0),
   );
 }
 
@@ -573,7 +721,7 @@ async function validateStagedImage({
   image,
   userId,
 }: {
-  adminClient: ReturnType<typeof createClient>;
+  adminClient: SupabaseClient;
   image: PublishTruffleImagePayload;
   userId: string;
 }): Promise<ValidatedImage> {
@@ -657,7 +805,7 @@ async function beginOrReadPublishRequest({
   requestId,
   requestFingerprint,
 }: {
-  adminClient: ReturnType<typeof createClient>;
+  adminClient: SupabaseClient;
   userId: string;
   requestId: string;
   requestFingerprint: string;
@@ -669,7 +817,7 @@ async function beginOrReadPublishRequest({
       request_id: requestId,
       request_status: "processing",
       request_fingerprint: requestFingerprint,
-    })
+    } as never)
     .select(
       "request_id, request_status, request_fingerprint, truffle_id, failure_code, failure_message, failure_http_status",
     )
@@ -718,12 +866,14 @@ async function beginOrReadPublishRequest({
 function resolveExistingRequest(
   row: PublishRequestRow,
   requestFingerprint: string,
+  requestId: string,
 ): Response {
   if (row.request_fingerprint !== requestFingerprint) {
     return errorResponse(
       "publish_request_payload_mismatch",
       "This publish request id was already used with a different payload.",
       409,
+      requestId,
     );
   }
 
@@ -732,6 +882,7 @@ function resolveExistingRequest(
       success: true,
       truffle_id: row.truffle_id,
       status: "active",
+      request_id: requestId,
     }, 200);
   }
 
@@ -740,6 +891,7 @@ function resolveExistingRequest(
       "publish_request_in_progress",
       "This publish request is still being processed.",
       409,
+      requestId,
     );
   }
 
@@ -749,6 +901,7 @@ function resolveExistingRequest(
       errorCode,
       row.failure_message ?? errorMessage(errorCode),
       row.failure_http_status ?? errorStatus(errorCode),
+      requestId,
     );
   }
 
@@ -756,6 +909,7 @@ function resolveExistingRequest(
     "publish_request_failed",
     "This publish request cannot be retried safely.",
     409,
+    requestId,
   );
 }
 
@@ -765,7 +919,7 @@ async function markPublishRequestSucceeded({
   requestId,
   truffleId,
 }: {
-  adminClient: ReturnType<typeof createClient>;
+  adminClient: SupabaseClient;
   userId: string;
   requestId: string;
   truffleId: string;
@@ -779,7 +933,7 @@ async function markPublishRequestSucceeded({
       failure_message: null,
       failure_http_status: null,
       updated_at: new Date().toISOString(),
-    })
+    } as never)
     .eq("user_id", userId)
     .eq("request_id", requestId)
     .eq("request_status", "processing");
@@ -799,11 +953,13 @@ async function markPublishRequestFailed({
   userId,
   requestId,
   error,
+  edgeRequestId,
 }: {
-  adminClient: ReturnType<typeof createClient>;
+  adminClient: SupabaseClient;
   userId: string;
   requestId: string;
   error: PublishFlowError;
+  edgeRequestId: string;
 }): Promise<void> {
   const updateResult = await adminClient
     .from("publish_truffle_requests")
@@ -814,14 +970,18 @@ async function markPublishRequestFailed({
       failure_message: error.message,
       failure_http_status: error.status,
       updated_at: new Date().toISOString(),
-    })
+    } as never)
     .eq("user_id", userId)
     .eq("request_id", requestId);
 
   if (updateResult.error) {
     console.error(
       "publish_truffle request state update failed",
-      updateResult.error,
+      {
+        request_id: edgeRequestId,
+        code: readErrorCode(updateResult.error),
+        message: readErrorMessage(updateResult.error),
+      },
     );
   }
 }
@@ -887,6 +1047,7 @@ function isPublishErrorCode(code: string): code is PublishErrorCode {
     "user_not_found",
     "inactive_account",
     "seller_not_allowed",
+    "seller_stripe_verification_unavailable",
     "invalid_json_body",
     "invalid_payload",
     "missing_publish_request_id",
@@ -1021,8 +1182,12 @@ function errorResponse(
   error: PublishErrorCode,
   message: string,
   status: number,
+  requestId?: string,
 ): Response {
-  return jsonResponse({ error, message }, status);
+  return jsonResponse(
+    requestId ? { error, message, request_id: requestId } : { error, message },
+    status,
+  );
 }
 
 function mapDatabaseError(
@@ -1118,6 +1283,8 @@ function errorStatus(errorCode: PublishErrorCode): number {
     case "inactive_account":
     case "seller_not_allowed":
       return 403;
+    case "seller_stripe_verification_unavailable":
+      return 503;
     case "user_not_found":
       return 404;
     case "publish_request_in_progress":
@@ -1163,6 +1330,8 @@ function errorMessage(errorCode: PublishErrorCode): string {
       return "This publish request is still being processed.";
     case "publish_request_failed":
       return "This publish request cannot be retried safely.";
+    case "seller_stripe_verification_unavailable":
+      return "Seller Stripe readiness could not be verified right now.";
     case "publish_image_upload_failed":
       return "Failed to upload one or more images.";
     case "publish_image_cleanup_failed":
@@ -1174,7 +1343,10 @@ function errorMessage(errorCode: PublishErrorCode): string {
   }
 }
 
-function validateRuntimeSupabaseUrl(supabaseUrl: string): Response | null {
+function validateRuntimeSupabaseUrl(
+  supabaseUrl: string,
+  requestId: string,
+): Response | null {
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(supabaseUrl);
@@ -1183,6 +1355,7 @@ function validateRuntimeSupabaseUrl(supabaseUrl: string): Response | null {
       "publish_unknown_error",
       "SUPABASE_URL is not a valid URL for the publish function runtime.",
       500,
+      requestId,
     );
   }
 
@@ -1191,8 +1364,47 @@ function validateRuntimeSupabaseUrl(supabaseUrl: string): Response | null {
       "publish_unknown_error",
       "SUPABASE_URL points to the Android emulator loopback. Edge Functions must not be started with the Flutter app env file.",
       500,
+      requestId,
     );
   }
 
   return null;
+}
+
+function readErrorCode(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const value = Reflect.get(error, "code");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function readErrorMessage(error: unknown): string {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const value = Reflect.get(error, "message");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function getRequestId(request: Request): string {
+  const headerValue = request.headers.get("x-request-id") ??
+    request.headers.get("x-correlation-id");
+  const normalized = normalizeOptionalString(headerValue);
+  return normalized ?? crypto.randomUUID();
+}
+
+function normalizeOptionalString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
 }

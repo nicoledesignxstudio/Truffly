@@ -39,6 +39,8 @@ class DeleteTruffleFlowError extends Error {
 }
 
 Deno.serve(async (request) => {
+  const requestId = getRequestId(request);
+
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -48,6 +50,7 @@ Deno.serve(async (request) => {
       "method_not_allowed",
       "Only POST requests are supported.",
       405,
+      requestId,
     );
   }
 
@@ -63,6 +66,7 @@ Deno.serve(async (request) => {
       "delete_truffle_unknown_error",
       "Missing runtime configuration.",
       500,
+      requestId,
     );
   }
 
@@ -78,7 +82,7 @@ Deno.serve(async (request) => {
   } = await authClient.auth.getUser();
 
   if (authError || !user) {
-    return errorResponse("unauthorized", "Authentication is required.", 401);
+    return errorResponse("unauthorized", "Authentication is required.", 401, requestId);
   }
 
   const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
@@ -94,6 +98,7 @@ Deno.serve(async (request) => {
       "user_not_found",
       "Authenticated user profile was not found.",
       404,
+      requestId,
     );
   }
 
@@ -102,6 +107,7 @@ Deno.serve(async (request) => {
       "inactive_account",
       "The authenticated account is inactive.",
       403,
+      requestId,
     );
   }
 
@@ -110,6 +116,7 @@ Deno.serve(async (request) => {
       "seller_not_allowed",
       "Only sellers can delete active truffles.",
       403,
+      requestId,
     );
   }
 
@@ -121,6 +128,7 @@ Deno.serve(async (request) => {
       "invalid_json_body",
       "Request body must be valid JSON.",
       400,
+      requestId,
     );
   }
 
@@ -130,6 +138,7 @@ Deno.serve(async (request) => {
       "invalid_truffle_id",
       "A valid truffle id is required.",
       400,
+      requestId,
     );
   }
 
@@ -221,6 +230,20 @@ Deno.serve(async (request) => {
     }
 
     if ((orders ?? []).length > 0) {
+      await insertAuditLog(adminClient, {
+        entityType: "truffle",
+        entityId: truffleId,
+        action: "delete_denied",
+        performedBy: user.id,
+        metadata: {
+          action: "delete_denied",
+          request_id: requestId,
+          result: "denied",
+          reason: "linked_orders",
+        },
+        logLabel: "delete_truffle denied audit insert failed",
+        requestId,
+      });
       throw new DeleteTruffleFlowError(
         "truffle_has_orders",
         409,
@@ -254,11 +277,11 @@ Deno.serve(async (request) => {
       );
       if (storageRemoval.error) {
         console.error("delete_truffle storage cleanup failed", {
-          truffle_id: truffleId,
-          seller_id: user.id,
+          request_id: requestId,
           bucket: finalImagesBucket,
           paths_count: deduped.length,
-          error: storageRemoval.error,
+          error_code: readErrorCode(storageRemoval.error),
+          error_message: readErrorMessage(storageRemoval.error),
         });
       }
     } else {
@@ -285,36 +308,51 @@ Deno.serve(async (request) => {
         .insert(notifications);
 
       if (notificationInsert.error) {
-        console.error("delete_truffle notification insert failed", notificationInsert.error);
+        console.error("delete_truffle notification insert failed", {
+          request_id: requestId,
+          error_code: readErrorCode(notificationInsert.error),
+          error_message: readErrorMessage(notificationInsert.error),
+        });
       }
     }
 
-    const auditInsert = await adminClient.from("audit_logs").insert({
-      entity_type: "truffle",
-      entity_id: truffleId,
+    await insertAuditLog(adminClient, {
+      entityType: "truffle",
+      entityId: truffleId,
       action: "deleted",
-      performed_by: user.id,
+      performedBy: user.id,
       metadata: {
+        action: "deleted",
+        request_id: requestId,
+        result: "succeeded",
         favorite_user_count: favoriteUserIds.length,
         storage_bucket: finalImagesBucket,
+        image_count: storagePaths.length,
       },
+      logLabel: "delete_truffle audit insert failed",
+      requestId,
     });
-
-    if (auditInsert.error) {
-      console.error("delete_truffle audit insert failed", auditInsert.error);
-    }
 
     return jsonResponse({
       success: true,
       truffle_id: truffleId,
+      request_id: requestId,
     }, 200);
   } catch (error) {
     const normalizedError = normalizeUnhandledError(error);
-    console.error("delete_truffle failed", error);
+    console.error("delete_truffle failed", {
+      request_id: requestId,
+      code: normalizedError.code,
+      status: normalizedError.status,
+      message: normalizedError.message,
+      cause_code: readErrorCode(normalizedError.cause),
+      cause_message: readErrorMessage(normalizedError.cause),
+    });
     return errorResponse(
       normalizedError.code,
       normalizedError.message,
       normalizedError.status,
+      requestId,
     );
   }
 });
@@ -377,6 +415,64 @@ function normalizeUnhandledError(error: unknown): DeleteTruffleFlowError {
   );
 }
 
+async function insertAuditLog(
+  adminClient: any,
+  args: {
+    entityType: string;
+    entityId: string;
+    action: string;
+    performedBy: string;
+    metadata: Record<string, unknown>;
+    logLabel: string;
+    requestId?: string;
+  },
+): Promise<void> {
+  const auditInsert = await adminClient.from("audit_logs").insert({
+    entity_type: args.entityType,
+    entity_id: args.entityId,
+    action: args.action,
+    performed_by: args.performedBy,
+    metadata: args.metadata,
+  });
+
+  if (auditInsert.error) {
+    console.error(args.logLabel, {
+      request_id: args.requestId,
+      error_code: readErrorCode(auditInsert.error),
+      error_message: readErrorMessage(auditInsert.error),
+    });
+  }
+}
+
+function readErrorCode(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const value = Reflect.get(error, "code");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function readErrorMessage(error: unknown): string {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const value = Reflect.get(error, "message");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function getRequestId(request: Request): string {
+  const headerValue = request.headers.get("x-request-id") ??
+    request.headers.get("x-correlation-id");
+  const normalized = normalizeTruffleId(headerValue);
+  return normalized ?? crypto.randomUUID();
+}
+
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -391,6 +487,10 @@ function errorResponse(
   error: DeleteTruffleErrorCode,
   message: string,
   status: number,
+  requestId?: string,
 ): Response {
-  return jsonResponse({ error, message }, status);
+  return jsonResponse(
+    requestId ? { error, message, request_id: requestId } : { error, message },
+    status,
+  );
 }

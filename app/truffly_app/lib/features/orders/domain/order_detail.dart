@@ -14,7 +14,13 @@ final class OrderDetail {
     required this.sellerAmount,
     required this.status,
     required this.createdAt,
+    required this.paidAt,
+    required this.shippedAt,
+    required this.completedAt,
+    required this.cancelledAt,
     required this.trackingCode,
+    required this.payoutStatus,
+    required this.refundStatus,
     required this.primaryImageUrl,
     required this.buyerId,
     required this.buyerName,
@@ -39,7 +45,13 @@ final class OrderDetail {
   final double sellerAmount;
   final OrderStatus status;
   final DateTime createdAt;
+  final DateTime paidAt;
+  final DateTime? shippedAt;
+  final DateTime? completedAt;
+  final DateTime? cancelledAt;
   final String? trackingCode;
+  final String? payoutStatus;
+  final String? refundStatus;
   final String? primaryImageUrl;
   final String buyerId;
   final String buyerName;

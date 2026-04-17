@@ -6,16 +6,32 @@ class Env {
 
   static String get supabaseUrl => _normalizeSupabaseUrl(_require('SUPABASE_URL'));
   static String get supabaseAnonKey => _require('SUPABASE_ANON_KEY');
+  static String get stripePublishableKey =>
+      _optional('STRIPE_PUBLISHABLE_KEY') ??
+      _require('STRIPE_PUBLISHABLE_KEY_TEST');
+  static String? get stripeMerchantIdentifier =>
+      _optional('STRIPE_MERCHANT_IDENTIFIER');
+  static String get stripeMerchantCountryCode =>
+      (_optional('STRIPE_MERCHANT_COUNTRY_CODE') ?? 'IT').toUpperCase();
 
   static void validate() {
     _normalizeSupabaseUrl(_require('SUPABASE_URL'));
     _require('SUPABASE_ANON_KEY');
+    stripePublishableKey;
   }
 
   static String _require(String key) {
     final value = dotenv.env[key];
     if (value == null || value.trim().isEmpty) {
       throw StateError('Missing required environment variable: $key');
+    }
+    return value;
+  }
+
+  static String? _optional(String key) {
+    final value = dotenv.env[key];
+    if (value == null || value.trim().isEmpty) {
+      return null;
     }
     return value;
   }

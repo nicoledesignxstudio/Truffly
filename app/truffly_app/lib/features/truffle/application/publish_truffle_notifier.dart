@@ -175,7 +175,8 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
   bool _shouldPreservePublishRequestId(
     PublishTruffleSubmissionFailure failure,
   ) {
-    return failure == PublishTruffleSubmissionFailure.network;
+    return failure == PublishTruffleSubmissionFailure.network ||
+        failure == PublishTruffleSubmissionFailure.inProgress;
   }
 
   String _generatePublishRequestId() {

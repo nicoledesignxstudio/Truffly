@@ -234,6 +234,62 @@ String paymentStatusCopy(BuildContext context, OrderStatus status) {
   };
 }
 
+String financialStatusTitle(BuildContext context) {
+  return isItalianOrders(context)
+      ? 'Stato finanziario'
+      : 'Financial status';
+}
+
+String financialStatusCopy(
+  BuildContext context, {
+  required OrderStatus status,
+  required bool isSellerView,
+  required String? payoutStatus,
+  required String? refundStatus,
+}) {
+  final italian = isItalianOrders(context);
+
+  if (status == OrderStatus.cancelled) {
+    if (refundStatus == 'succeeded') {
+      return italian
+          ? 'Rimborso elaborato con successo.'
+          : 'Refund processed successfully.';
+    }
+    if (refundStatus == 'failed') {
+      return italian
+          ? 'Il rimborso richiede un nuovo tentativo lato backend.'
+          : 'The refund requires a backend retry.';
+    }
+    return italian
+        ? 'L ordine e annullato. Il rimborso viene gestito lato backend.'
+        : 'The order is cancelled. The refund is handled server-side.';
+  }
+
+  if (status == OrderStatus.completed) {
+    if (payoutStatus == 'succeeded') {
+      return isSellerView
+          ? (italian
+                ? 'Il payout al seller e stato registrato.'
+                : 'Seller payout has been recorded.')
+          : (italian
+                ? 'L ordine e completato e i fondi sono stati rilasciati al seller.'
+                : 'The order is complete and funds have been released to the seller.');
+    }
+    if (payoutStatus == 'failed') {
+      return italian
+          ? 'Il payout richiede un nuovo tentativo lato backend, ma l ordine resta completato.'
+          : 'Payout needs a backend retry, but the order remains completed.';
+    }
+    if (payoutStatus == 'processing') {
+      return italian
+          ? 'Il payout e in lavorazione lato backend.'
+          : 'Payout is being processed server-side.';
+    }
+  }
+
+  return paymentStatusCopy(context, status);
+}
+
 String supportTitle(BuildContext context) {
   return isItalianOrders(context) ? 'Supporto' : 'Support';
 }

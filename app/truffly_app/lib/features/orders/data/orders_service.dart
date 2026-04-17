@@ -169,6 +169,7 @@ final class OrdersService {
       401 => OrdersFailure.unauthenticated,
       403 => OrdersFailure.forbidden,
       404 => OrdersFailure.notFound,
+      408 || 429 || 503 => OrdersFailure.network,
       _ => OrdersFailure.unknown,
     };
   }
@@ -189,7 +190,13 @@ final class OrdersService {
       sellerAmount: _toDouble(row['seller_amount']),
       status: OrderStatus.fromDbValue(row['status'] as String),
       createdAt: DateTime.parse(row['created_at'] as String),
+      paidAt: DateTime.parse(row['paid_at'] as String),
+      shippedAt: _parseNullableDate(row['shipped_at']),
+      completedAt: _parseNullableDate(row['completed_at']),
+      cancelledAt: _parseNullableDate(row['cancelled_at']),
       trackingCode: row['tracking_code'] as String?,
+      payoutStatus: row['payout_status'] as String?,
+      refundStatus: row['refund_status'] as String?,
       primaryImageUrl: resolvedImageUrl,
       buyerId: row['buyer_id'] as String,
       buyerName: _normalizedPartyName(
@@ -214,6 +221,11 @@ final class OrdersService {
   double _toDouble(Object value) {
     if (value is num) return value.toDouble();
     return double.parse(value.toString());
+  }
+
+  DateTime? _parseNullableDate(Object? value) {
+    if (value is! String || value.trim().isEmpty) return null;
+    return DateTime.tryParse(value);
   }
 
   Future<List<OrderSummary>> _mapSummaries(

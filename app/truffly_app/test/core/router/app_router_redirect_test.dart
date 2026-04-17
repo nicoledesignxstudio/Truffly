@@ -57,13 +57,22 @@ void main() {
       expect(redirect, isNull);
     });
 
-    test('/verify-email auth callback with code is accessible', () {
+    test('/verify-email auth callback with signup code is accessible', () {
+      final redirect = resolveAuthRedirectForTesting(
+        authState: const AuthUnauthenticated(),
+        location: AppRoutes.verifyEmail,
+        uri: uriFor('${AppRoutes.verifyEmail}?type=signup&code=abc123'),
+      );
+      expect(redirect, isNull);
+    });
+
+    test('/verify-email callback without allowed type redirects away', () {
       final redirect = resolveAuthRedirectForTesting(
         authState: const AuthUnauthenticated(),
         location: AppRoutes.verifyEmail,
         uri: uriFor('${AppRoutes.verifyEmail}?code=abc123'),
       );
-      expect(redirect, isNull);
+      expect(redirect, AppRoutes.welcome);
     });
   });
 
@@ -231,6 +240,26 @@ void main() {
         ),
       );
       expect(redirect, isNull);
+    });
+
+    test('with only one recovery token is rejected', () {
+      final redirect = resolveAuthRedirectForTesting(
+        authState: const AuthUnauthenticated(),
+        location: AppRoutes.resetPassword,
+        uri: uriFor(
+          '${AppRoutes.resetPassword}#type=recovery&access_token=abc',
+        ),
+      );
+      expect(redirect, AppRoutes.forgotPassword);
+    });
+
+    test('with wrong callback type is rejected', () {
+      final redirect = resolveAuthRedirectForTesting(
+        authState: const AuthUnauthenticated(),
+        location: AppRoutes.resetPassword,
+        uri: uriFor('${AppRoutes.resetPassword}?type=signup&code=abc'),
+      );
+      expect(redirect, AppRoutes.forgotPassword);
     });
   });
 }
