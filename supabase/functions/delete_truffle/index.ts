@@ -299,8 +299,11 @@ Deno.serve(async (request) => {
     if (favoriteUserIds.length > 0) {
       const notifications = favoriteUserIds.map((userId) => ({
         user_id: userId,
-        type: "favorite_truffle_deleted",
+        type: "favorite_truffle_unavailable",
         message: "A truffle you saved is no longer available.",
+        target_route: "/favorites",
+        target_id: null,
+        metadata: { truffle_id: truffleId },
       }));
 
       const notificationInsert = await adminClient

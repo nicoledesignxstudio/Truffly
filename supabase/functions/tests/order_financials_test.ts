@@ -198,6 +198,65 @@ Deno.test("refund payment creates one refund for a paid order", async () => {
   assertEquals(result.operation.stripeRefundId, "re_1");
 });
 
+Deno.test("refund payment is idempotent when refund already succeeded", async () => {
+  let refundCreated = false;
+
+  const result = await refundOrderPayment({
+    orderId: "order-2",
+    requestId: "req-refund-2",
+    triggerSource: "auto_cancel_unshipped_48h",
+    triggeredBy: null,
+    refundReason: "seller_did_not_ship_within_48h",
+    store: createNoopStore({
+      getOrderForFinancialAction: async () => ({
+        id: "order-2",
+        buyerId: "buyer-1",
+        sellerId: "seller-1",
+        status: "paid",
+        totalPrice: 79,
+        sellerAmount: 71.1,
+        stripePaymentIntentId: "pi_2",
+        sellerStripeAccountId: "acct_ready",
+        sellerStripeReadyAt: "2026-04-08T10:00:00.000Z",
+        sellerStripePayoutsEnabled: true,
+        sellerStripeRequirementsPending: false,
+      }),
+      beginOrReadFinancialOperation: async () => ({
+        id: "fo_refund_1",
+        orderId: "order-2",
+        kind: "refund",
+        logicalKey: "refund:primary:order-2",
+        idempotencyKey: "refund:primary:order-2",
+        status: "succeeded",
+        amount: 79,
+        currency: "EUR",
+        stripePaymentIntentId: "pi_2",
+        stripeRefundId: "re_existing",
+        stripeTransferId: null,
+        sourceChargeId: null,
+        destinationAccountId: null,
+        requestId: "req-refund-2",
+        triggeredBy: null,
+        triggerSource: "auto_cancel_unshipped_48h",
+        failureCode: null,
+        failureMessage: null,
+        metadata: {},
+        processedAt: "2026-04-08T10:00:00.000Z",
+      }),
+    }),
+    stripeGateway: createNoopGateway({
+      createRefund: async () => {
+        refundCreated = true;
+        return { id: "re_unexpected", status: "succeeded" };
+      },
+    }),
+  });
+
+  assertEquals(result.idempotent, true);
+  assertEquals(refundCreated, false);
+  assertEquals(result.operation.stripeRefundId, "re_existing");
+});
+
 function createNoopStore(overrides: Record<string, unknown> = {}) {
   return {
     getOrderForFinancialAction: async () => null,

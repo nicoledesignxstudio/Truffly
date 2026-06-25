@@ -70,6 +70,8 @@ type PublishErrorCode =
   | "user_not_found"
   | "inactive_account"
   | "seller_not_allowed"
+  | "seller_stripe_onboarding_required"
+  | "seller_stripe_verification_pending"
   | "seller_stripe_verification_unavailable"
   | "invalid_json_body"
   | "invalid_payload"
@@ -212,7 +214,7 @@ Deno.serve(async (request) => {
   ) {
     return errorResponse(
       "seller_not_allowed",
-      "Only approved sellers with verified Stripe onboarding can publish truffles.",
+      "Only approved sellers with an active Stripe account can publish truffles.",
       403,
       requestId,
     );
@@ -223,8 +225,8 @@ Deno.serve(async (request) => {
     `${currentUser.stripe_account_id}`.trim() === ""
   ) {
     return errorResponse(
-      "seller_not_allowed",
-      "A verified Stripe seller account is required before publishing truffles.",
+      "seller_stripe_onboarding_required",
+      "Complete Stripe onboarding before publishing truffles.",
       403,
       requestId,
     );
@@ -278,8 +280,8 @@ Deno.serve(async (request) => {
 
   if (!isSellerStripeReady(refreshedStripeStatus)) {
     return errorResponse(
-      "seller_not_allowed",
-      "Only approved sellers with verified Stripe onboarding can publish truffles.",
+      "seller_stripe_verification_pending",
+      "Stripe is still verifying the connected seller account.",
       403,
       requestId,
     );
@@ -1047,6 +1049,8 @@ function isPublishErrorCode(code: string): code is PublishErrorCode {
     "user_not_found",
     "inactive_account",
     "seller_not_allowed",
+    "seller_stripe_onboarding_required",
+    "seller_stripe_verification_pending",
     "seller_stripe_verification_unavailable",
     "invalid_json_body",
     "invalid_payload",
@@ -1282,6 +1286,8 @@ function errorStatus(errorCode: PublishErrorCode): number {
       return 401;
     case "inactive_account":
     case "seller_not_allowed":
+    case "seller_stripe_onboarding_required":
+    case "seller_stripe_verification_pending":
       return 403;
     case "seller_stripe_verification_unavailable":
       return 503;
@@ -1330,6 +1336,10 @@ function errorMessage(errorCode: PublishErrorCode): string {
       return "This publish request is still being processed.";
     case "publish_request_failed":
       return "This publish request cannot be retried safely.";
+    case "seller_stripe_onboarding_required":
+      return "Complete Stripe onboarding before publishing truffles.";
+    case "seller_stripe_verification_pending":
+      return "Stripe is still verifying the connected seller account.";
     case "seller_stripe_verification_unavailable":
       return "Seller Stripe readiness could not be verified right now.";
     case "publish_image_upload_failed":

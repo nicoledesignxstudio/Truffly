@@ -40,11 +40,8 @@ as $$
       and u.is_active = true
       and u.stripe_account_id is not null
       and btrim(u.stripe_account_id) <> ''
-      and u.stripe_details_submitted = true
       and u.stripe_charges_enabled = true
       and u.stripe_payouts_enabled = true
-      and u.stripe_requirements_pending = false
-      and u.stripe_ready_at is not null
   );
 $$;
 

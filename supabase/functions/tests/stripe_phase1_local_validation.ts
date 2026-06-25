@@ -92,6 +92,13 @@ const fakeStripeGateway = {
       status: "requires_payment_method",
     };
   },
+  async cancelPaymentIntent(args: { paymentIntentId: string }) {
+    return {
+      id: args.paymentIntentId,
+      clientSecret: `${args.paymentIntentId}_secret_validation`,
+      status: "canceled",
+    };
+  },
 };
 
 async function main() {

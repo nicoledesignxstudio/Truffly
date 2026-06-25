@@ -42,8 +42,11 @@ type UpdateOrderErrorCode =
   | "order_not_found"
   | "order_not_accessible"
   | "invalid_order_transition"
+  | "shipping_window_expired"
+  | "order_auto_cancel_pending"
+  | "missing_runtime_secret"
   | "refund_failed"
-  | "update_order_unknown_error";
+  | "internal_error";
 
 class UpdateOrderFlowError extends Error {
   constructor(
@@ -59,12 +62,20 @@ class UpdateOrderFlowError extends Error {
 
 Deno.serve(async (request) => {
   const requestId = getRequestId(request);
+  let step = "init";
+  let authUserId: string | null = null;
+  let orderId: string | null = null;
+  let action: OrderAction | null = null;
+  let targetStatus: OrderStatus | null = null;
+  let trackingPresent = false;
+  let payloadSummary: Record<string, unknown> = {};
 
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   if (request.method !== "POST") {
+    step = "validate_method";
     return errorResponse(
       "method_not_allowed",
       "Only POST requests are supported.",
@@ -78,13 +89,24 @@ Deno.serve(async (request) => {
   const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
   const authHeader = request.headers.get("Authorization");
+  step = "parse_request";
 
   if (
     !supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey || !authHeader
   ) {
+    const missing = [
+      !supabaseUrl ? "SUPABASE_URL" : null,
+      !supabaseAnonKey ? "SUPABASE_ANON_KEY" : null,
+      !supabaseServiceRoleKey ? "SUPABASE_SERVICE_ROLE_KEY" : null,
+      !authHeader ? "Authorization header" : null,
+    ].filter((value): value is string => value !== null);
+    console.error("update_order_status missing runtime config", {
+      request_id: requestId,
+      missing,
+    });
     return errorResponse(
-      "update_order_unknown_error",
-      "Missing runtime configuration.",
+      "missing_runtime_secret",
+      `Missing runtime configuration: ${missing.join(", ")}.`,
       500,
       requestId,
     );
@@ -100,6 +122,7 @@ Deno.serve(async (request) => {
     data: { user },
     error: authError,
   } = await authClient.auth.getUser();
+  step = "load_user";
 
   if (authError || !user) {
     return errorResponse(
@@ -109,6 +132,7 @@ Deno.serve(async (request) => {
       requestId,
     );
   }
+  authUserId = user.id;
 
   const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
   const financialStore = createSupabaseOrderFinancialStore(adminClient);
@@ -142,6 +166,7 @@ Deno.serve(async (request) => {
 
   let payload: UpdateOrderPayload;
   try {
+    step = "parse_payload";
     payload = await request.json();
   } catch {
     return errorResponse(
@@ -152,7 +177,12 @@ Deno.serve(async (request) => {
     );
   }
 
-  const action = normalizeAction(payload.action);
+  action = normalizeAction(payload.action);
+  payloadSummary = summarizePayload(payload);
+  orderId = normalizeRequiredString(payload.order_id);
+  trackingPresent = normalizeOptionalString(payload.tracking_code) != null;
+  targetStatus = action == null ? null : actionToTargetStatus(action);
+  step = "validate_payload";
   if (action == null) {
     return errorResponse(
       "invalid_action",
@@ -162,7 +192,6 @@ Deno.serve(async (request) => {
     );
   }
 
-  const orderId = normalizeRequiredString(payload.order_id);
   if (orderId == null) {
     return errorResponse(
       "invalid_order_id",
@@ -173,6 +202,7 @@ Deno.serve(async (request) => {
   }
 
   const trackingCode = normalizeOptionalString(payload.tracking_code);
+  trackingPresent = trackingCode != null;
   if (action === "mark_shipped" && trackingCode == null) {
     return errorResponse(
       "invalid_tracking_code",
@@ -191,38 +221,125 @@ Deno.serve(async (request) => {
   }
 
   try {
+    if (action === "mark_shipped") {
+      step = "load_order";
+      const existingOrder = await getOrderStatusForMutation(
+        adminClient,
+        orderId,
+      );
+      if (existingOrder == null) {
+        throw new UpdateOrderFlowError(
+          "order_not_found",
+          404,
+          "The requested order was not found.",
+        );
+      }
+      if (existingOrder.sellerId !== user.id) {
+        throw new UpdateOrderFlowError(
+          "order_not_accessible",
+          403,
+          "You cannot update this order.",
+        );
+      }
+
+      step = "shipping_deadline_check";
+      if (
+        existingOrder.status === "paid" &&
+        isShippingDeadlineElapsed(existingOrder.createdAt)
+      ) {
+        const latestRefundOperation = await getLatestRefundOperation(
+          adminClient,
+          orderId,
+        );
+        if (
+          latestRefundOperation?.status === "pending" ||
+          latestRefundOperation?.status === "processing"
+        ) {
+          throw new UpdateOrderFlowError(
+            "order_auto_cancel_pending",
+            409,
+            "An automatic cancel/refund is already in progress for this order.",
+          );
+        }
+
+        throw new UpdateOrderFlowError(
+          "shipping_window_expired",
+          409,
+          "This order can no longer be marked as shipped because the 48-hour shipping window has expired.",
+        );
+      }
+    }
+
     if (action === "cancel_order") {
+      step = "load_order";
       const existingOrder = await financialStore.getOrderForFinancialAction(
         orderId,
       );
+      if (existingOrder == null) {
+        throw new UpdateOrderFlowError(
+          "order_not_found",
+          404,
+          "The requested order was not found.",
+        );
+      }
+      if (existingOrder.sellerId !== user.id) {
+        throw new UpdateOrderFlowError(
+          "order_not_accessible",
+          403,
+          "You cannot update this order.",
+        );
+      }
+
+      if (existingOrder.status === "cancelled") {
+        return jsonResponse({
+          success: true,
+          order_id: existingOrder.id,
+          action,
+          status: "cancelled",
+          idempotent: true,
+          payout_status: "not_applicable",
+          request_id: requestId,
+        }, 200);
+      }
+
+      if (existingOrder.status !== "paid") {
+        throw new UpdateOrderFlowError(
+          "invalid_order_transition",
+          409,
+          "Only paid orders can be refunded before cancellation.",
+        );
+      }
+
       if (financialGateway == null) {
         throw new UpdateOrderFlowError(
-          "update_order_unknown_error",
+          "internal_error",
           500,
           "Missing Stripe runtime configuration for refunds.",
         );
       }
 
-      if (existingOrder?.status !== "cancelled") {
-        await refundOrderPayment({
-          orderId,
-          requestId,
-          triggerSource: "seller_cancel_order",
-          triggeredBy: user.id,
-          refundReason: "seller_cancelled_before_shipment",
-          store: financialStore,
-          stripeGateway: financialGateway,
-        });
-      }
+      await refundOrderPayment({
+        orderId,
+        requestId,
+        triggerSource: "seller_cancel_order",
+        triggeredBy: user.id,
+        refundReason: "seller_cancelled_before_shipment",
+        store: financialStore,
+        stripeGateway: financialGateway,
+      });
     }
 
-    const { data, error } = await adminClient.rpc("update_order_status_atomic", {
-      p_order_id: orderId,
-      p_actor_user_id: user.id,
-      p_action: action,
-      p_tracking_code: trackingCode,
-      p_request_id: requestId,
-    }).single();
+    step = "run_rpc";
+    const { data, error } = await adminClient.rpc(
+      "update_order_status_atomic",
+      {
+        p_order_id: orderId,
+        p_actor_user_id: user.id,
+        p_action: action,
+        p_tracking_code: trackingCode,
+        p_request_id: requestId,
+      },
+    ).single();
 
     if (error) {
       throw mapRpcError(error);
@@ -231,7 +348,7 @@ Deno.serve(async (request) => {
     const result = data as UpdateOrderRpcResult | null;
     if (!result) {
       throw new UpdateOrderFlowError(
-        "update_order_unknown_error",
+        "internal_error",
         500,
         "The order update did not return a result.",
       );
@@ -280,17 +397,33 @@ Deno.serve(async (request) => {
     }, 200);
   } catch (error) {
     const normalizedError = normalizeUnhandledError(error);
+    const errorDetails = describeError(error);
+    const debugMessage = buildDebugMessage(step, errorDetails);
     console.error("update_order_status failed", {
       request_id: requestId,
+      step,
+      order_id: orderId,
+      target_status: targetStatus,
+      auth_user_id: authUserId,
+      tracking_present: trackingPresent,
+      payload: payloadSummary,
       code: normalizedError.code,
       status: normalizedError.status,
       message: normalizedError.message,
+      error_message: errorDetails.message,
+      error_code: errorDetails.code,
+      error_name: errorDetails.name,
+      error_stack: errorDetails.stack,
+      cause_message: errorDetails.cause?.message ?? null,
+      cause_code: errorDetails.cause?.code ?? null,
+      cause_stack: errorDetails.cause?.stack ?? null,
     });
     return errorResponse(
       normalizedError.code,
       normalizedError.message,
       normalizedError.status,
       requestId,
+      debugMessage,
     );
   }
 });
@@ -351,7 +484,7 @@ function normalizeUnhandledError(error: unknown): UpdateOrderFlowError {
   }
 
   return new UpdateOrderFlowError(
-    "update_order_unknown_error",
+    "internal_error",
     500,
     "An unexpected error occurred while updating the order.",
     error,
@@ -398,14 +531,110 @@ function mapRpcError(error: unknown): UpdateOrderFlowError {
         "Tracking code is invalid.",
         error,
       );
+    case "shipping_window_expired":
+    case "shipping_deadline_elapsed":
+      return new UpdateOrderFlowError(
+        "shipping_window_expired",
+        409,
+        "This order can no longer be marked as shipped because the 48-hour shipping window has expired.",
+        error,
+      );
+    case "order_auto_cancel_pending":
+      return new UpdateOrderFlowError(
+        "order_auto_cancel_pending",
+        409,
+        "An automatic cancel/refund is already in progress for this order.",
+        error,
+      );
+    case "missing_runtime_secret":
+      return new UpdateOrderFlowError(
+        "missing_runtime_secret",
+        500,
+        "Missing runtime configuration.",
+        error,
+      );
     default:
       return new UpdateOrderFlowError(
-        "update_order_unknown_error",
+        "internal_error",
         500,
         "Failed to update the order.",
         error,
       );
   }
+}
+
+async function getOrderStatusForMutation(
+  adminClient: any,
+  orderId: string,
+): Promise<
+  {
+    id: string;
+    sellerId: string;
+    status: OrderStatus;
+    createdAt: string;
+  } | null
+> {
+  const { data, error } = await adminClient
+    .from("orders")
+    .select("id, seller_id, status, created_at")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (error != null) {
+    throw error;
+  }
+  const row = data as Record<string, unknown> | null;
+  if (row == null) return null;
+
+  return {
+    id: row.id as string,
+    sellerId: row.seller_id as string,
+    status: row.status as OrderStatus,
+    createdAt: row.created_at as string,
+  };
+}
+
+async function getLatestRefundOperation(
+  adminClient: any,
+  orderId: string,
+): Promise<
+  {
+    id: string;
+    status: string;
+    failureCode: string | null;
+    failureMessage: string | null;
+    metadata: Record<string, unknown> | null;
+  } | null
+> {
+  const { data, error } = await adminClient
+    .from("order_financial_operations")
+    .select("id, status, failure_code, failure_message, metadata, created_at")
+    .eq("order_id", orderId)
+    .eq("kind", "refund")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error != null) {
+    throw error;
+  }
+
+  const row = data as Record<string, unknown> | null;
+  if (row == null) return null;
+
+  return {
+    id: row.id as string,
+    status: row.status as string,
+    failureCode: (row.failure_code as string | null) ?? null,
+    failureMessage: (row.failure_message as string | null) ?? null,
+    metadata: (row.metadata as Record<string, unknown> | null) ?? null,
+  };
+}
+
+function isShippingDeadlineElapsed(createdAt: string): boolean {
+  const createdAtMs = Date.parse(createdAt);
+  if (!Number.isFinite(createdAtMs)) return false;
+  return createdAtMs <= Date.now() - 48 * 60 * 60 * 1000;
 }
 
 function isOrderStateInvariantViolation(error: unknown): boolean {
@@ -435,6 +664,96 @@ function readErrorMessage(error: unknown): string {
   return "";
 }
 
+function readErrorStack(error: unknown): string {
+  if (typeof error === "object" && error !== null && "stack" in error) {
+    const value = Reflect.get(error, "stack");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function readErrorName(error: unknown): string {
+  if (typeof error === "object" && error !== null && "name" in error) {
+    const value = Reflect.get(error, "name");
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function readErrorCause(
+  error: unknown,
+): { message: string; code: string; stack: string } | null {
+  if (typeof error !== "object" || error === null || !("cause" in error)) {
+    return null;
+  }
+
+  const cause = Reflect.get(error, "cause");
+  if (typeof cause !== "object" || cause === null) return null;
+
+  return {
+    message: readErrorMessage(cause),
+    code: readErrorCode(cause),
+    stack: readErrorStack(cause),
+  };
+}
+
+function describeError(error: unknown): {
+  message: string;
+  code: string;
+  name: string;
+  stack: string;
+  cause: { message: string; code: string; stack: string } | null;
+} {
+  return {
+    message: readErrorMessage(error),
+    code: readErrorCode(error),
+    name: readErrorName(error),
+    stack: readErrorStack(error),
+    cause: readErrorCause(error),
+  };
+}
+
+function buildDebugMessage(
+  step: string,
+  errorDetails: ReturnType<typeof describeError>,
+): string {
+  const parts = [
+    `step=${step}`,
+    errorDetails.code ? `code=${errorDetails.code}` : null,
+    errorDetails.message ? `message=${errorDetails.message}` : null,
+  ].filter((value): value is string => value !== null);
+  return parts.join(" | ");
+}
+
+function summarizePayload(
+  payload: UpdateOrderPayload,
+): Record<string, unknown> {
+  const trackingCode = normalizeOptionalString(payload.tracking_code);
+  return {
+    action: payload.action ?? null,
+    order_id_present: normalizeRequiredString(payload.order_id) != null,
+    tracking_present: trackingCode != null,
+    tracking_length: trackingCode?.length ?? 0,
+  };
+}
+
+function actionToTargetStatus(action: OrderAction): OrderStatus {
+  switch (action) {
+    case "confirm_receipt":
+      return "completed";
+    case "mark_shipped":
+      return "shipped";
+    case "cancel_order":
+      return "cancelled";
+  }
+}
+
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -450,11 +769,16 @@ function errorResponse(
   message: string,
   status: number,
   requestId?: string,
+  debugMessage?: string,
 ): Response {
-  return jsonResponse(
-    requestId ? { error, message, request_id: requestId } : { error, message },
-    status,
-  );
+  const body: Record<string, unknown> = { error, message };
+  if (requestId) {
+    body.request_id = requestId;
+  }
+  if (debugMessage) {
+    body.debug_message = debugMessage;
+  }
+  return jsonResponse(body, status);
 }
 
 function getRequestId(request: Request): string {

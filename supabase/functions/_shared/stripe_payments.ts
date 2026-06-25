@@ -1,3 +1,10 @@
+import {
+  buildSellerStripeStatusLogContext,
+  mapStripeAccountToSellerStripeStatus,
+  parseStripeConnectAccount,
+  type SellerStripeStore,
+} from "./stripe_connect.ts";
+
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
 type JsonObject = { [key: string]: JsonValue };
@@ -9,6 +16,7 @@ export const corsHeaders = {
 };
 
 const stripeApiBaseUrl = "https://api.stripe.com/v1";
+const stripeApiVersion = "2026-03-25.dahlia";
 const paymentAttemptExpiryMinutes = 30;
 const webhookSignatureToleranceSeconds = 300;
 
@@ -36,6 +44,7 @@ export type CreatePaymentIntentErrorCode =
   | "shipping_address_not_found"
   | "truffle_not_found"
   | "truffle_not_available"
+  | "seller_not_stripe_ready"
   | "self_purchase_forbidden"
   | "forbidden"
   | "payment_attempt_payload_mismatch"
@@ -56,6 +65,8 @@ export type StripeWebhookErrorCode =
   | "payment_attempt_not_found"
   | "payment_attempt_mismatch"
   | "payment_attempt_order_creation_failed"
+  | "seller_stripe_account_missing"
+  | "seller_stripe_webhook_runtime_error"
   | "webhook_unknown_error";
 
 export class AppError extends Error {
@@ -82,6 +93,11 @@ export type TrufflePurchaseRecord = {
   priceTotal: number;
   shippingPriceItaly?: number;
   shippingPriceAbroad?: number;
+  sellerStripeReadinessKnown?: boolean;
+  sellerStripeAccountId?: string | null;
+  sellerStripeReadyAt?: string | null;
+  sellerStripePayoutsEnabled?: boolean;
+  sellerStripeRequirementsPending?: boolean;
 };
 
 export type ShippingAddressRecord = {
@@ -194,7 +210,14 @@ export type PaymentStore = {
     userId: string,
     shippingAddressId: string,
   ): Promise<ShippingAddressRecord | null>;
-  expireStalePaymentAttempts(truffleId: string, nowIso: string): Promise<void>;
+  getStalePaymentAttempts(
+    truffleId: string,
+    nowIso: string,
+  ): Promise<PaymentAttemptRecord[]>;
+  expirePaymentAttempt(args: {
+    attemptId: string;
+    nowIso: string;
+  }): Promise<void>;
   beginOrReadPaymentAttempt(
     args: BeginPaymentAttemptArgs,
   ): Promise<BeginPaymentAttemptResult>;
@@ -252,10 +275,15 @@ export type StripeGateway = {
     metadata: Record<string, string>;
     idempotencyKey: string;
     paymentMethodTypes?: string[];
+    automaticPaymentMethodsEnabled?: boolean;
   }): Promise<StripePaymentIntentResult>;
   retrievePaymentIntent(
     paymentIntentId: string,
   ): Promise<StripePaymentIntentResult>;
+  cancelPaymentIntent(args: {
+    paymentIntentId: string;
+    idempotencyKey: string;
+  }): Promise<StripePaymentIntentResult>;
 };
 
 type CreatePaymentIntentRequestPayload = {
@@ -277,6 +305,7 @@ type StripeWebhookHandlerDeps = {
   request: Request;
   requestId: string;
   store: PaymentStore;
+  sellerStripeStore?: SellerStripeStore;
   webhookSecret: string;
   now?: () => Date;
 };
@@ -420,13 +449,24 @@ export async function handleCreatePaymentIntent(
       );
     }
 
+    if (!isSellerReadyForPayouts(truffle)) {
+      throw new AppError(
+        "seller_not_stripe_ready",
+        409,
+        "The selected seller cannot receive payouts right now.",
+      );
+    }
+
     const currentTimestamp = now();
     const nowIso = currentTimestamp.toISOString();
 
-    await deps.store.expireStalePaymentAttempts(
-      truffle.id,
+    await expireStalePaymentAttemptsForTruffle({
+      store: deps.store,
+      stripeGateway: deps.stripeGateway,
+      truffleId: truffle.id,
       nowIso,
-    );
+      requestId,
+    });
 
     const normalizedShippingCountryCode = normalizeCountryCode(
       shippingAddress.countryCode,
@@ -520,7 +560,13 @@ export async function handleCreatePaymentIntent(
       attempt.status === "requires_payment_method" &&
       isPaymentAttemptTemporallyExpired(attempt.expiresAt, currentTimestamp)
     ) {
-      await deps.store.expireStalePaymentAttempts(truffle.id, nowIso);
+      await expirePaymentAttemptIfSafe({
+        attempt,
+        store: deps.store,
+        stripeGateway: deps.stripeGateway,
+        nowIso,
+        requestId,
+      });
       throw new AppError(
         "payment_attempt_expired",
         409,
@@ -553,7 +599,7 @@ export async function handleCreatePaymentIntent(
         attempt.stripePaymentIntentId,
       );
       assertReusableExistingPaymentIntent(stripePaymentIntent);
-      if (!isCardOnlyPaymentIntent(stripePaymentIntent)) {
+      if (!hasAutomaticPaymentMethodsEnabled(stripePaymentIntent)) {
         stripePaymentIntent = await deps.stripeGateway.createPaymentIntent({
           amountCents: toStripeAmountCents(totalPrice),
           currency: "eur",
@@ -566,7 +612,7 @@ export async function handleCreatePaymentIntent(
           idempotencyKey: buildStripePaymentIntentRepairIdempotencyKey(
             attempt.id,
           ),
-          paymentMethodTypes: ["card"],
+          automaticPaymentMethodsEnabled: true,
         });
 
         await deps.store.attachStripePaymentIntent(
@@ -577,10 +623,10 @@ export async function handleCreatePaymentIntent(
         await safeAuditInsert(deps.store, {
           entityType: "payment_attempt",
           entityId: attempt.id,
-          action: "payment_intent_recreated_card_only",
+          action: "payment_intent_recreated_automatic_payment_methods",
           performedBy: currentUser.id,
           metadata: {
-            action: "payment_intent_recreated_card_only",
+            action: "payment_intent_recreated_automatic_payment_methods",
             request_id: requestId,
             result: "succeeded",
             stripe_payment_intent_id: stripePaymentIntent.id,
@@ -600,7 +646,7 @@ export async function handleCreatePaymentIntent(
           shipping_address_id: shippingAddress.id,
         },
         idempotencyKey: buildStripePaymentIntentIdempotencyKey(attempt.id),
-        paymentMethodTypes: ["card"],
+        automaticPaymentMethodsEnabled: true,
       });
 
       await deps.store.attachStripePaymentIntent(
@@ -678,7 +724,10 @@ export async function handleFinalizePaymentAttempt(
     );
   }
 
-  let payload: { payment_attempt_id?: string; stripe_payment_intent_id?: string };
+  let payload: {
+    payment_attempt_id?: string;
+    stripe_payment_intent_id?: string;
+  };
   try {
     payload = await request.json();
   } catch {
@@ -907,6 +956,15 @@ export async function handleStripeWebhook(
     }, 200);
   }
 
+  if (supportedEvent.type === "account.updated") {
+    return await handleStripeAccountUpdatedWebhook({
+      deps,
+      event: supportedEvent,
+      accountId: normalizeNonEmptyString(supportedEvent.data.object.id),
+      now,
+    });
+  }
+
   const stripePaymentIntentId = normalizeNonEmptyString(
     supportedEvent.data.object.id,
   );
@@ -1085,6 +1143,137 @@ export async function handleStripeWebhook(
   }
 }
 
+async function handleStripeAccountUpdatedWebhook(args: {
+  deps: StripeWebhookHandlerDeps;
+  event: StripeWebhookEvent;
+  accountId: string | null;
+  now: () => Date;
+}): Promise<Response> {
+  const { deps, event, accountId } = args;
+
+  if (accountId == null) {
+    return errorResponse(
+      "invalid_webhook_payload",
+      "Webhook payload is missing the Stripe account id.",
+      400,
+      deps.requestId,
+    );
+  }
+
+  if (deps.sellerStripeStore == null) {
+    return errorResponse(
+      "seller_stripe_webhook_runtime_error",
+      "Seller Stripe store is required for account.updated events.",
+      500,
+      deps.requestId,
+    );
+  }
+
+  try {
+    const webhookRegistration = await deps.store.registerWebhookEvent({
+      stripeEventId: event.id,
+      eventType: event.type,
+      stripeObjectId: accountId,
+      requestId: deps.requestId,
+      metadata: {
+        stripe_account_id: accountId,
+      },
+    });
+
+    if (webhookRegistration.isDuplicate) {
+      return jsonResponse({
+        received: true,
+        duplicate: true,
+        request_id: deps.requestId,
+      }, 200);
+    }
+
+    const seller = await deps.sellerStripeStore
+      .getSellerStripeUserByStripeAccountId(accountId);
+    if (seller == null) {
+      throw new AppError(
+        "seller_stripe_account_missing",
+        404,
+        "The Stripe account referenced by the webhook is not linked to a seller.",
+      );
+    }
+
+    const account = parseStripeConnectAccount(
+      event.data.object as unknown as Record<string, unknown>,
+    );
+    const status = mapStripeAccountToSellerStripeStatus({
+      account,
+      existingUser: seller,
+      now: args.now(),
+    });
+    const logContext = buildSellerStripeStatusLogContext({
+      requestId: deps.requestId,
+      userId: seller.id,
+      accountId,
+      accountRequirements: account.requirements,
+      status,
+    });
+
+    await deps.sellerStripeStore.updateSellerStripeStatus(seller.id, status);
+    console.log("seller_stripe_status_refreshed", {
+      ...logContext,
+      triggerSource: "stripe_webhook",
+      eventId: event.id,
+    });
+    await deps.sellerStripeStore.insertAuditLog({
+      entityType: "user",
+      entityId: seller.id,
+      action: status.readiness === "ready"
+        ? "seller_stripe_ready"
+        : "seller_stripe_not_ready",
+      performedBy: seller.id,
+      metadata: {
+        request_id: deps.requestId,
+        result: "succeeded",
+        trigger_source: "stripe_webhook",
+        stripe_event_id: event.id,
+        stripe_account_id: accountId,
+        readiness: status.readiness,
+      },
+    });
+
+    await deps.store.completeWebhookEvent({
+      stripeEventId: event.id,
+      processingStatus: "processed",
+    });
+
+    return jsonResponse({
+      received: true,
+      processed: true,
+      request_id: deps.requestId,
+    }, 200);
+  } catch (error) {
+    const normalizedError = normalizeStripeWebhookError(error);
+    console.error("stripe_webhook account.updated failed", {
+      request_id: deps.requestId,
+      code: normalizedError.code,
+      status: normalizedError.status,
+      message: normalizedError.message,
+      cause_code: readErrorCode(normalizedError.cause),
+      cause_message: readErrorMessage(normalizedError.cause),
+    });
+
+    await safeFailWebhookEvent(
+      deps.store,
+      event.id,
+      normalizedError.code,
+      normalizedError.message,
+    );
+
+    return errorResponse(
+      normalizedError.code,
+      normalizedError.message,
+      normalizedError.status,
+      deps.requestId,
+    );
+  }
+}
+
 export async function verifyStripeWebhookSignature(args: {
   payload: string;
   signatureHeader: string;
@@ -1126,15 +1315,16 @@ export function createStripeGateway(
 ): StripeGateway {
   return {
     async createPaymentIntent(args) {
-      const paymentMethodTypes = args.paymentMethodTypes?.length
-        ? args.paymentMethodTypes
-        : ["card"];
-      const paymentMethodFormEntries = Object.fromEntries(
-        paymentMethodTypes.map((type, index) => [
-          `payment_method_types[${index}]`,
-          type,
-        ]),
-      );
+      const paymentMethodFormEntries = args.automaticPaymentMethodsEnabled ===
+          true
+        ? { "automatic_payment_methods[enabled]": "true" }
+        : Object.fromEntries(
+          (args.paymentMethodTypes?.length ? args.paymentMethodTypes : ["card"])
+            .map((type, index) => [
+              `payment_method_types[${index}]`,
+              type,
+            ]),
+        );
       const response = await stripeApiRequest(fetchImpl, secretKey, {
         path: "/payment_intents",
         method: "POST",
@@ -1158,6 +1348,27 @@ export function createStripeGateway(
       const response = await stripeApiRequest(fetchImpl, secretKey, {
         path: `/payment_intents/${encodeURIComponent(paymentIntentId)}`,
         method: "GET",
+      });
+
+      return {
+        id: readRequiredStripeString(response, "id"),
+        clientSecret: readRequiredStripeString(response, "client_secret"),
+        status: readRequiredStripeString(response, "status"),
+        metadata: readMetadataMap(response),
+        paymentMethodTypes: readStringArray(response.payment_method_types),
+        automaticPaymentMethodsEnabled: readAutomaticPaymentMethodsEnabled(
+          response.automatic_payment_methods,
+        ),
+      };
+    },
+
+    async cancelPaymentIntent(args) {
+      const response = await stripeApiRequest(fetchImpl, secretKey, {
+        path: `/payment_intents/${
+          encodeURIComponent(args.paymentIntentId)
+        }/cancel`,
+        method: "POST",
+        idempotencyKey: args.idempotencyKey,
       });
 
       return {
@@ -1197,7 +1408,7 @@ export function createSupabasePaymentStore(adminClient: any): PaymentStore {
       const { data, error } = await adminClient
         .from("truffles")
         .select(
-          "id, seller_id, status, price_total, shipping_price_italy, shipping_price_abroad",
+          "id, seller_id, status, price_total, shipping_price_italy, shipping_price_abroad, seller:users!truffles_seller_id_fkey(stripe_account_id, stripe_ready_at, stripe_payouts_enabled, stripe_requirements_pending)",
         )
         .eq("id", truffleId)
         .single();
@@ -1206,6 +1417,8 @@ export function createSupabasePaymentStore(adminClient: any): PaymentStore {
         return null;
       }
 
+      const seller = Array.isArray(data.seller) ? data.seller[0] : data.seller;
+
       return {
         id: data.id as string,
         sellerId: data.seller_id as string,
@@ -1213,6 +1426,20 @@ export function createSupabasePaymentStore(adminClient: any): PaymentStore {
         priceTotal: toNumber(data.price_total),
         shippingPriceItaly: toNullableNumber(data.shipping_price_italy),
         shippingPriceAbroad: toNullableNumber(data.shipping_price_abroad),
+        sellerStripeReadinessKnown: true,
+        sellerStripeAccountId: readOptionalRecordString(
+          seller,
+          "stripe_account_id",
+        ),
+        sellerStripeReadyAt: readOptionalRecordString(
+          seller,
+          "stripe_ready_at",
+        ),
+        sellerStripePayoutsEnabled:
+          readOptionalRecordBoolean(seller, "stripe_payouts_enabled") === true,
+        sellerStripeRequirementsPending:
+          readOptionalRecordBoolean(seller, "stripe_requirements_pending") !==
+            false,
       };
     },
 
@@ -1242,18 +1469,32 @@ export function createSupabasePaymentStore(adminClient: any): PaymentStore {
       };
     },
 
-    async expireStalePaymentAttempts(truffleId, nowIso) {
+    async getStalePaymentAttempts(truffleId, nowIso) {
+      const { data, error } = await adminClient
+        .from("payment_attempts")
+        .select(paymentAttemptSelectClause)
+        .eq("truffle_id", truffleId)
+        .eq("status", "requires_payment_method")
+        .lt("expires_at", nowIso);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map(mapPaymentAttemptRow);
+    },
+
+    async expirePaymentAttempt(args) {
       const { error } = await adminClient
         .from("payment_attempts")
         .update({
           status: "expired",
-          processed_at: nowIso,
+          processed_at: args.nowIso,
           failure_code: "payment_attempt_expired",
           failure_message: "Payment attempt expired before confirmation.",
         })
-        .eq("truffle_id", truffleId)
-        .eq("status", "requires_payment_method")
-        .lt("expires_at", nowIso);
+        .eq("id", args.attemptId)
+        .eq("status", "requires_payment_method");
 
       if (error) {
         throw error;
@@ -1577,8 +1818,91 @@ function buildPaymentAttemptFingerprint(args: {
   });
 }
 
+async function expireStalePaymentAttemptsForTruffle(args: {
+  store: PaymentStore;
+  stripeGateway: StripeGateway;
+  truffleId: string;
+  nowIso: string;
+  requestId: string;
+}): Promise<void> {
+  const staleAttempts = await args.store.getStalePaymentAttempts(
+    args.truffleId,
+    args.nowIso,
+  );
+
+  for (const attempt of staleAttempts) {
+    await expirePaymentAttemptIfSafe({
+      attempt,
+      store: args.store,
+      stripeGateway: args.stripeGateway,
+      nowIso: args.nowIso,
+      requestId: args.requestId,
+    });
+  }
+}
+
+async function expirePaymentAttemptIfSafe(args: {
+  attempt: PaymentAttemptRecord;
+  store: PaymentStore;
+  stripeGateway: StripeGateway;
+  nowIso: string;
+  requestId: string;
+}): Promise<boolean> {
+  const stripePaymentIntentId = normalizeNonEmptyString(
+    args.attempt.stripePaymentIntentId,
+  );
+
+  if (stripePaymentIntentId == null) {
+    await args.store.expirePaymentAttempt({
+      attemptId: args.attempt.id,
+      nowIso: args.nowIso,
+    });
+    return true;
+  }
+
+  try {
+    const paymentIntent = await args.stripeGateway.retrievePaymentIntent(
+      stripePaymentIntentId,
+    );
+
+    if (paymentIntent.status === "succeeded") {
+      return false;
+    }
+
+    if (paymentIntent.status !== "canceled") {
+      await args.stripeGateway.cancelPaymentIntent({
+        paymentIntentId: stripePaymentIntentId,
+        idempotencyKey: buildStripePaymentIntentExpiryCancelIdempotencyKey(
+          args.attempt.id,
+        ),
+      });
+    }
+
+    await args.store.expirePaymentAttempt({
+      attemptId: args.attempt.id,
+      nowIso: args.nowIso,
+    });
+    return true;
+  } catch (error) {
+    console.error("payment_attempt expiry cancellation skipped", {
+      request_id: args.requestId,
+      payment_attempt_id: args.attempt.id,
+      stripe_payment_intent_id: stripePaymentIntentId,
+      code: readErrorCode(error),
+      message: readErrorMessage(error),
+    });
+    return false;
+  }
+}
+
 function buildStripePaymentIntentIdempotencyKey(attemptId: string): string {
   return `truffly_payment_intent_${attemptId}`;
+}
+
+function buildStripePaymentIntentExpiryCancelIdempotencyKey(
+  attemptId: string,
+): string {
+  return `truffly_payment_intent_${attemptId}_expiry_cancel`;
 }
 
 function buildStripePaymentIntentRepairIdempotencyKey(
@@ -1616,21 +1940,21 @@ function assertReusableExistingPaymentIntent(
   }
 }
 
-function isCardOnlyPaymentIntent(
+function hasAutomaticPaymentMethodsEnabled(
   paymentIntent: StripePaymentIntentResult,
 ): boolean {
-  const paymentMethodTypes = paymentIntent.paymentMethodTypes
-    ?.map((type) => type.trim().toLowerCase())
-    .filter((type) => type.length > 0);
-  if (paymentMethodTypes != null && paymentMethodTypes.length > 0) {
-    return paymentMethodTypes.length === 1 && paymentMethodTypes[0] === "card";
+  return paymentIntent.automaticPaymentMethodsEnabled === true;
+}
+
+function isSellerReadyForPayouts(truffle: TrufflePurchaseRecord): boolean {
+  if (truffle.sellerStripeReadinessKnown !== true) {
+    return true;
   }
 
-  if (paymentIntent.automaticPaymentMethodsEnabled === true) {
-    return false;
-  }
-
-  return true;
+  return normalizeNonEmptyString(truffle.sellerStripeAccountId) != null &&
+    normalizeNonEmptyString(truffle.sellerStripeReadyAt) != null &&
+    truffle.sellerStripePayoutsEnabled === true &&
+    truffle.sellerStripeRequirementsPending === false;
 }
 
 function normalizeSupportedStripeWebhookEvent(
@@ -1641,6 +1965,14 @@ function normalizeSupportedStripeWebhookEvent(
   }
 
   if (event?.type === "payment_intent.payment_failed") {
+    return event;
+  }
+
+  if (event?.type === "payment_intent.canceled") {
+    return event;
+  }
+
+  if (event?.type === "account.updated") {
     return event;
   }
 
@@ -1703,6 +2035,7 @@ async function stripeApiRequest(
 ): Promise<Record<string, unknown>> {
   const headers = new Headers({
     "Authorization": `Bearer ${secretKey}`,
+    "Stripe-Version": stripeApiVersion,
   });
 
   let body: string | undefined;
@@ -1792,7 +2125,9 @@ function readStringArray(value: unknown): string[] | undefined {
     return undefined;
   }
 
-  const strings = value.filter((item): item is string => typeof item === "string");
+  const strings = value.filter((item): item is string =>
+    typeof item === "string"
+  );
   return strings.length > 0 ? strings : undefined;
 }
 
@@ -1805,6 +2140,26 @@ function readAutomaticPaymentMethodsEnabled(
 
   const enabled = value.enabled;
   return typeof enabled === "boolean" ? enabled : undefined;
+}
+
+function readOptionalRecordString(record: unknown, key: string): string | null {
+  if (!isRecord(record)) {
+    return null;
+  }
+
+  return normalizeNonEmptyString(record[key]);
+}
+
+function readOptionalRecordBoolean(
+  record: unknown,
+  key: string,
+): boolean | null {
+  if (!isRecord(record)) {
+    return null;
+  }
+
+  const value = record[key];
+  return typeof value === "boolean" ? value : null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

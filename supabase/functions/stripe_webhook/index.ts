@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
+import { createSupabaseSellerStripeStore } from "../_shared/stripe_connect.ts";
 import {
   createSupabasePaymentStore,
   getRequestId,
@@ -49,6 +50,7 @@ Deno.serve(async (request) => {
     request,
     requestId,
     store: createSupabasePaymentStore(adminClient),
+    sellerStripeStore: createSupabaseSellerStripeStore(adminClient),
     webhookSecret: stripeWebhookSecret,
   });
 });

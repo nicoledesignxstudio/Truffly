@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createBusinessNotificationAndPush } from "../_shared/business_notifications.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -290,20 +291,13 @@ Deno.serve(async (request) => {
     // The repo does not constrain notifications.type with an enum; the column
     // is free text. Keep a descriptive event key while still avoiding any
     // invented admin-recipient contract in the notifications table.
-    const notificationInsert = await adminClient
-      .from("notifications")
-      .insert({
-        user_id: user.id,
-        type: "seller_application_submitted",
-        message: "Your seller application has been submitted and is pending review.",
-      });
-    if (notificationInsert.error) {
-      console.error("submit_seller_application notification insert failed", {
-        request_id: requestId,
-        code: readErrorCode(notificationInsert.error),
-        message: readErrorMessage(notificationInsert.error),
-      });
-    }
+    await createBusinessNotificationAndPush({
+      adminClient,
+      userId: user.id,
+      type: "seller_application_submitted",
+      message: "Your request to sell on Truffly has been submitted.",
+      requestId,
+    });
 
     await insertAuditLog(adminClient, {
       entityType: "seller_application",

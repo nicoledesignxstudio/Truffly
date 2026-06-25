@@ -18,11 +18,13 @@ Deno.serve(async (request) => {
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+  const stripeConnectReturnUrl = Deno.env.get("STRIPE_CONNECT_RETURN_URL");
+  const stripeConnectRefreshUrl = Deno.env.get("STRIPE_CONNECT_REFRESH_URL");
   const authHeader = request.headers.get("Authorization");
 
   if (
     !supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey ||
-    !stripeSecretKey
+    !stripeSecretKey || !stripeConnectReturnUrl || !stripeConnectRefreshUrl
   ) {
     return new Response(
       JSON.stringify({
@@ -67,7 +69,7 @@ Deno.serve(async (request) => {
     authenticatedUserEmail: authenticatedUser.email,
     store: createSupabaseSellerStripeStore(adminClient),
     stripeGateway: createStripeConnectGateway(fetch, stripeSecretKey),
-    accountLinkReturnUrl: Deno.env.get("STRIPE_CONNECT_RETURN_URL"),
-    accountLinkRefreshUrl: Deno.env.get("STRIPE_CONNECT_REFRESH_URL"),
+    accountLinkReturnUrl: stripeConnectReturnUrl,
+    accountLinkRefreshUrl: stripeConnectRefreshUrl,
   });
 });

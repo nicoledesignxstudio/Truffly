@@ -1,4 +1,5 @@
 import {
+  createStripeConnectGateway,
   handleCreateSellerStripeAccountLink,
   handleRefreshSellerStripeStatus,
   isSellerStripeReady,
@@ -110,6 +111,38 @@ Deno.test("seller onboarding creates connected account when missing", async () =
   assertMatch(await response.json(), {
     stripe_account_id: "acct_created",
   });
+});
+
+Deno.test("Stripe Connect account creation sends a seller-scoped idempotency key", async () => {
+  let receivedIdempotencyKey: string | null = null;
+
+  const gateway = createStripeConnectGateway(
+    async (_url, init) => {
+      const headers = new Headers((init as globalThis.RequestInit).headers);
+      receivedIdempotencyKey = headers.get("Idempotency-Key");
+      return new Response(
+        JSON.stringify({
+          id: "acct_created",
+          details_submitted: false,
+          charges_enabled: false,
+          payouts_enabled: false,
+          requirements: { currently_due: [] },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    },
+    "sk_test_validation",
+  );
+
+  await gateway.createExpressAccount({
+    email: "seller@example.com",
+    country: "IT",
+    firstName: "Seller",
+    lastName: "Example",
+    metadata: { user_id: "seller-1" },
+  });
+
+  assertEquals(receivedIdempotencyKey, "truffly_connect_account_seller-1");
 });
 
 Deno.test("seller onboarding reuses existing account", async () => {
@@ -237,10 +270,10 @@ Deno.test("refresh seller status updates readiness to ready", async () => {
       retrieveAccount: async () => ({
         id: "acct_ready",
         detailsSubmitted: true,
-        chargesEnabled: false,
+        chargesEnabled: true,
         payoutsEnabled: true,
         requirements: {
-          currently_due: [],
+          currently_due: ["business_profile.url"],
           past_due: [],
           pending_verification: [],
           disabled_reason: null,
@@ -254,9 +287,9 @@ Deno.test("refresh seller status updates readiness to ready", async () => {
   assertMatch(await response.json(), {
     readiness: "ready",
     stripe_account_id: "acct_ready",
-    charges_enabled: false,
+    charges_enabled: true,
     payouts_enabled: true,
-    requirements_pending: false,
+    requirements_pending: true,
   });
   assertEquals(persistedReadiness, "ready");
 });
@@ -265,11 +298,8 @@ Deno.test("publish gate helper blocks not ready sellers", () => {
   assertEquals(
     isSellerStripeReady({
       accountId: "acct_test",
-      detailsSubmitted: true,
       chargesEnabled: false,
       payoutsEnabled: false,
-      requirementsPending: false,
-      readyAt: null,
     }),
     false,
   );
@@ -279,11 +309,8 @@ Deno.test("publish gate helper allows ready sellers", () => {
   assertEquals(
     isSellerStripeReady({
       accountId: "acct_test",
-      detailsSubmitted: true,
-      chargesEnabled: false,
+      chargesEnabled: true,
       payoutsEnabled: true,
-      requirementsPending: false,
-      readyAt: "2026-03-29T10:00:00.000Z",
     }),
     true,
   );
@@ -337,6 +364,7 @@ function approvedSeller() {
 function createNoopSellerStripeStore(overrides: Record<string, unknown> = {}) {
   return {
     getSellerStripeUser: async () => null,
+    getSellerStripeUserByStripeAccountId: async () => null,
     updateSellerStripeStatus: async () => undefined,
     saveSellerStripeAccountId: async () => undefined,
     insertAuditLog: async () => undefined,

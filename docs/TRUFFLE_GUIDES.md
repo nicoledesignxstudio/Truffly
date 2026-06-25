@@ -17,6 +17,8 @@
   - RLS enabled, read-only policy for authenticated users on published rows
 - Seed: `supabase/seed.sql`
   - idempotent upsert of 9 guide rows (`ON CONFLICT (truffle_type) DO UPDATE`)
+- Seed only guide: `supabase/seeds/truffle_guides.sql`
+  - same 9 rows, isolated so you can load only the guide data when needed
 
 ## Local run
 1. Apply migrations + seed (local Supabase workflow already used in project).
@@ -25,6 +27,10 @@
 3. Run checks:
    - `flutter analyze`
    - `flutter test`
+
+## Guide-only reset
+- If you want a lightweight reset that loads only `public.truffle_guides`, point `db.seed.sql_paths` in `supabase/config.toml` to `./seeds/truffle_guides.sql` for that local run.
+- The default config still uses `supabase/seed.sql`, so the rest of the fake data remains available unless you switch it manually.
 
 ## Notes
 - Guide route params are strictly parsed via `TruffleType.tryFromDbValue`; invalid values redirect safely.

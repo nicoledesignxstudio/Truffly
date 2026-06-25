@@ -367,11 +367,10 @@ async function attemptExpressOnboardingCompletionForValidation(
   let lastAccount: Record<string, unknown> | null = null;
   for (let attempt = 0; attempt < 8; attempt++) {
     lastAccount = await retrieveStripeAccount(accountId);
-    const requirementsPending = stripeRequirementsPending(lastAccount);
     if (
       lastAccount.details_submitted === true &&
-      lastAccount.payouts_enabled === true &&
-      !requirementsPending
+      lastAccount.charges_enabled === true &&
+      lastAccount.payouts_enabled === true
     ) {
       return {
         mode: "platform_api_completion_attempt",
@@ -528,7 +527,7 @@ async function cleanupPublishedTruffle(truffleId: string) {
       .from("truffle_images")
       .select("image_url")
       .eq("truffle_id", truffleId)
-  ).data?.map((row) => row.image_url as string).filter(Boolean) ?? [];
+  ).data?.map((row: { image_url: string | null }) => row.image_url as string).filter(Boolean) ?? [];
 
   if (images.length > 0) {
     await adminClient.storage.from("truffle_images").remove(images);

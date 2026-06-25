@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Truffly Local",
+      "request": "launch",
+      "type": "dart",
+      "program": "app/truffly_app/lib/main.dart",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--dart-define=APP_ENV=local",
+        "--dart-define=AUTH_REDIRECT_BASE_URL=truffly://auth",
+        "--dart-define=SUPABASE_URL=${env:TRUFFLY_LOCAL_SUPABASE_URL}",
+        "--dart-define=SUPABASE_ANON_KEY=${env:TRUFFLY_LOCAL_SUPABASE_ANON_KEY}",
+        "--dart-define=STRIPE_PUBLISHABLE_KEY_TEST=${env:TRUFFLY_STRIPE_PUBLISHABLE_KEY_TEST}",
+        "--dart-define=ANDROID_DEVICE_HOST=${env:TRUFFLY_ANDROID_DEVICE_HOST}"
+      ]
+    },
+    {
+      "name": "Truffly Staging",
+      "request": "launch",
+      "type": "dart",
+      "program": "app/truffly_app/lib/main.dart",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--dart-define=APP_ENV=staging",
+        "--dart-define=AUTH_REDIRECT_BASE_URL=truffly://auth",
+        "--dart-define=SUPABASE_URL=${env:TRUFFLY_STAGING_SUPABASE_URL}",
+        "--dart-define=SUPABASE_ANON_KEY=${env:TRUFFLY_STAGING_SUPABASE_ANON_KEY}",
+        "--dart-define=STRIPE_PUBLISHABLE_KEY=${env:TRUFFLY_STRIPE_PUBLISHABLE_KEY}",
+        "--dart-define=ANDROID_DEVICE_HOST=${env:TRUFFLY_ANDROID_DEVICE_HOST}"
+      ]
+    }
+  ]
+}

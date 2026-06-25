@@ -1,434 +1,240 @@
 # Project Status - Truffly
 
-Current phase: Core marketplace backend materially hardened, seller flows integrated, security phases 1-8 largely completed, Stripe integration not started yet
-Goal: Build MVP truffle marketplace with production-grade backend foundations before enabling real payments
+Snapshot date: 2026-05-09
+Environment analyzed: local repo (`Flutter app + Supabase local stack + Stripe test integration code`)
 
 ---
 
 # Executive Summary
 
-Truffly is no longer in an early MVP-backend state.
+Truffly is no longer just an MVP skeleton.
 
-The project now has:
+Today the repository already contains:
 
-* authenticated Flutter app structure with onboarding, marketplace, seller publish flow and seller-managed listings
-* Supabase schema with RLS, constrained write paths and service-owned flows
-* hardened seller document storage and signed URL access
-* robust DB invariants for orders and truffle availability
-* atomic/idempotent order status transitions through SQL RPC + Edge Function
-* audit/observability improvements with `request_id`
-* first lifecycle/privacy controls for seller documents, notifications and audit minimization
+* a structured Flutter app with auth, onboarding, home, marketplace, seller area, checkout, orders, guides and account pages
+* a substantial Supabase backend with migrations, RLS, protected views, RPCs and Edge Functions
+* an end-to-end Stripe test-mode architecture for buyer payments and seller Connect onboarding
+* financial/order lifecycle automation for refunds, payouts, auto-completion and retry flows
 
-Main strategic conclusion:
+Main conclusion:
 
-* backend security posture is good enough to begin Stripe integration in test mode
-* backend is not yet ready for live money without a dedicated payment hardening phase
+* the product is materially ahead of the previous project status document
+* Stripe integration is already started and broadly wired in both Flutter and Supabase
+* the project is still not production-ready because several UX/product surfaces remain incomplete and the whole stack is still configured around local/provisional operation
 
 ---
 
-# Completed
+# Current State
 
-## Project Setup
+## Flutter App
 
-* Git repository initialized
-* GitHub repository created
-* Flutter project created
-* Initial Flutter app runs successfully
+Implemented in app code:
 
-## Supabase Setup
+* email/password signup, login, verify email, forgot password, reset password, session restore and sign out
+* startup/bootstrap gate with route-aware auth redirection
+* buyer and seller onboarding flows
+* home screen with buyer/seller variants
+* marketplace listing with search, filters, pagination and favorites
+* truffle detail page with seller preview and checkout entry
+* checkout page with shipping address selection and Stripe Payment Sheet
+* orders list/detail with buyer and seller actions
+* seller publish flow
+* seller managed truffles page
+* sellers directory
+* seller public profile page
+* truffle guides listing and detail pages
+* account details, favorites, shipping addresses, support, settings, privacy policy and terms pages
+* Italian/English localization across the main flows
 
-* Supabase project created
-* Supabase CLI installed
-* Supabase initialized locally
-* Local Supabase stack configured for development
+Known incomplete or placeholder Flutter surfaces:
 
-## Database Schema
+* Google sign-in is hidden/not wired in the current auth flow
+* account payments page is still a placeholder
+* notification permission request in onboarding is still a fallback/mock implementation, not a real platform integration
+* push notification delivery still needs real Firebase/staging validation
 
-Schema is materially established and no longer just a draft MVP schema.
+Implemented but worth validating in staging:
 
-Current main entities:
+* notifications inbox is implemented and reachable from account/home flows
+* buyer review creation after completed orders is implemented
+* profile image upload is implemented against Supabase Storage
+* account deletion/anonymization is implemented through an authenticated Edge Function
 
-* `users`
-* `shipping_addresses`
-* `truffles`
-* `truffle_images`
-* `publish_truffle_requests`
-* `orders`
-* `reviews`
-* `favorites`
-* `notifications`
-* `seller_documents`
-* `audit_logs`
+## Supabase Backend
 
-Current schema capabilities include:
+Implemented in backend code and migrations:
 
-* ENUM types for user/seller/truffle/order domains
-* constraints and indexes for integrity/performance
-* RLS enabled on protected tables
-* storage buckets and policies for private assets
-* RPCs for shipping addresses and other constrained operations
-* security comments and lifecycle markers for future anonymization work
+* local Supabase stack configuration
+* full schema for users, shipping addresses, truffles, truffle images, publish requests, orders, reviews, favorites, notifications, seller documents, audit logs, payment attempts, webhook events and financial operations
+* RLS policies on protected tables
+* protected/public-safe views for marketplace, seller cards, seller profile and current-user order details
+* RPCs for enum access, shipping addresses, order transitions and payment-attempt-to-order creation
+* audit logging with `request_id`
+* privacy/lifecycle helpers for notifications and seller documents
+* seller document storage protection with signed URL retrieval through an Edge Function
+* publish flow with staging bucket, validation, idempotency and cleanup paths
+* order invariants and atomic status transitions
+* Stripe readiness gating on marketplace visibility and seller publishing
 
-## Seed Data
+## Stripe Integration
 
-* `seed.sql` aligned to current DB invariants
-* local reset/seed supports users, truffles, orders and reviews under current constraints
-* seller/truffle/order seed transitions were updated to comply with new status invariants
-
-## Flutter + Supabase Integration
-
-Implemented and working:
-
-* `.env.local` loading in Flutter bootstrap
-* environment validation for `SUPABASE_URL` and `SUPABASE_ANON_KEY`
-* Supabase initialization in app startup
-* Riverpod application shell
-* route-aware auth/bootstrap flow
-
-## Flutter Project Architecture
-
-Feature-first architecture remains in place in `app/truffly_app/lib`.
-
-Main areas already structured:
-
-* `core/`
-* `features/auth/`
-* `features/onboarding/`
-* `features/home/`
-* `features/marketplace/`
-* `features/truffle/`
-* `features/orders/`
-* `features/account/`
-
-Main framework choices currently in use:
-
-* Riverpod
-* go_router
-* Supabase Auth
-* Supabase Postgres + RLS
-* Supabase Edge Functions
-
-## Bootstrap + Routing Foundation
-
-Implemented and integrated:
-
-* typed bootstrap state machine
-* startup loading / error screens
-* route-driven app entry
-* bootstrap/auth redirect orchestration
-* onboarding gating based on `public.users.onboarding_completed`
-* auth state evaluation after bootstrap and auth events
-
-## Auth Feature
+Stripe is already materially integrated.
 
 Implemented:
 
-* login
-* signup
-* verify email
-* forgot password
-* reset password
-* session restore
-* onboarding gating
-* password recovery support
-* sign out / session refresh handling
+* `flutter_stripe` initialized in app startup
+* Stripe Payment Sheet in checkout
+* Edge Function `create_payment_intent`
+* Edge Function `finalize_payment_attempt`
+* Stripe webhook endpoint with signature verification
+* payment attempt persistence and idempotency
+* order creation from successful payment attempts
+* seller Stripe Connect Express onboarding
+* seller Stripe status refresh and readiness mirroring on `users`
+* payout release flow via Stripe transfers
+* refund flow via Stripe refunds
+* retry flow for failed financial operations
+* scheduled job SQL for:
+  * auto-complete shipped orders
+  * auto-cancel unshipped paid orders
+  * retry failed financial operations
 
-Security hardening already completed at repo level:
+Important nuance:
 
-* fail-closed account/session handling
-* hardened callback/deep-link behavior
-* safer routing around auth state transitions
+* the codebase is designed around Stripe test/integration readiness, but production operations still need real secrets, hosted callbacks, webhook setup, cron installation and rollout hardening
 
-## Onboarding Feature
-
-Buyer and seller onboarding are implemented with dedicated domain/application/data/presentation layers.
-
-Implemented:
-
-* role-based onboarding paths
-* buyer onboarding persistence to `public.users`
-* seller onboarding submit through Edge Function
-* seller document capture and validation
-* localized onboarding flow
-* notifications step fallback flow
-
-## Seller Document Flow
-
-Seller document handling is materially implemented and hardened.
-
-Current behavior:
-
-* documents uploaded only through backend-controlled seller submit flow
-* private `seller_documents` bucket
-* owner/admin gated access
-* signed URL access through dedicated Edge Function
-* document access events now auditable
-* lifecycle markers added for review outcome / retention / purge readiness
-
-Privacy/lifecycle improvements now present:
-
-* `seller_documents.review_outcome`
-* `seller_documents.reviewed_at`
-* `seller_documents.documents_retention_expires_at`
-* `seller_documents.documents_purged_at`
-* duplicated `tesserino_number` in `seller_documents` minimized after approval/rejection
-
-## Marketplace Listing
-
-Marketplace is implemented beyond placeholder state.
-
-Current surface includes:
-
-* authenticated listing page
-* debounced search
-* type quick filters
-* filter sheet for quality/price/weight/harvest date/region
-* pagination/load more
-* loading skeletons
-* empty/error/retry states
-* favorite toggle wiring
-* seller publish CTA gating
-
-## Truffle Detail / Images
-
-Current behavior:
-
-* private storage image resolution through signed URLs
-* storage path normalization
-* Android emulator URL normalization where needed
-
-## Seller Publish Flow
-
-Seller publish is materially wired end-to-end.
+## Orders / Financial Lifecycle
 
 Implemented:
 
-* publish form page
-* image picking and validation
-* quality/type/pricing/shipping/region/harvest date inputs
-* confirmation dialog
-* Edge Function-backed publish flow
-* publish request idempotency via `publish_truffle_requests`
+* buyer can confirm receipt
+* seller can mark as shipped with tracking code
+* seller can cancel a paid order before shipment
+* successful completion can trigger seller payout release
+* cancellation can trigger refund processing
+* cron-style functions handle:
+  * refund + cancel after 48h if seller does not ship
+  * reminder after 7 days from shipment
+  * auto-complete after reminder window
+  * payout release after auto-completion
 
-Seller publish access model:
+## Tests / Verification
 
-* only approved sellers
-* Stripe account presence required at publish gate
-* service-owned backend mutation path
+Present in repo:
 
-## Seller Managed Truffles
+* Flutter tests for auth, startup, routing, account details, shipping addresses, home, marketplace filters, guides, orders and seller status presentation
+* Deno tests for Stripe payments, Stripe Connect and order financial flows
+* local validation scripts for Stripe phases
 
-Seller listing management is aligned to the new truffle status model.
+Current limitation:
 
-Current seller-visible statuses:
-
-* `publishing`
-* `active`
-* `reserved`
-* `sold`
-* `expired`
-
-Implemented:
-
-* seller client support for `reserved`
-* clear seller distinction between `reserved` and `sold`
-* fail-closed handling for unknown statuses
-* seller tabs/cards updated
-* localization for `publishing` and `reserved`
-* basic widget/domain test coverage for seller status presentation
-
-## Orders Domain And Status Handling
-
-This area is now one of the strongest parts of the backend.
-
-Implemented:
-
-* DB invariants between `orders` and `truffles`
-* `reserved` introduced in `truffle_status_enum`
-* partial unique indexes to enforce one open/completed order shape per truffle
-* triggers to keep truffle state derived from domain facts
-* DB enforcement of allowed order status transitions
-* atomic SQL RPC for `update_order_status`
-* idempotent replay handling
-* race/conflict protection via locked/current-state evaluation
-
-Supported order transitions at DB level:
-
-* `paid -> shipped`
-* `paid -> cancelled`
-* `shipped -> completed`
-
-## Shipping Addresses
-
-Shipping address management is implemented through SQL RPCs.
-
-Current capabilities:
-
-* save/update/delete through constrained backend logic
-* one default address per user
-* RLS ownership enforcement
-* addresses ready for future checkout flow
-
-## Views / RPC / SQL Exposure Hardening
-
-Security hardening phases already completed:
-
-* exposed views moved to `security_invoker = true` where needed
-* execute privileges tightened on SQL functions / RPC / helpers
-* helper and trigger functions reduced to intended callers
-* sensitive views and RPC surfaces reviewed for RLS consistency
-
-## Audit / Observability
-
-Audit quality is materially improved.
-
-Implemented:
-
-* `request_id` propagation across main Edge Functions
-* normalized audit metadata with `request_id`, `result`, `action`
-* order transition audits including idempotent replays
-* document access auditing
-* seller application auditing
-* truffle delete auditing
-* audit index on `metadata->>'request_id'`
-
-Console logging has been hardened to reduce sensitive output:
-
-* no signed URL logging
-* no document base64 logging
-* no full payload logging in sensitive paths
-* errors normalized toward request id / code / message patterns
-
-## Privacy / Retention / Lifecycle
-
-Initial privacy/lifecycle phase is implemented.
-
-Now present:
-
-* seller document lifecycle markers
-* minimization of duplicated PII in seller document metadata
-* notification purge helper
-* minimized order audit tracking metadata
-* schema comments clarifying anonymization direction for accounts
-
-Important current design note:
-
-* `users.deleted_at` is only a soft-delete marker
-* historical user-linked data means future account deletion will require anonymization flows rather than hard deletes
-
-## Localization
-
-Localization coverage includes:
-
-* auth
-* onboarding
-* marketplace
-* publish flow
-* shipping addresses
-* seller managed truffle statuses including `publishing` and `reserved`
-
-## Local Runtime / Development Hardening
-
-Implemented:
-
-* Android emulator host normalization
-* local Supabase URL validation in sensitive functions
-* reduced risk of starting Edge Functions with incorrect Flutter app env assumptions
+* coverage exists, but it is still not broad enough to treat the app as production-hardened end to end
 
 ---
 
-# Security Posture Summary
+# Important Gaps
 
-## Current Security Assessment
+## Product / UX Gaps
 
-Current backend/app security posture is **good for pre-production integration work**.
+The main product-level gaps still visible in the codebase are:
 
-Approximate expert assessment:
+* no real Google authentication flow
+* no real push notification delivery validation on staging/production
+* no real payment methods management page in account
+* no in-app admin/reviewer tooling for seller approval and seller document review
 
-* Auth / session handling: strong
-* RLS / authorization model: strong
-* Storage / seller document protection: strong
-* DB integrity / order concurrency safety: very strong
-* Audit / observability: good
-* Privacy / retention / lifecycle: good but not complete
-* Payment security readiness: not yet complete
+## Legacy Placeholder Routes Audit
 
-## Current Recommendation On Stripe
+The following placeholder pages are present in the tree but are not reachable from the current router/UI:
 
-It is now reasonable to proceed with:
+* `seller_profile_placeholder_page`
+* `account_destination_placeholder_page`
+* `truffle_guide_placeholder_page`
 
-* Stripe integration in test mode
-* payment architecture work
-* checkout / PaymentIntent / webhook implementation phase
+Why they remain:
 
-It is **not yet recommended** to enable live money in production without a dedicated payment hardening phase covering:
+* `app_router.dart` routes to the real pages instead of these placeholders
+* the account guide destination redirects to the real guides route
+* there are no current UI entry points that reference the placeholder widgets
+* they are safe legacy artifacts and can be removed in a later cleanup pass if desired
 
-* Stripe webhooks
-* signature verification
-* payment event idempotency
-* reconciliation tooling
-* refund/dispute operational paths
-* payment-specific observability and runbooks
+## Technical / Operational Gaps
 
----
+The main technical gaps before production are:
 
-# Current Validation / Verification Status
-
-Verified at code/repo level:
-
-* security migrations through Phase 8 are present in repo
-* main sensitive Edge Functions have been hardened and aligned on `request_id`
-* seller and order domain logic is materially stronger than earlier project phases
-
-Still recommended:
-
-* re-run full local DB reset after the latest migration sequence changes
-* run targeted end-to-end manual verification for:
-  * seller onboarding submit
-  * document signed URL access
-  * publish truffle flow
-  * delete truffle flow
-  * update order status flow
-
-Automated coverage still remains lighter than desired for backend-sensitive flows.
+* current workflow is still centered on local Supabase and local env files
+* production Stripe callback URLs and secrets are still example/provisional in repo templates
+* scheduled Edge jobs are prepared via SQL script but not guaranteed installed in a real hosted environment
+* push notification config still needs real Firebase/staging validation
+* there is no evidence of CI/CD, release pipeline, staging environment discipline or production observability setup
+* legal/compliance/ops flows are still mostly represented as static pages or comments rather than complete operational systems
 
 ---
 
-# Remaining Gaps / Known Limitations
+# Deployment Readiness
 
-The following items are still incomplete or intentionally deferred:
+## What Looks Ready Enough For The Next Phase
 
-* no production-ready Stripe payment flow yet
-* no Stripe webhook implementation yet
-* no reconciliation/admin tooling for payments yet
-* no full account anonymization flow yet
-* no storage purge job yet for seller documents after retention expiry
-* no formalized retention policy for `audit_logs`
-* no advanced alerting/dashboard layer beyond current audit trail
-* automated tests are still thinner than ideal for:
-  * onboarding submit backend path
-  * publish flow backend path
-  * seller document access flow
-  * order status RPC edge cases
+The following areas look solid enough to continue building on:
+
+* auth and route gating foundation
+* marketplace read models
+* seller onboarding submission backend
+* seller Stripe onboarding base flow
+* checkout + payment intent orchestration
+* order/refund/payout domain modeling
+* Supabase security baseline
+
+## What Prevents A Safe Production Launch Today
+
+The following areas still block a confident public launch:
+
+* incomplete user-facing features in account/auth/notifications/reviews
+* missing real production infrastructure and environment rollout
+* missing admin/reviewer operational tooling
+* incomplete production observability and incident procedures
+* incomplete account/privacy lifecycle implementation
+* insufficient evidence of full end-to-end production validation on hosted Supabase + Stripe
 
 ---
 
-# Current Task Direction
+# TODO - Missing Product Work
 
-## Recommended Next Phase
+* wire Google authentication or keep it hidden until it is ready
+* validate push notification permissions and delivery integration on staging
+* replace the account payments placeholder with a real payments area
+* add admin/reviewer tooling for seller application approval/rejection and seller document review
+* add explicit surfaces for seller payout/refund visibility if needed in the account/order UX
+* review whether buyer-facing support, dispute and refund communication pages need dedicated product flows instead of static destinations
 
-The most sensible next phase is:
+# TODO - Work Needed To Bring The App Online
 
-* start Stripe integration in test mode
-* keep security standards already established
-* add payment-specific hardening before any live rollout
-
-Recommended concrete next tasks:
-
-* implement Stripe PaymentIntent creation flow
-* implement verified/idempotent Stripe webhook handling
-* define payment-to-order reconciliation logic
-* add payment incident runbooks and observability hooks
-* add backend-focused tests around payment + order interaction
-* implement seller document storage purge job
-* plan account anonymization workflow
+* provision a hosted Supabase project and migrate the full local schema there
+* configure production environment variables for Flutter and all Edge Functions
+* configure real Stripe test/live projects, keys, webhook secret and callback URLs
+* deploy all required Edge Functions:
+  * `create_payment_intent`
+  * `finalize_payment_attempt`
+  * `stripe_webhook`
+  * `create_seller_stripe_account_or_link`
+  * `refresh_seller_stripe_status`
+  * `update_order_status`
+  * `publish_truffle`
+  * `submit_seller_application`
+  * `auto_complete_orders`
+  * `cancel_unshipped_orders`
+  * `retry_financial_operations`
+* install scheduled jobs from `supabase/scripts/install_scheduled_edge_jobs.sql` in the hosted environment
+* verify Storage buckets, policies and signed URL flows on hosted Supabase
+* replace all local/dev redirect assumptions with production app/web deep links
+* prepare Android/iOS production configuration for Stripe, package ids, merchant identifiers and release signing
+* define a staging environment and run full hosted end-to-end tests for auth, onboarding, publish, checkout, webhook, refund and payout flows
+* add production monitoring/alerting for Edge Functions, Stripe webhooks, failed financial operations and cron jobs
+* define manual operations and incident runbooks for seller approval, refunds, payout failures and webhook failures
+* complete legal/compliance readiness:
+  * privacy policy and terms final review
+  * seller verification operational policy
+  * retention/anonymization policy
+  * payment/refund support process
+* set up CI/CD or at least a repeatable release/deploy checklist
+* execute a production-readiness pass on security, secrets handling and rollback procedures

@@ -6,6 +6,7 @@ import {
   type StripeGateway,
   verifyStripeWebhookSignature,
 } from "../_shared/stripe_payments.ts";
+import type { SellerStripeStore } from "../_shared/stripe_connect.ts";
 
 Deno.test("create payment intent rejects unauthenticated buyers", async () => {
   const response = await handleCreatePaymentIntent({
@@ -30,22 +31,24 @@ Deno.test("create payment intent rejects unauthenticated buyers", async () => {
 Deno.test("create payment intent blocks self purchase", async () => {
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "buyer-1",
-      status: "active",
-      priceTotal: 79,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "buyer-1",
+        status: "active",
+        priceTotal: 79,
+      }),
   });
 
   const response = await handleCreatePaymentIntent({
@@ -70,22 +73,24 @@ Deno.test("create payment intent blocks self purchase", async () => {
 Deno.test("create payment intent blocks unavailable truffles", async () => {
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "reserved",
-      priceTotal: 79,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "reserved",
+        priceTotal: 79,
+      }),
   });
 
   const response = await handleCreatePaymentIntent({
@@ -136,29 +141,32 @@ Deno.test("create payment intent creates attempt and payment intent", async () =
 
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "active",
-      priceTotal: 79,
-      shippingPriceItaly: 10.99,
-      shippingPriceAbroad: 25,
-    }),
-    beginOrReadPaymentAttempt: () => Promise.resolve({
-      attempt,
-      isNew: true,
-      conflict: null,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "active",
+        priceTotal: 79,
+        shippingPriceItaly: 10.99,
+        shippingPriceAbroad: 25,
+      }),
+    beginOrReadPaymentAttempt: () =>
+      Promise.resolve({
+        attempt,
+        isNew: true,
+        conflict: null,
+      }),
     attachStripePaymentIntent: (
       _attemptId: string,
       stripePaymentIntentId: string,
@@ -205,6 +213,121 @@ Deno.test("create payment intent creates attempt and payment intent", async () =
   });
 });
 
+Deno.test("create payment intent cancels stale Stripe intent before expiring attempt", async () => {
+  let canceledIntentId: string | null = null;
+  let expiredAttemptId: string | null = null;
+
+  const staleAttempt = {
+    id: "123e4567-e89b-42d3-a456-426614174010",
+    buyerId: "buyer-2",
+    sellerId: "seller-1",
+    truffleId: "123e4567-e89b-42d3-a456-426614174001",
+    shippingAddressId: "123e4567-e89b-42d3-a456-426614174003",
+    status: "requires_payment_method" as const,
+    requestFingerprint: "stale",
+    stripePaymentIntentId: "pi_stale",
+    totalPrice: 89.99,
+    commissionAmount: 9,
+    sellerAmount: 80.99,
+    shippingFullName: "Buyer Two",
+    shippingStreet: "Via Milano 1",
+    shippingCity: "Milano",
+    shippingPostalCode: "20100",
+    shippingCountryCode: "IT",
+    shippingPhone: "3332222222",
+    orderId: null,
+    expiresAt: "2026-03-29T09:00:00.000Z",
+  };
+  const newAttempt = {
+    ...staleAttempt,
+    id: "123e4567-e89b-42d3-a456-426614174000",
+    buyerId: "buyer-1",
+    shippingAddressId: "123e4567-e89b-42d3-a456-426614174002",
+    requestFingerprint:
+      '{"truffle_id":"123e4567-e89b-42d3-a456-426614174001","shipping_address_id":"123e4567-e89b-42d3-a456-426614174002"}',
+    stripePaymentIntentId: null,
+    shippingFullName: "Buyer One",
+    shippingStreet: "Via Roma 1",
+    shippingCity: "Roma",
+    shippingPostalCode: "00100",
+    shippingPhone: "3331111111",
+    expiresAt: "2026-03-29T10:30:00.000Z",
+  };
+
+  const response = await handleCreatePaymentIntent({
+    request: new Request("http://localhost/create_payment_intent", {
+      method: "POST",
+      body: JSON.stringify({
+        payment_attempt_id: newAttempt.id,
+        truffle_id: newAttempt.truffleId,
+        shipping_address_id: newAttempt.shippingAddressId,
+      }),
+    }),
+    requestId: "req-expire-stale",
+    authenticatedUserId: "buyer-1",
+    now: () => new Date("2026-03-29T10:00:00.000Z"),
+    store: createNoopStore({
+      getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
+      getShippingAddress: () =>
+        Promise.resolve({
+          id: newAttempt.shippingAddressId,
+          userId: "buyer-1",
+          fullName: "Buyer One",
+          street: "Via Roma 1",
+          city: "Roma",
+          postalCode: "00100",
+          countryCode: "IT",
+          phone: "3331111111",
+        }),
+      getTruffleForPurchase: () =>
+        Promise.resolve({
+          id: newAttempt.truffleId,
+          sellerId: "seller-1",
+          status: "active",
+          priceTotal: 79,
+          shippingPriceItaly: 10.99,
+        }),
+      getStalePaymentAttempts: () => Promise.resolve([staleAttempt]),
+      expirePaymentAttempt: (args) => {
+        expiredAttemptId = args.attemptId;
+        return Promise.resolve();
+      },
+      beginOrReadPaymentAttempt: () =>
+        Promise.resolve({
+          attempt: newAttempt,
+          isNew: true,
+          conflict: null,
+        }),
+    }),
+    stripeGateway: createNoopStripeGateway({
+      retrievePaymentIntent: () =>
+        Promise.resolve({
+          id: "pi_stale",
+          clientSecret: "pi_stale_secret",
+          status: "requires_payment_method",
+        }),
+      cancelPaymentIntent: (args) => {
+        canceledIntentId = args.paymentIntentId;
+        return Promise.resolve({
+          id: args.paymentIntentId,
+          clientSecret: `${args.paymentIntentId}_secret`,
+          status: "canceled",
+        });
+      },
+      createPaymentIntent: () =>
+        Promise.resolve({
+          id: "pi_new",
+          clientSecret: "pi_new_secret",
+          status: "requires_payment_method",
+        }),
+    }),
+  });
+
+  assertEquals(response.status, 200);
+  assertEquals(canceledIntentId, "pi_stale");
+  assertEquals(expiredAttemptId, staleAttempt.id);
+});
+
 Deno.test("create payment intent reuses an open attempt and existing payment intent", async () => {
   let createdStripeIntent = false;
   let retrievedStripeIntent = false;
@@ -234,29 +357,32 @@ Deno.test("create payment intent reuses an open attempt and existing payment int
 
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "active",
-      priceTotal: 79,
-      shippingPriceItaly: 10.99,
-      shippingPriceAbroad: 25,
-    }),
-    beginOrReadPaymentAttempt: () => Promise.resolve({
-      attempt: openAttempt,
-      isNew: false,
-      conflict: null,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "active",
+        priceTotal: 79,
+        shippingPriceItaly: 10.99,
+        shippingPriceAbroad: 25,
+      }),
+    beginOrReadPaymentAttempt: () =>
+      Promise.resolve({
+        attempt: openAttempt,
+        isNew: false,
+        conflict: null,
+      }),
     attachStripePaymentIntent: () => Promise.resolve(),
   });
 
@@ -303,7 +429,7 @@ Deno.test("create payment intent reuses an open attempt and existing payment int
   });
 });
 
-Deno.test("create payment intent refreshes a legacy payment intent that is not card-only", async () => {
+Deno.test("create payment intent refreshes a legacy payment intent without automatic payment methods", async () => {
   let createdStripeIntent = false;
   let retrievedStripeIntent = false;
   let attachedIntentId: string | null = null;
@@ -333,30 +459,36 @@ Deno.test("create payment intent refreshes a legacy payment intent that is not c
 
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "active",
-      priceTotal: 79,
-      shippingPriceItaly: 10.99,
-      shippingPriceAbroad: 25,
-    }),
-    beginOrReadPaymentAttempt: () => Promise.resolve({
-      attempt: openAttempt,
-      isNew: false,
-      conflict: null,
-    }),
-    attachStripePaymentIntent: (_attemptId: string, stripePaymentIntentId: string) => {
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "active",
+        priceTotal: 79,
+        shippingPriceItaly: 10.99,
+        shippingPriceAbroad: 25,
+      }),
+    beginOrReadPaymentAttempt: () =>
+      Promise.resolve({
+        attempt: openAttempt,
+        isNew: false,
+        conflict: null,
+      }),
+    attachStripePaymentIntent: (
+      _attemptId: string,
+      stripePaymentIntentId: string,
+    ) => {
       attachedIntentId = stripePaymentIntentId;
       return Promise.resolve();
     },
@@ -459,14 +591,15 @@ Deno.test("finalize payment attempt creates the order immediately when Stripe su
     authenticatedUserId: "buyer-1",
     store,
     stripeGateway: createNoopStripeGateway({
-      retrievePaymentIntent: () => Promise.resolve({
-        id: attempt.stripePaymentIntentId,
-        clientSecret: "pi_finalized_1_secret",
-        status: "succeeded",
-        metadata: {
-          payment_attempt_id: attempt.id,
-        },
-      }),
+      retrievePaymentIntent: () =>
+        Promise.resolve({
+          id: attempt.stripePaymentIntentId,
+          clientSecret: "pi_finalized_1_secret",
+          status: "succeeded",
+          metadata: {
+            payment_attempt_id: attempt.id,
+          },
+        }),
     }),
   });
 
@@ -532,14 +665,15 @@ Deno.test("finalize payment attempt stays pending when Stripe has not succeeded 
     authenticatedUserId: "buyer-1",
     store,
     stripeGateway: createNoopStripeGateway({
-      retrievePaymentIntent: () => Promise.resolve({
-        id: attempt.stripePaymentIntentId,
-        clientSecret: "pi_finalized_2_secret",
-        status: "processing",
-        metadata: {
-          payment_attempt_id: attempt.id,
-        },
-      }),
+      retrievePaymentIntent: () =>
+        Promise.resolve({
+          id: attempt.stripePaymentIntentId,
+          clientSecret: "pi_finalized_2_secret",
+          status: "processing",
+          metadata: {
+            payment_attempt_id: attempt.id,
+          },
+        }),
     }),
   });
 
@@ -580,29 +714,32 @@ Deno.test("create payment intent rejects temporally expired attempts", async () 
 
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "active",
-      priceTotal: 79,
-      shippingPriceItaly: 10.99,
-      shippingPriceAbroad: 25,
-    }),
-    beginOrReadPaymentAttempt: () => Promise.resolve({
-      attempt: expiredAttempt,
-      isNew: false,
-      conflict: null,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "active",
+        priceTotal: 79,
+        shippingPriceItaly: 10.99,
+        shippingPriceAbroad: 25,
+      }),
+    beginOrReadPaymentAttempt: () =>
+      Promise.resolve({
+        attempt: expiredAttempt,
+        isNew: false,
+        conflict: null,
+      }),
   });
 
   const stripeGateway = createNoopStripeGateway({
@@ -642,22 +779,24 @@ Deno.test("create payment intent normalizes shipping country code before insert"
 
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "it",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "active",
-      priceTotal: 79,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "it",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "active",
+        priceTotal: 79,
+      }),
     beginOrReadPaymentAttempt: (
       args: { shippingCountryCode: string },
     ) => {
@@ -736,27 +875,30 @@ Deno.test("create payment intent blocks reuse of succeeded payment intents", asy
 
   const store = createNoopStore({
     getCurrentUser: () => Promise.resolve({ id: "buyer-1", isActive: true }),
-    getShippingAddress: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174002",
-      userId: "buyer-1",
-      fullName: "Buyer One",
-      street: "Via Roma 1",
-      city: "Roma",
-      postalCode: "00100",
-      countryCode: "IT",
-      phone: "3331111111",
-    }),
-    getTruffleForPurchase: () => Promise.resolve({
-      id: "123e4567-e89b-42d3-a456-426614174001",
-      sellerId: "seller-1",
-      status: "active",
-      priceTotal: 79,
-    }),
-    beginOrReadPaymentAttempt: () => Promise.resolve({
-      attempt,
-      isNew: false,
-      conflict: null,
-    }),
+    getShippingAddress: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174002",
+        userId: "buyer-1",
+        fullName: "Buyer One",
+        street: "Via Roma 1",
+        city: "Roma",
+        postalCode: "00100",
+        countryCode: "IT",
+        phone: "3331111111",
+      }),
+    getTruffleForPurchase: () =>
+      Promise.resolve({
+        id: "123e4567-e89b-42d3-a456-426614174001",
+        sellerId: "seller-1",
+        status: "active",
+        priceTotal: 79,
+      }),
+    beginOrReadPaymentAttempt: () =>
+      Promise.resolve({
+        attempt,
+        isNew: false,
+        conflict: null,
+      }),
   });
 
   const response = await handleCreatePaymentIntent({
@@ -772,11 +914,12 @@ Deno.test("create payment intent blocks reuse of succeeded payment intents", asy
     authenticatedUserId: "buyer-1",
     store,
     stripeGateway: createNoopStripeGateway({
-      retrievePaymentIntent: () => Promise.resolve({
-        id: "pi_succeeded",
-        clientSecret: "pi_succeeded_secret",
-        status: "succeeded",
-      }),
+      retrievePaymentIntent: () =>
+        Promise.resolve({
+          id: "pi_succeeded",
+          clientSecret: "pi_succeeded_secret",
+          status: "succeeded",
+        }),
     }),
     now: () => new Date("2024-03-09T16:00:00.000Z"),
   });
@@ -878,27 +1021,28 @@ Deno.test("payment_intent.succeeded creates one order", async () => {
     now: () => new Date("2024-03-09T16:00:00.000Z"),
     store: createNoopStore({
       registerWebhookEvent: () => Promise.resolve({ isDuplicate: false }),
-      getPaymentAttemptById: () => Promise.resolve({
-        id: "123e4567-e89b-42d3-a456-426614174000",
-        buyerId: "buyer-1",
-        sellerId: "seller-1",
-        truffleId: "truffle-1",
-        shippingAddressId: "shipping-1",
-        status: "requires_payment_method",
-        requestFingerprint: "fp",
-        stripePaymentIntentId: "pi_test_success",
-        totalPrice: 79,
-        commissionAmount: 7.9,
-        sellerAmount: 71.1,
-        shippingFullName: "Buyer One",
-        shippingStreet: "Via Roma 1",
-        shippingCity: "Roma",
-        shippingPostalCode: "00100",
-        shippingCountryCode: "IT",
-        shippingPhone: "3331111111",
-        orderId: null,
-        expiresAt: new Date().toISOString(),
-      }),
+      getPaymentAttemptById: () =>
+        Promise.resolve({
+          id: "123e4567-e89b-42d3-a456-426614174000",
+          buyerId: "buyer-1",
+          sellerId: "seller-1",
+          truffleId: "truffle-1",
+          shippingAddressId: "shipping-1",
+          status: "requires_payment_method",
+          requestFingerprint: "fp",
+          stripePaymentIntentId: "pi_test_success",
+          totalPrice: 79,
+          commissionAmount: 7.9,
+          sellerAmount: 71.1,
+          shippingFullName: "Buyer One",
+          shippingStreet: "Via Roma 1",
+          shippingCity: "Roma",
+          shippingPostalCode: "00100",
+          shippingCountryCode: "IT",
+          shippingPhone: "3331111111",
+          orderId: null,
+          expiresAt: new Date().toISOString(),
+        }),
       createOrderFromPaymentAttempt: () => {
         createOrderCalled = true;
         return Promise.resolve({
@@ -952,27 +1096,28 @@ Deno.test("payment_intent.payment_failed does not create orders", async () => {
     now: () => new Date("2024-03-09T16:00:00.000Z"),
     store: createNoopStore({
       registerWebhookEvent: () => Promise.resolve({ isDuplicate: false }),
-      getPaymentAttemptById: () => Promise.resolve({
-        id: "123e4567-e89b-42d3-a456-426614174000",
-        buyerId: "buyer-1",
-        sellerId: "seller-1",
-        truffleId: "truffle-1",
-        shippingAddressId: "shipping-1",
-        status: "requires_payment_method",
-        requestFingerprint: "fp",
-        stripePaymentIntentId: "pi_test_failed",
-        totalPrice: 79,
-        commissionAmount: 7.9,
-        sellerAmount: 71.1,
-        shippingFullName: "Buyer One",
-        shippingStreet: "Via Roma 1",
-        shippingCity: "Roma",
-        shippingPostalCode: "00100",
-        shippingCountryCode: "IT",
-        shippingPhone: "3331111111",
-        orderId: null,
-        expiresAt: new Date().toISOString(),
-      }),
+      getPaymentAttemptById: () =>
+        Promise.resolve({
+          id: "123e4567-e89b-42d3-a456-426614174000",
+          buyerId: "buyer-1",
+          sellerId: "seller-1",
+          truffleId: "truffle-1",
+          shippingAddressId: "shipping-1",
+          status: "requires_payment_method",
+          requestFingerprint: "fp",
+          stripePaymentIntentId: "pi_test_failed",
+          totalPrice: 79,
+          commissionAmount: 7.9,
+          sellerAmount: 71.1,
+          shippingFullName: "Buyer One",
+          shippingStreet: "Via Roma 1",
+          shippingCity: "Roma",
+          shippingPostalCode: "00100",
+          shippingCountryCode: "IT",
+          shippingPhone: "3331111111",
+          orderId: null,
+          expiresAt: new Date().toISOString(),
+        }),
       markPaymentAttemptFailed: () => {
         markedFailed = true;
         return Promise.resolve({
@@ -996,32 +1141,114 @@ Deno.test("payment_intent.payment_failed does not create orders", async () => {
   assertEquals(createOrderCalled, false);
 });
 
+Deno.test("account.updated webhook refreshes seller Stripe readiness", async () => {
+  let updatedReadyAt: string | null = null;
+  const payload = JSON.stringify({
+    id: "evt_account_updated",
+    type: "account.updated",
+    data: {
+      object: {
+        id: "acct_ready",
+        object: "account",
+        details_submitted: true,
+        charges_enabled: true,
+        payouts_enabled: true,
+        requirements: {
+          currently_due: [],
+          past_due: [],
+          pending_verification: [],
+        },
+      },
+    },
+  });
+  const signature = await makeStripeSignature(
+    "whsec_test",
+    payload,
+    1710000000,
+  );
+
+  const response = await handleStripeWebhook({
+    request: new Request("http://localhost/stripe_webhook", {
+      method: "POST",
+      headers: { "stripe-signature": signature },
+      body: payload,
+    }),
+    requestId: "req-account",
+    webhookSecret: "whsec_test",
+    now: () => new Date("2024-03-09T16:00:00.000Z"),
+    store: createNoopStore(),
+    sellerStripeStore: createNoopSellerStripeStore({
+      getSellerStripeUserByStripeAccountId: () =>
+        Promise.resolve({
+          id: "seller-1",
+          role: "seller",
+          sellerStatus: "approved",
+          isActive: true,
+          firstName: "Seller",
+          lastName: "One",
+          stripeAccountId: "acct_ready",
+          stripeDetailsSubmitted: false,
+          stripeChargesEnabled: false,
+          stripePayoutsEnabled: false,
+          stripeRequirementsPending: true,
+          stripeOnboardingCompletedAt: null,
+          stripeReadyAt: null,
+          countryCode: "IT",
+        }),
+      updateSellerStripeStatus: (_userId, status) => {
+        updatedReadyAt = status.readyAt;
+        return Promise.resolve();
+      },
+    }),
+  });
+
+  assertEquals(response.status, 200);
+  assertEquals(updatedReadyAt, "2024-03-09T16:00:00.000Z");
+});
+
 function createNoopStore(overrides: Partial<PaymentStore> = {}): PaymentStore {
   return {
     getCurrentUser: () => Promise.resolve(null),
     getTruffleForPurchase: () => Promise.resolve(null),
     getShippingAddress: () => Promise.resolve(null),
-    expireStalePaymentAttempts: () => Promise.resolve(),
-    beginOrReadPaymentAttempt: () => Promise.resolve({
-      attempt: null,
-      isNew: false,
-      conflict: null,
-    }),
+    getStalePaymentAttempts: () => Promise.resolve([]),
+    expirePaymentAttempt: () => Promise.resolve(),
+    beginOrReadPaymentAttempt: () =>
+      Promise.resolve({
+        attempt: null,
+        isNew: false,
+        conflict: null,
+      }),
     attachStripePaymentIntent: () => Promise.resolve(),
     getPaymentAttemptById: () => Promise.resolve(null),
     getPaymentAttemptByStripeIntentId: () => Promise.resolve(null),
-    markPaymentAttemptFailed: () => Promise.resolve({
-      idempotent: false,
-      status: "failed" as const,
-    }),
+    markPaymentAttemptFailed: () =>
+      Promise.resolve({
+        idempotent: false,
+        status: "failed" as const,
+      }),
     registerWebhookEvent: () => Promise.resolve({ isDuplicate: false }),
     completeWebhookEvent: () => Promise.resolve(),
     failWebhookEvent: () => Promise.resolve(),
-    createOrderFromPaymentAttempt: () => Promise.resolve({
-      orderId: "223e4567-e89b-42d3-a456-426614174000",
-      created: false,
-      paymentAttemptStatus: "succeeded" as const,
-    }),
+    createOrderFromPaymentAttempt: () =>
+      Promise.resolve({
+        orderId: "223e4567-e89b-42d3-a456-426614174000",
+        created: false,
+        paymentAttemptStatus: "succeeded" as const,
+      }),
+    insertAuditLog: () => Promise.resolve(),
+    ...overrides,
+  };
+}
+
+function createNoopSellerStripeStore(
+  overrides: Partial<SellerStripeStore> = {},
+): SellerStripeStore {
+  return {
+    getSellerStripeUser: () => Promise.resolve(null),
+    getSellerStripeUserByStripeAccountId: () => Promise.resolve(null),
+    updateSellerStripeStatus: () => Promise.resolve(),
+    saveSellerStripeAccountId: () => Promise.resolve(),
     insertAuditLog: () => Promise.resolve(),
     ...overrides,
   };
@@ -1031,16 +1258,24 @@ function createNoopStripeGateway(
   overrides: Partial<StripeGateway> = {},
 ): StripeGateway {
   return {
-    createPaymentIntent: () => Promise.resolve({
-      id: "pi_default",
-      clientSecret: "pi_default_secret",
-      status: "requires_payment_method" as const,
-    }),
-    retrievePaymentIntent: () => Promise.resolve({
-      id: "pi_default",
-      clientSecret: "pi_default_secret",
-      status: "requires_payment_method" as const,
-    }),
+    createPaymentIntent: () =>
+      Promise.resolve({
+        id: "pi_default",
+        clientSecret: "pi_default_secret",
+        status: "requires_payment_method" as const,
+      }),
+    retrievePaymentIntent: () =>
+      Promise.resolve({
+        id: "pi_default",
+        clientSecret: "pi_default_secret",
+        status: "requires_payment_method" as const,
+      }),
+    cancelPaymentIntent: () =>
+      Promise.resolve({
+        id: "pi_default",
+        clientSecret: "pi_default_secret",
+        status: "canceled" as const,
+      }),
     ...overrides,
   };
 }

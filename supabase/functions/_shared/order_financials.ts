@@ -5,6 +5,7 @@ type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
 type JsonObject = { [key: string]: JsonValue };
 
 const stripeApiBaseUrl = "https://api.stripe.com/v1";
+const stripeApiVersion = "2026-03-25.dahlia";
 
 export type FinancialOperationKind = "payment" | "refund" | "transfer";
 export type FinancialOperationStatus =
@@ -700,6 +701,7 @@ async function stripeRequest(
     method: args.method,
     headers: {
       Authorization: `Bearer ${secretKey}`,
+      "Stripe-Version": stripeApiVersion,
       ...(args.body == null
         ? {}
         : { "Content-Type": "application/x-www-form-urlencoded" }),
@@ -737,12 +739,36 @@ function normalizeFinancialFailure(error: unknown): OrderFinancialActionError {
     return error;
   }
 
-  const message = error instanceof Error ? error.message : String(error);
+  const message = readUnknownFailureMessage(error);
   return new OrderFinancialActionError(
     "financial_operation_failed",
     message,
     error,
   );
+}
+
+function readUnknownFailureMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim() !== "") {
+    return error.message;
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const message = Reflect.get(error, "message");
+    if (typeof message === "string" && message.trim() !== "") {
+      return message;
+    }
+
+    try {
+      const serialized = JSON.stringify(error);
+      if (serialized != null && serialized.trim() !== "") {
+        return serialized;
+      }
+    } catch {
+      // Fall through to String(error).
+    }
+  }
+
+  return String(error);
 }
 
 function readStripeErrorMessage(body: unknown): string | null {

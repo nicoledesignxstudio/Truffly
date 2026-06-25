@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createBusinessNotificationAndPush } from "../_shared/business_notifications.ts";
 import {
   createStripeOrderFinancialGateway,
   createSupabaseOrderFinancialStore,
@@ -57,6 +58,7 @@ Deno.serve(async (request) => {
   const reminderResult = await sendDeliveryReminders({
     adminClient,
     cutoffIso: reminderCutoffIso,
+    requestId,
   });
 
   const { data, error } = await adminClient
@@ -122,6 +124,7 @@ Deno.serve(async (request) => {
 async function sendDeliveryReminders(args: {
   adminClient: any;
   cutoffIso: string;
+  requestId: string;
 }): Promise<{ scanned: number; sent: number }> {
   const { data, error } = await args.adminClient
     .from("orders")
@@ -157,18 +160,15 @@ async function sendDeliveryReminders(args: {
       continue;
     }
 
-    const { error: notificationError } = await args.adminClient
-      .from("notifications")
-      .insert({
-        user_id: order.buyer_id,
-        type: "order_delivery_confirmation_reminder",
-        message:
-          "Please confirm delivery within 48 hours or the order will be auto-completed.",
-      });
-
-    if (notificationError != null) {
-      throw notificationError;
-    }
+    await createBusinessNotificationAndPush({
+      adminClient: args.adminClient,
+      userId: order.buyer_id,
+      type: "delivery_confirmation_reminder",
+      message:
+        "Have you received your truffle? Confirm delivery to complete the order.",
+      metadata: { order_id: order.id },
+      requestId: args.requestId,
+    });
 
     sent += 1;
   }

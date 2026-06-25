@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+const stripeApiVersion = "2026-03-25.dahlia";
+
 export type SellerStripeReadiness =
   | "not_connected"
   | "onboarding_in_progress"
@@ -34,6 +36,25 @@ export type SellerStripeStatusSnapshot = {
   readyAt: string | null;
 };
 
+export type StripeRequirementCounts = {
+  currentlyDue: number;
+  pastDue: number;
+  eventuallyDue: number;
+};
+
+export type SellerStripeStatusLogContext = {
+  requestId: string;
+  userId: string;
+  stripeAccountId: string | null;
+  detailsSubmitted: boolean;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  currentlyDueCount: number;
+  pastDueCount: number;
+  eventuallyDueCount: number;
+  computedReady: boolean;
+};
+
 type StripeAccountRequirements = {
   disabled_reason?: string | null;
   currently_due?: unknown;
@@ -56,6 +77,9 @@ export type StripeAccountLink = {
 
 export type SellerStripeStore = {
   getSellerStripeUser(userId: string): Promise<SellerStripeUser | null>;
+  getSellerStripeUserByStripeAccountId(
+    accountId: string,
+  ): Promise<SellerStripeUser | null>;
   updateSellerStripeStatus(
     userId: string,
     status: SellerStripeStatusSnapshot,
@@ -279,6 +303,19 @@ export async function handleRefreshSellerStripeStatus(
       };
 
       await deps.store.updateSellerStripeStatus(user.id, notConnectedStatus);
+      console.log("seller_stripe_status_refreshed", {
+        requestId: deps.requestId,
+        userId: user.id,
+        stripeAccountId: null,
+        detailsSubmitted: false,
+        chargesEnabled: false,
+        payoutsEnabled: false,
+        currentlyDueCount: 0,
+        pastDueCount: 0,
+        eventuallyDueCount: 0,
+        computedReady: false,
+        triggerSource: "refresh_seller_stripe_status",
+      });
       await insertAuditLogSafe(deps.store, {
         entityType: "user",
         entityId: user.id,
@@ -311,8 +348,19 @@ export async function handleRefreshSellerStripeStatus(
       existingUser: user,
       now: (deps.now ?? (() => new Date()))(),
     });
+    const logContext = buildSellerStripeStatusLogContext({
+      requestId: deps.requestId,
+      userId: user.id,
+      accountId,
+      accountRequirements: account.requirements,
+      status,
+    });
 
     await deps.store.updateSellerStripeStatus(user.id, status);
+    console.log("seller_stripe_status_refreshed", {
+      ...logContext,
+      triggerSource: "refresh_seller_stripe_status",
+    });
     await insertAuditLogSafe(deps.store, {
       entityType: "user",
       entityId: user.id,
@@ -374,13 +422,13 @@ export function mapStripeAccountToSellerStripeStatus(args: {
   const detailsSubmitted = args.account.detailsSubmitted === true;
   const chargesEnabled = args.account.chargesEnabled === true;
   const payoutsEnabled = args.account.payoutsEnabled === true;
-  const requirementsPending = hasPendingStripeRequirements(
-    args.account.requirements,
-  );
+  const requirementsPending = hasPendingStripeRequirements(args.account.requirements);
 
-  const readiness = !detailsSubmitted
+  const readiness = !normalizeOptionalString(args.account.id)
+    ? "not_connected"
+    : !detailsSubmitted
     ? "onboarding_in_progress"
-    : payoutsEnabled && !requirementsPending
+    : chargesEnabled && payoutsEnabled
     ? "ready"
     : "verification_pending";
 
@@ -403,18 +451,13 @@ export function isSellerStripeReady(
   status: Pick<
     SellerStripeStatusSnapshot,
     | "accountId"
-    | "detailsSubmitted"
     | "chargesEnabled"
     | "payoutsEnabled"
-    | "requirementsPending"
-    | "readyAt"
   >,
 ): boolean {
   return normalizeOptionalString(status.accountId) != null &&
-    status.detailsSubmitted === true &&
-    status.payoutsEnabled === true &&
-    status.requirementsPending === false &&
-    normalizeOptionalString(status.readyAt) != null;
+    status.chargesEnabled === true &&
+    status.payoutsEnabled === true;
 }
 
 export async function refreshSellerStripeStatusForPublish(args: {
@@ -460,6 +503,11 @@ export function createStripeConnectGateway(
         "https://api.stripe.com/v1/accounts",
         {
           method: "POST",
+          headers: {
+            "Idempotency-Key": buildStripeConnectAccountIdempotencyKey(
+              args.metadata.user_id,
+            ),
+          },
           body: new URLSearchParams({
             type: "express",
             country: args.country,
@@ -490,6 +538,7 @@ export function createStripeConnectGateway(
           method: "POST",
           body: new URLSearchParams({
             account: args.accountId,
+            "collection_options[fields]": "eventually_due",
             refresh_url: args.refreshUrl,
             return_url: args.returnUrl,
             type: "account_onboarding",
@@ -534,6 +583,30 @@ export function createSupabaseSellerStripeStore(
           "seller_stripe_unknown_error",
           500,
           "Failed to load the seller profile.",
+          result.error,
+        );
+      }
+
+      if (result.data == null) {
+        return null;
+      }
+
+      return mapSellerStripeUserRow(result.data);
+    },
+    async getSellerStripeUserByStripeAccountId(accountId) {
+      const result = await adminClient
+        .from("users")
+        .select(
+          "id, role, seller_status, is_active, first_name, last_name, stripe_account_id, stripe_details_submitted, stripe_charges_enabled, stripe_payouts_enabled, stripe_requirements_pending, stripe_onboarding_completed_at, stripe_ready_at, country_code",
+        )
+        .eq("stripe_account_id", accountId)
+        .maybeSingle();
+
+      if (result.error) {
+        throw new SellerStripeError(
+          "seller_stripe_unknown_error",
+          500,
+          "Failed to load the seller profile by Stripe account.",
           result.error,
         );
       }
@@ -662,14 +735,6 @@ async function loadSellerStripeUserOrThrow(args: {
     );
   }
 
-  if (user.role !== "seller") {
-    throw new SellerStripeError(
-      "seller_not_allowed",
-      403,
-      "Only sellers can access this Stripe onboarding flow.",
-    );
-  }
-
   if (user.sellerStatus !== "approved") {
     throw new SellerStripeError(
       "seller_not_approved",
@@ -728,7 +793,7 @@ function mapSellerStripeUserRow(
   };
 }
 
-function parseStripeConnectAccount(
+export function parseStripeConnectAccount(
   response: Record<string, unknown>,
 ): StripeConnectAccount {
   return {
@@ -759,6 +824,42 @@ function hasPendingStripeRequirements(
     toStringArray(requirements.pending_verification).length > 0;
 }
 
+export function summarizeStripeRequirementCounts(
+  requirements: StripeAccountRequirements | null,
+): StripeRequirementCounts {
+  return {
+    currentlyDue: toStringArray(requirements?.currently_due).length,
+    pastDue: toStringArray(requirements?.past_due).length,
+    eventuallyDue: toStringArray(requirements?.pending_verification).length,
+  };
+}
+
+export function buildSellerStripeStatusLogContext(args: {
+  requestId: string;
+  userId: string;
+  accountId: string | null;
+  accountRequirements: StripeAccountRequirements | null;
+  status: SellerStripeStatusSnapshot;
+}): SellerStripeStatusLogContext {
+  const counts = summarizeStripeRequirementCounts(args.accountRequirements);
+  return {
+    requestId: args.requestId,
+    userId: args.userId,
+    stripeAccountId: normalizeOptionalString(args.accountId),
+    detailsSubmitted: args.status.detailsSubmitted,
+    chargesEnabled: args.status.chargesEnabled,
+    payoutsEnabled: args.status.payoutsEnabled,
+    currentlyDueCount: counts.currentlyDue,
+    pastDueCount: counts.pastDue,
+    eventuallyDueCount: counts.eventuallyDue,
+    computedReady: isSellerStripeReady({
+      accountId: args.status.accountId,
+      chargesEnabled: args.status.chargesEnabled,
+      payoutsEnabled: args.status.payoutsEnabled,
+    }),
+  };
+}
+
 async function fetchStripeConnect(
   fetchImpl: typeof fetch,
   stripeSecretKey: string,
@@ -767,14 +868,16 @@ async function fetchStripeConnect(
 ): Promise<Record<string, unknown>> {
   let response: Response;
   try {
+    const headers = new Headers(init.headers);
+    headers.set("Authorization", `Bearer ${stripeSecretKey}`);
+    headers.set("Stripe-Version", stripeApiVersion);
+    if (init.body != null) {
+      headers.set("Content-Type", "application/x-www-form-urlencoded");
+    }
+
     response = await fetchImpl(url, {
       ...init,
-      headers: {
-        Authorization: `Bearer ${stripeSecretKey}`,
-        ...(init.body == null ? {} : {
-          "Content-Type": "application/x-www-form-urlencoded",
-        }),
-      },
+      headers,
     });
   } catch (error) {
     const runtimeMessage = readRuntimeErrorMessage(error) ??
@@ -829,6 +932,10 @@ function flattenStripeMetadata(
   return Object.fromEntries(
     Object.entries(metadata).map(([key, value]) => [`metadata[${key}]`, value]),
   );
+}
+
+function buildStripeConnectAccountIdempotencyKey(userId: string): string {
+  return `truffly_connect_account_${userId}`;
 }
 
 function normalizeCountryCode(value: string | null): string {
@@ -931,7 +1038,9 @@ function readRuntimeErrorMessage(error: unknown): string | null {
   }
 
   if (typeof error === "object" && error !== null) {
-    const nestedMessage = normalizeOptionalString(Reflect.get(error, "message"));
+    const nestedMessage = normalizeOptionalString(
+      Reflect.get(error, "message"),
+    );
     if (nestedMessage != null) {
       return nestedMessage;
     }
