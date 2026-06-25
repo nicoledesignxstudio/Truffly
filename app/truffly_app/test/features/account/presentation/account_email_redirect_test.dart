@@ -48,9 +48,7 @@ class _FakeAccountDetailsService implements AccountDetailsService {
   }
 
   @override
-  Future<AuthResult<AuthUnit>> updateEmail({
-    required String email,
-  }) async {
+  Future<AuthResult<AuthUnit>> updateEmail({required String email}) async {
     updateEmailCalls += 1;
     lastUpdatedEmail = email;
     return const AuthSuccess<AuthUnit>(AuthUnit.value);
@@ -58,10 +56,7 @@ class _FakeAccountDetailsService implements AccountDetailsService {
 }
 
 class _MutableAuthNotifier extends AuthNotifier {
-  _MutableAuthNotifier({
-    required this.initialState,
-    this.refreshedState,
-  });
+  _MutableAuthNotifier({required this.initialState, this.refreshedState});
 
   final AuthState initialState;
   final AuthState? refreshedState;
@@ -151,90 +146,97 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      await _pumpApp(
-        tester,
-        container: container,
-        locale: const Locale('en'),
-      );
+      await _pumpApp(tester, container: container, locale: const Locale('en'));
 
+      await tester.ensureVisible(find.text('Change email'));
+      await tester.tap(find.text('Change email'));
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const Key('account_email_field')),
         'new-email@test.com',
       );
-      await tester.tap(find.byKey(const Key('account_save_button')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Save new email'));
+      await tester.tap(find.text('Save new email'));
       await tester.pumpAndSettle();
 
       final router = container.read(appRouterProvider);
 
-      expect(fakeService.updateProfileCalls, 1);
+      expect(fakeService.updateProfileCalls, 0);
       expect(fakeService.updateEmailCalls, 1);
       expect(fakeService.lastUpdatedEmail, 'new-email@test.com');
 
-      expect(authNotifier.refreshCalls, 1);
-      expect(container.read(authNotifierProvider), isA<AuthAuthenticatedUnverified>());
-      expect(router.routeInformationProvider.value.uri.path, AppRoutes.verifyEmail);
+      expect(authNotifier.refreshCalls, 0);
+      expect(
+        container.read(authNotifierProvider),
+        isA<AuthAuthenticatedReady>(),
+      );
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        AppRoutes.verifyEmail,
+      );
       expect(find.byType(VerifyEmailScreen), findsOneWidget);
 
       // Verifica testo persistente della schermata verify-email
       expect(
         find.text(
-          'We sent a verification link to your new email address. Verify your email to continue.',
+          'Check both your current and new email addresses and confirm both links to complete the change.',
         ),
         findsOneWidget,
       );
     },
   );
 
-  testWidgets(
-    'shows the italian verification screen after email change',
-    (tester) async {
-      final fakeService = _FakeAccountDetailsService(_profile());
-      final authNotifier = _MutableAuthNotifier(
-        initialState: const AuthAuthenticatedReady(
-          userId: 'u1',
-          email: 'verified@test.com',
-        ),
-        refreshedState: const AuthAuthenticatedUnverified(
-          userId: 'u1',
-          email: 'new-email@test.com',
-        ),
-      );
+  testWidgets('shows the italian verification screen after email change', (
+    tester,
+  ) async {
+    final fakeService = _FakeAccountDetailsService(_profile());
+    final authNotifier = _MutableAuthNotifier(
+      initialState: const AuthAuthenticatedReady(
+        userId: 'u1',
+        email: 'verified@test.com',
+      ),
+      refreshedState: const AuthAuthenticatedUnverified(
+        userId: 'u1',
+        email: 'new-email@test.com',
+      ),
+    );
 
-      final container = ProviderContainer(
-        overrides: [
-          bootstrapNotifierProvider.overrideWith(_FakeBootstrapNotifier.new),
-          authNotifierProvider.overrideWith(() => authNotifier),
-          accountDetailsServiceProvider.overrideWithValue(fakeService),
-        ],
-      );
-      addTearDown(container.dispose);
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapNotifierProvider.overrideWith(_FakeBootstrapNotifier.new),
+        authNotifierProvider.overrideWith(() => authNotifier),
+        accountDetailsServiceProvider.overrideWithValue(fakeService),
+      ],
+    );
+    addTearDown(container.dispose);
 
-      await _pumpApp(
-        tester,
-        container: container,
-        locale: const Locale('it'),
-      );
+    await _pumpApp(tester, container: container, locale: const Locale('it'));
 
-      await tester.enterText(
-        find.byKey(const Key('account_email_field')),
-        'new-email@test.com',
-      );
-      await tester.tap(find.byKey(const Key('account_save_button')));
-      await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Cambia email'));
+    await tester.tap(find.text('Cambia email'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('account_email_field')),
+      'new-email@test.com',
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Salva nuova email'));
+    await tester.tap(find.text('Salva nuova email'));
+    await tester.pumpAndSettle();
 
-      expect(fakeService.updateProfileCalls, 1);
-      expect(fakeService.updateEmailCalls, 1);
-      expect(authNotifier.refreshCalls, 1);
-      expect(find.byType(VerifyEmailScreen), findsOneWidget);
+    expect(fakeService.updateProfileCalls, 0);
+    expect(fakeService.updateEmailCalls, 1);
+    expect(authNotifier.refreshCalls, 0);
+    expect(find.byType(VerifyEmailScreen), findsOneWidget);
 
-      expect(
-        find.text(
-          "Ti abbiamo inviato un link di verifica al nuovo indirizzo email. Verifica l'email per continuare.",
-        ),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(
+      find.text(
+        "Controlla sia l'indirizzo email attuale sia quello nuovo e conferma entrambi i link per completare il cambio.",
+      ),
+      findsOneWidget,
+    );
+  });
 
   testWidgets(
     'does not redirect when only profile data changes and email stays the same',
@@ -260,16 +262,13 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      await _pumpApp(
-        tester,
-        container: container,
-        locale: const Locale('en'),
-      );
+      await _pumpApp(tester, container: container, locale: const Locale('en'));
 
       await tester.enterText(
         find.byKey(const Key('account_first_name_field')),
         'Luigi',
       );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('account_save_button')));
       await tester.pumpAndSettle();
 
@@ -281,14 +280,17 @@ void main() {
 
       expect(
         container.read(authNotifierProvider),
-        const AuthAuthenticatedReady(
-          userId: 'u1',
-          email: 'verified@test.com',
-        ),
+        const AuthAuthenticatedReady(userId: 'u1', email: 'verified@test.com'),
       );
-      expect(router.routeInformationProvider.value.uri.path, AppRoutes.accountDetails);
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        AppRoutes.accountDetails,
+      );
       expect(find.byType(VerifyEmailScreen), findsNothing);
-      expect(find.text('Account details updated successfully.'), findsOneWidget);
+      expect(
+        find.text('Account details updated successfully.'),
+        findsOneWidget,
+      );
     },
   );
 }

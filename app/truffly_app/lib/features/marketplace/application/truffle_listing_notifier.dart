@@ -58,12 +58,11 @@ final class TruffleListingNotifier extends Notifier<TruffleListingState> {
     await _loadPage(page: nextPage, append: true);
   }
 
-  Future<void> _loadPage({
-    required int page,
-    required bool append,
-  }) async {
+  Future<void> _loadPage({required int page, required bool append}) async {
     try {
-      final items = await ref.read(marketplaceServiceProvider).fetchListingPage(
+      final items = await ref
+          .read(marketplaceServiceProvider)
+          .fetchListingPage(
             localeCode: ref.read(appLocaleCodeProvider),
             searchQuery: state.searchQuery,
             filters: state.appliedFilters,

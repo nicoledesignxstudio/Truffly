@@ -12,6 +12,7 @@ import 'package:truffly_app/features/onboarding/data/models/notification_permiss
 import 'package:truffly_app/features/onboarding/data/models/submit_seller_onboarding_input.dart';
 import 'package:truffly_app/features/onboarding/domain/onboarding_draft.dart';
 import 'package:truffly_app/features/onboarding/domain/onboarding_state.dart';
+import 'package:truffly_app/features/push/data/notification_permission_service.dart';
 
 abstract interface class OnboardingService {
   Future<void> completeBuyerOnboarding(CompleteBuyerOnboardingInput input);
@@ -57,17 +58,20 @@ final class UnimplementedOnboardingService implements OnboardingService {
 final class AppOnboardingService implements OnboardingService {
   AppOnboardingService({
     required SupabaseClient supabaseClient,
-    required ProfileService profileService,
-    required Future<AuthResult<AuthUnit>> Function() refreshAuthState,
-  }) : _supabaseClient = supabaseClient,
+      required ProfileService profileService,
+      required Future<AuthResult<AuthUnit>> Function() refreshAuthState,
+      required NotificationPermissionService notificationPermissionService,
+    }) : _supabaseClient = supabaseClient,
        _profileService = profileService,
-       _refreshAuthState = refreshAuthState;
+       _refreshAuthState = refreshAuthState,
+       _notificationPermissionService = notificationPermissionService;
 
   static const _submitSellerApplicationFunction = 'submit_seller_application';
 
   final SupabaseClient _supabaseClient;
   final ProfileService _profileService;
   final Future<AuthResult<AuthUnit>> Function() _refreshAuthState;
+  final NotificationPermissionService _notificationPermissionService;
 
   @override
   Future<void> completeBuyerOnboarding(CompleteBuyerOnboardingInput input) async {
@@ -92,7 +96,7 @@ final class AppOnboardingService implements OnboardingService {
 
   @override
   Future<NotificationPermissionResult> requestNotificationPermission() {
-    return _fallbackNotificationPermissionResult();
+    return _notificationPermissionService.requestPermission();
   }
 
   @override
@@ -168,6 +172,8 @@ final class AppOnboardingService implements OnboardingService {
       ResetLinkInvalidFailure() => OnboardingSubmissionFailure.validation,
       UserProfileMissingFailure() ||
       UnauthenticatedFailure() ||
+      EmailResendRateLimitedFailure() ||
+      EmailDeliveryRestrictedFailure() ||
       UnknownAuthFailure() => OnboardingSubmissionFailure.unknown,
     };
   }

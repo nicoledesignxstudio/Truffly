@@ -46,7 +46,7 @@ abstract final class AppTheme {
         hintStyle: AppTextStyles.fieldLabel,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.spacingM,
-          vertical: AppSpacing.spacingM,
+          vertical: AppSpacing.authControlVerticalPadding,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: AppRadii.authBorderRadius,
@@ -68,7 +68,7 @@ abstract final class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          minimumSize: const Size.fromHeight(55),
+          minimumSize: const Size.fromHeight(AppSpacing.authControlHeight),
           backgroundColor: AppColors.black,
           foregroundColor: AppColors.white,
           disabledBackgroundColor: AppColors.black,

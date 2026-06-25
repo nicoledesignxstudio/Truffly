@@ -42,7 +42,7 @@ class TruffleShippingCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: AppSpacing.spacingM),
+            const SizedBox(height: AppSpacing.spacingS),
             _ShippingRow(
               label: italyLabel,
               value: formatEuro(shippingPriceItaly),
@@ -80,7 +80,7 @@ class _ShippingRow extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.spacingS),
+        const SizedBox(width: AppSpacing.spacingXS),
         Text(
           value,
           style: AppTextStyles.bodySmall.copyWith(

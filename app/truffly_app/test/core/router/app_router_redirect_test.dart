@@ -153,13 +153,13 @@ void main() {
       expect(redirect, AppRoutes.home);
     });
 
-    test('/verify-email -> /home', () {
+    test('/verify-email remains available for a manual email change', () {
       final redirect = resolveAuthRedirectForTesting(
         authState: ready,
         location: AppRoutes.verifyEmail,
         uri: uriFor(AppRoutes.verifyEmail),
       );
-      expect(redirect, AppRoutes.home);
+      expect(redirect, isNull);
     });
 
     test('/onboarding -> /home', () {
@@ -260,6 +260,29 @@ void main() {
         uri: uriFor('${AppRoutes.resetPassword}?type=signup&code=abc'),
       );
       expect(redirect, AppRoutes.forgotPassword);
+    });
+
+    test(
+      'active recovery flow redirects authenticated users to reset password',
+      () {
+        final redirect = resolveAuthRedirectForTesting(
+          authState: ready,
+          location: AppRoutes.home,
+          uri: uriFor(AppRoutes.home),
+          recoveryFlowActive: true,
+        );
+        expect(redirect, AppRoutes.resetPassword);
+      },
+    );
+
+    test('active recovery flow keeps reset password route accessible', () {
+      final redirect = resolveAuthRedirectForTesting(
+        authState: ready,
+        location: AppRoutes.resetPassword,
+        uri: uriFor(AppRoutes.resetPassword),
+        recoveryFlowActive: true,
+      );
+      expect(redirect, isNull);
     });
   });
 }

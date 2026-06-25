@@ -1,22 +1,16 @@
 import 'package:truffly_app/features/truffle/domain/truffle_quality.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_type.dart';
 
-enum HarvestDatePreset {
-  all,
-  today,
-  last2Days,
-  last3Days,
-  last5Days,
-}
+enum HarvestDatePreset { all, today, last2Days, last3Days, last5Days }
 
 abstract final class TruffleListingFilterBounds {
   static const double minPriceEuro = 0;
   static const double maxPriceEuro = 3000;
-  static const double priceStepEuro = 250;
+  static const double priceStepEuro = 50;
 
   static const double minWeightGrams = 0;
   static const double maxWeightGrams = 1000;
-  static const double weightStepGrams = 100;
+  static const double weightStepGrams = 50;
 
   static int get priceDivisions =>
       ((maxPriceEuro - minPriceEuro) / priceStepEuro).round();
@@ -99,15 +93,15 @@ final class TruffleListingFilters {
 
   @override
   int get hashCode => Object.hash(
-        selectedType,
-        Object.hashAllUnordered(qualities),
-        Object.hashAllUnordered(regions),
-        minPrice,
-        maxPrice,
-        minWeight,
-        maxWeight,
-        harvestDatePreset,
-      );
+    selectedType,
+    Object.hashAllUnordered(qualities),
+    Object.hashAllUnordered(regions),
+    minPrice,
+    maxPrice,
+    minWeight,
+    maxWeight,
+    harvestDatePreset,
+  );
 }
 
 bool _setEquals<T>(Set<T> left, Set<T> right) {

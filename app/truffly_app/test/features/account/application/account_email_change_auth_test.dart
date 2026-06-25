@@ -3,9 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:truffly_app/features/account/application/account_details_notifier.dart';
 import 'package:truffly_app/features/account/application/account_details_providers.dart';
 import 'package:truffly_app/features/account/data/account_details_service.dart';
-import 'package:truffly_app/features/auth/application/auth_notifier.dart';
+import 'package:truffly_app/features/account/domain/account_details_state.dart';
 import 'package:truffly_app/features/auth/data/auth_result.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/auth/domain/auth_state.dart';
 
 class _FakeAccountDetailsService implements AccountDetailsService {
@@ -107,7 +108,6 @@ void main() {
           email: 'new-email@test.com',
         ),
       );
-
       final container = ProviderContainer(
         overrides: [
           accountDetailsServiceProvider.overrideWithValue(service),
@@ -127,18 +127,10 @@ void main() {
         submitResult,
         const AccountDetailsSubmissionResult(emailChanged: true),
       );
-      expect(service.updateProfileCalls, 1);
+      expect(service.updateProfileCalls, 0);
       expect(service.updateEmailCalls, 1);
       expect(service.lastUpdatedEmail, 'new-email@test.com');
-
-      expect(authNotifier.refreshCalls, 1);
-      expect(
-        container.read(authNotifierProvider),
-        const AuthAuthenticatedUnverified(
-          userId: 'u1',
-          email: 'new-email@test.com',
-        ),
-      );
+      expect(authNotifier.refreshCalls, 0);
     },
   );
 

@@ -9,10 +9,11 @@ final homeRepositoryProvider = Provider<HomeRepository>((ref) {
 
 final seasonalHighlightProvider =
     AsyncNotifierProvider<SeasonalHighlightNotifier, SeasonalHighlightResponse>(
-  SeasonalHighlightNotifier.new,
-);
+      SeasonalHighlightNotifier.new,
+    );
 
-class SeasonalHighlightNotifier extends AsyncNotifier<SeasonalHighlightResponse> {
+class SeasonalHighlightNotifier
+    extends AsyncNotifier<SeasonalHighlightResponse> {
   @override
   Future<SeasonalHighlightResponse> build() async {
     return _fetch();
@@ -24,8 +25,8 @@ class SeasonalHighlightNotifier extends AsyncNotifier<SeasonalHighlightResponse>
   }
 
   Future<SeasonalHighlightResponse> _fetch() {
-    return ref.read(homeRepositoryProvider).fetchSeasonalHighlight(
-          localeCode: ref.read(appLocaleCodeProvider),
-        );
+    return ref
+        .read(homeRepositoryProvider)
+        .fetchSeasonalHighlight(localeCode: ref.read(appLocaleCodeProvider));
   }
 }

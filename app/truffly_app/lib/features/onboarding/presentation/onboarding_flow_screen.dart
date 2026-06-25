@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_error_message.dart';
 import 'package:truffly_app/features/onboarding/application/onboarding_notifier.dart';
@@ -40,9 +42,21 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     final onboardingState = ref.watch(onboardingNotifierProvider);
     final notifier = ref.read(onboardingNotifierProvider.notifier);
     final currentStep = onboardingState.currentStep;
+    final isSellerApplicationEntry = ref.watch(
+      onboardingSellerApplicationEntryProvider,
+    );
 
     if (!onboardingState.hasSteps || currentStep == null) {
       return const SizedBox.shrink();
+    }
+
+    final isWelcomeStep = currentStep.id == OnboardingStepId.welcome;
+
+    if (isWelcomeStep) {
+      return _buildWelcomeScreen(
+        currentStep: currentStep,
+        onboardingState: onboardingState,
+      );
     }
 
     return Padding(
@@ -78,23 +92,50 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
             ),
           ],
         ),
-        bottomActions: currentStep.id == OnboardingStepId.notifications
+        bottomActions:
+            currentStep.id == OnboardingStepId.notifications ||
+                currentStep.id == OnboardingStepId.welcome
             ? null
             : OnboardingBottomActions(
-                backLabel: l10n.onboardingFlowBackButton,
-                primaryLabel:
-                currentStep.id == OnboardingStepId.welcome
-                    ? l10n.onboardingFlowEnterAppButton
-                    : l10n.onboardingFlowNextButton,
+                backLabel:
+                    isSellerApplicationEntry && !onboardingState.canGoBack
+                    ? l10n.onboardingDocumentSourceCancelOption
+                    : l10n.onboardingFlowBackButton,
+                primaryLabel: l10n.onboardingFlowNextButton,
                 isLoading: onboardingState.isSubmitting,
                 isPrimaryEnabled: true,
-                isBackEnabled: onboardingState.canGoBack,
-                isBackVisible: onboardingState.canGoBack,
-                onBackPressed: notifier.previousStep,
+                isBackEnabled: true,
+                isBackVisible: onboardingState.hasSelectedPath,
+                onBackPressed: () {
+                  if (isSellerApplicationEntry && !onboardingState.canGoBack) {
+                    ref
+                            .read(
+                              onboardingSellerApplicationEntryProvider.notifier,
+                            )
+                            .state =
+                        false;
+                    notifier.resetFlow();
+                    context.go(AppRoutes.account);
+                  } else if (onboardingState.canGoBack) {
+                    notifier.previousStep();
+                  } else {
+                    notifier.resetFlow();
+                  }
+                },
                 onPrimaryPressed: () =>
                     _handlePrimaryAction(notifier, onboardingState),
               ),
       ),
+    );
+  }
+
+  Widget _buildWelcomeScreen({
+    required OnboardingStepDefinition currentStep,
+    required OnboardingState onboardingState,
+  }) {
+    return KeyedSubtree(
+      key: ValueKey(currentStep.id),
+      child: _buildStepPage(currentStep),
     );
   }
 
@@ -144,11 +185,15 @@ String _submissionErrorText(
 ) {
   final baseMessage = switch (issue?.failure) {
     OnboardingSubmissionFailure.network => l10n.onboardingSubmitNetworkError,
-    OnboardingSubmissionFailure.validation => l10n.onboardingSubmitValidationError,
-    OnboardingSubmissionFailure.documentUpload => l10n.onboardingSubmitDocumentError,
+    OnboardingSubmissionFailure.validation =>
+      l10n.onboardingSubmitValidationError,
+    OnboardingSubmissionFailure.documentUpload =>
+      l10n.onboardingSubmitDocumentError,
     OnboardingSubmissionFailure.server => l10n.onboardingSubmitServerError,
-    OnboardingSubmissionFailure.unimplemented => l10n.onboardingSubmitUnavailableError,
-    OnboardingSubmissionFailure.unknown || null => l10n.onboardingFlowSubmissionError,
+    OnboardingSubmissionFailure.unimplemented =>
+      l10n.onboardingSubmitUnavailableError,
+    OnboardingSubmissionFailure.unknown ||
+    null => l10n.onboardingFlowSubmissionError,
   };
 
   final diagnostics = <String>[

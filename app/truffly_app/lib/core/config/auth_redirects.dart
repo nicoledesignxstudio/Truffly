@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 class AuthRedirects {
   static const _debugScheme = 'truffly';
   static const _debugHost = 'auth';
+  static const _preferredProductionScheme = 'truffly';
   static const _verifyEmailPath = '/verify-email';
   static const _resetPasswordPath = '/reset-password';
   static const _productionBaseUrl = String.fromEnvironment(
@@ -41,7 +42,7 @@ class AuthRedirects {
       if (kReleaseMode) {
         throw StateError(
           'Missing AUTH_REDIRECT_BASE_URL for release build. '
-          'Production auth callbacks must use an HTTPS universal/app link.',
+          'Pass truffly://auth for mobile deep links.',
         );
       }
       return null;
@@ -54,9 +55,12 @@ class AuthRedirects {
       );
     }
 
-    if (uri.scheme.toLowerCase() != 'https') {
+    final normalizedScheme = uri.scheme.toLowerCase();
+    if (normalizedScheme != _preferredProductionScheme &&
+        normalizedScheme != 'https') {
       throw StateError(
-        'AUTH_REDIRECT_BASE_URL must use https: $configuredValue',
+        'AUTH_REDIRECT_BASE_URL must use truffly://auth or an HTTPS origin. '
+        'Received: $configuredValue',
       );
     }
 
@@ -64,7 +68,7 @@ class AuthRedirects {
     if (normalizedPath.isNotEmpty && normalizedPath != '/') {
       throw StateError(
         'AUTH_REDIRECT_BASE_URL must not include a path. '
-        'Provide only the HTTPS origin, for example https://auth.example.com',
+        'Provide only the callback origin, for example truffly://auth',
       );
     }
 

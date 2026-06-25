@@ -21,6 +21,25 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
     state = OnboardingState.forPath(path);
   }
 
+  void startSellerApplicationFromProfile({
+    required String firstName,
+    required String lastName,
+    required String? region,
+  }) {
+    state = OnboardingState.forPath(OnboardingPath.seller).copyWith(
+      draft: OnboardingDraft(
+        path: OnboardingPath.seller,
+        firstName: firstName,
+        lastName: lastName,
+        countryCode: 'IT',
+        region: _normalizeOptionalValue(region),
+      ),
+      currentStepIndex: 0,
+      validationFailures: const [],
+      submissionIssue: null,
+    );
+  }
+
   void resetFlow() {
     state = OnboardingState.initial();
   }
@@ -98,9 +117,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
   }
 
   void updateSellerRegion(String value) {
-    _updateDraft(
-      state.draft.copyWith(region: _normalizeOptionalValue(value)),
-    );
+    _updateDraft(state.draft.copyWith(region: _normalizeOptionalValue(value)));
   }
 
   void updateTesserinoNumber(String value) {
@@ -130,21 +147,24 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
   void setNotificationPermissionStatus(
     OnboardingNotificationPermissionStatus status,
   ) {
-    _updateDraft(
-      state.draft.copyWith(notificationPermissionStatus: status),
-    );
+    _updateDraft(state.draft.copyWith(notificationPermissionStatus: status));
   }
 
   Future<OnboardingNotificationPermissionStatus?>
-      requestNotificationPermission() async {
+  requestNotificationPermission() async {
     if (state.isSubmitting) return null;
 
     try {
-      final result =
-          await ref.read(onboardingServiceProvider).requestNotificationPermission();
+      final result = await ref
+          .read(onboardingServiceProvider)
+          .requestNotificationPermission();
       final status = switch (result) {
         NotificationPermissionResult.granted =>
           OnboardingNotificationPermissionStatus.granted,
+        NotificationPermissionResult.provisional =>
+          OnboardingNotificationPermissionStatus.provisional,
+        NotificationPermissionResult.notDetermined =>
+          OnboardingNotificationPermissionStatus.notDetermined,
         NotificationPermissionResult.denied =>
           OnboardingNotificationPermissionStatus.denied,
       };
@@ -186,9 +206,9 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
       ...switch (path) {
         OnboardingPath.buyer => _validateBuyerLocationStep(),
         OnboardingPath.seller => <OnboardingValidationFailure>[
-            ..._validateSellerRegionStep(),
-            ..._validateSellerDocumentsStep(),
-          ],
+          ..._validateSellerRegionStep(),
+          ..._validateSellerDocumentsStep(),
+        ],
       },
     ];
 
@@ -238,16 +258,10 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
 
     try {
       await submission();
-      state = state.copyWith(
-        isSubmitting: false,
-        submissionIssue: null,
-      );
+      state = state.copyWith(isSubmitting: false, submissionIssue: null);
       return true;
     } on OnboardingSubmissionException catch (error) {
-      state = state.copyWith(
-        isSubmitting: false,
-        submissionIssue: error.issue,
-      );
+      state = state.copyWith(isSubmitting: false, submissionIssue: error.issue);
       return false;
     } catch (_) {
       state = state.copyWith(
@@ -361,10 +375,7 @@ final class OnboardingNotifier extends Notifier<OnboardingState> {
   }
 
   void _setValidationFailures(List<OnboardingValidationFailure> failures) {
-    state = state.copyWith(
-      validationFailures: failures,
-      submissionIssue: null,
-    );
+    state = state.copyWith(validationFailures: failures, submissionIssue: null);
   }
 
   bool _hasSelectedPathOrSteps() {

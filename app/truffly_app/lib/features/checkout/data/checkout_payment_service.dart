@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -6,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:truffly_app/core/config/env.dart';
+import 'package:truffly_app/core/config/runtime_config.dart';
 import 'package:truffly_app/features/account/domain/shipping_address.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_detail.dart';
 
@@ -15,6 +16,7 @@ enum CheckoutFailure {
   unauthenticated,
   forbidden,
   notFound,
+  sellerNotReady,
   validation,
   paymentCanceled,
   paymentFailed,
@@ -154,12 +156,8 @@ class CheckoutPaymentService {
         return null;
       }
 
-      final data = response.data;
-      if (data is! Map<String, dynamic>) {
-        return null;
-      }
-
-      final orderId = data['order_id'] as String?;
+      final data = _normalizeResponseData(response.data);
+      final orderId = data?['order_id'] as String?;
       return orderId;
     } on FunctionException catch (error) {
       if (kDebugMode) {
@@ -358,9 +356,12 @@ class CheckoutPaymentService {
       linkDisplayParams: const LinkDisplayParams(
         linkDisplay: LinkDisplay.never,
       ),
+      // Apple Pay is only prewired for now. A real launch still requires:
+      // Apple Developer Account, a real Apple Merchant ID, Xcode signing/capabilities,
+      // and testing on a physical iOS device.
       applePay: includeWallets && Platform.isIOS && _applePayEnabled
           ? PaymentSheetApplePay(
-              merchantCountryCode: Env.stripeMerchantCountryCode,
+              merchantCountryCode: RuntimeConfig.stripeMerchantCountryCode,
               buttonType: PlatformButtonType.buy,
               cartItems: [
                 ApplePayCartSummaryItem.immediate(
@@ -372,9 +373,9 @@ class CheckoutPaymentService {
           : null,
       googlePay: includeWallets && Platform.isAndroid
           ? PaymentSheetGooglePay(
-              merchantCountryCode: Env.stripeMerchantCountryCode,
+              merchantCountryCode: RuntimeConfig.stripeMerchantCountryCode,
               currencyCode: 'EUR',
-              testEnv: true,
+              testEnv: RuntimeConfig.stripeGooglePayTestEnv,
               buttonType: PlatformButtonType.pay,
               label: _merchantDisplayName,
             )
@@ -401,7 +402,10 @@ class CheckoutPaymentService {
 
       if (response.status < 200 || response.status >= 300) {
         return _CreatePaymentIntentResult.failure(
-          _mapFunctionFailure(response.status),
+          _mapFunctionFailure(
+            response.status,
+            _extractFunctionErrorCode(response.data),
+          ),
         );
       }
 
@@ -429,7 +433,10 @@ class CheckoutPaymentService {
       );
     } on FunctionException catch (error) {
       return _CreatePaymentIntentResult.failure(
-        _mapFunctionFailure(error.status),
+        _mapFunctionFailure(
+          error.status,
+          _extractFunctionErrorCode(error.details),
+        ),
       );
     } on SocketException {
       return const _CreatePaymentIntentResult.failure(CheckoutFailure.network);
@@ -457,7 +464,11 @@ class CheckoutPaymentService {
     };
   }
 
-  CheckoutFailure _mapFunctionFailure(int status) {
+  CheckoutFailure _mapFunctionFailure(int status, [String? errorCode]) {
+    if (errorCode == 'seller_not_stripe_ready') {
+      return CheckoutFailure.sellerNotReady;
+    }
+
     return switch (status) {
       400 || 409 || 422 => CheckoutFailure.validation,
       401 => CheckoutFailure.unauthenticated,
@@ -466,6 +477,56 @@ class CheckoutPaymentService {
       408 || 429 || 503 => CheckoutFailure.network,
       _ => CheckoutFailure.unknown,
     };
+  }
+
+  String? _extractFunctionErrorCode(Object? details) {
+    if (details is Map) {
+      return _normalizedString(details['error']);
+    }
+
+    if (details is String && details.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(details);
+        if (decoded is Map) {
+          return _normalizedString(decoded['error']);
+        }
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  String? _normalizedString(Object? value) {
+    if (value is! String) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  Map<String, dynamic>? _normalizeResponseData(Object? raw) {
+    if (raw is Map<String, dynamic>) {
+      return raw;
+    }
+
+    if (raw is Map) {
+      return raw.map((key, value) => MapEntry(key.toString(), value));
+    }
+
+    if (raw is String) {
+      final trimmed = raw.trim();
+      if (trimmed.isEmpty) return null;
+      try {
+        final decoded = jsonDecode(trimmed);
+        if (decoded is Map) {
+          return decoded.map((key, value) => MapEntry(key.toString(), value));
+        }
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   double _shippingCost(
@@ -480,7 +541,7 @@ class CheckoutPaymentService {
   }
 
   bool get _applePayEnabled =>
-      (Env.stripeMerchantIdentifier ?? '').trim().isNotEmpty;
+      RuntimeConfig.stripeAppleMerchantIdentifier.trim().isNotEmpty;
 
   bool _canRetryWithoutWallets(String message) {
     final normalized = message.toLowerCase();

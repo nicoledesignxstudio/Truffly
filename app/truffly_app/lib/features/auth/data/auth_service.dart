@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:truffly_app/core/config/auth_redirects.dart';
 import 'package:truffly_app/features/auth/data/auth_result.dart';
@@ -11,11 +12,13 @@ final class AuthUserSnapshot {
     required this.userId,
     required this.email,
     required this.emailVerified,
+    required this.pendingEmail,
   });
 
   final String userId;
   final String email;
   final bool emailVerified;
+  final String? pendingEmail;
 
   @override
   bool operator ==(Object other) {
@@ -23,11 +26,12 @@ final class AuthUserSnapshot {
         (other is AuthUserSnapshot &&
             other.userId == userId &&
             other.email == email &&
-            other.emailVerified == emailVerified);
+            other.emailVerified == emailVerified &&
+            other.pendingEmail == pendingEmail);
   }
 
   @override
-  int get hashCode => Object.hash(userId, email, emailVerified);
+  int get hashCode => Object.hash(userId, email, emailVerified, pendingEmail);
 }
 
 final class AuthService {
@@ -50,7 +54,8 @@ final class AuthService {
             email: normalizedEmail,
             password: password,
             emailRedirectTo:
-                emailRedirectTo ?? AuthRedirects.verifyEmailCallbackUri.toString(),
+                emailRedirectTo ??
+                AuthRedirects.verifyEmailCallbackUri.toString(),
           )
           .timeout(_requestTimeout);
       return AuthSuccess<AuthSignupSuccess>(
@@ -108,7 +113,30 @@ final class AuthService {
             email: normalizedEmail,
             type: OtpType.signup,
             emailRedirectTo:
-                emailRedirectTo ?? AuthRedirects.verifyEmailCallbackUri.toString(),
+                emailRedirectTo ??
+                AuthRedirects.verifyEmailCallbackUri.toString(),
+          )
+          .timeout(_requestTimeout);
+      return const AuthSuccess<AuthUnit>(AuthUnit.value);
+    } catch (error) {
+      return AuthFailureResult<AuthUnit>(_mapAuthError(error));
+    }
+  }
+
+  Future<AuthResult<AuthUnit>> resendEmailChangeVerification({
+    required String email,
+    String? emailRedirectTo,
+  }) async {
+    final normalizedEmail = _normalizeEmail(email);
+
+    try {
+      await _supabaseClient.auth
+          .resend(
+            email: normalizedEmail,
+            type: OtpType.emailChange,
+            emailRedirectTo:
+                emailRedirectTo ??
+                AuthRedirects.verifyEmailCallbackUri.toString(),
           )
           .timeout(_requestTimeout);
       return const AuthSuccess<AuthUnit>(AuthUnit.value);
@@ -143,9 +171,7 @@ final class AuthService {
   }) async {
     try {
       await _supabaseClient.auth
-          .updateUser(
-            UserAttributes(password: newPassword),
-          )
+          .updateUser(UserAttributes(password: newPassword))
           .timeout(_requestTimeout);
       return const AuthSuccess<AuthUnit>(AuthUnit.value);
     } catch (error) {
@@ -164,7 +190,8 @@ final class AuthService {
           .updateUser(
             UserAttributes(email: normalizedEmail),
             emailRedirectTo:
-                emailRedirectTo ?? AuthRedirects.verifyEmailCallbackUri.toString(),
+                emailRedirectTo ??
+                AuthRedirects.verifyEmailCallbackUri.toString(),
           )
           .timeout(_requestTimeout);
       return const AuthSuccess<AuthUnit>(AuthUnit.value);
@@ -179,8 +206,9 @@ final class AuthService {
 
   Future<AuthResult<AuthUserSnapshot>> refreshUser() async {
     try {
-      final response =
-          await _supabaseClient.auth.getUser().timeout(_requestTimeout);
+      final response = await _supabaseClient.auth.getUser().timeout(
+        _requestTimeout,
+      );
       final user = response.user;
       if (user == null) {
         return const AuthFailureResult<AuthUserSnapshot>(
@@ -191,6 +219,30 @@ final class AuthService {
     } catch (error) {
       return AuthFailureResult<AuthUserSnapshot>(_mapAuthError(error));
     }
+  }
+
+  Future<AuthResult<AuthUnit>> verifyEmailChangeCompleted({
+    required String expectedEmail,
+  }) async {
+    final normalizedExpectedEmail = _normalizeEmail(expectedEmail);
+    final refreshedUserResult = await refreshUser();
+
+    if (refreshedUserResult case AuthFailureResult<AuthUserSnapshot>(
+      :final failure,
+    )) {
+      return AuthFailureResult<AuthUnit>(failure);
+    }
+
+    final snapshot =
+        (refreshedUserResult as AuthSuccess<AuthUserSnapshot>).data;
+    if (!emailChangeIsCompleted(
+      snapshot: snapshot,
+      expectedEmail: normalizedExpectedEmail,
+    )) {
+      return const AuthFailureResult<AuthUnit>(EmailNotVerifiedFailure());
+    }
+
+    return const AuthSuccess<AuthUnit>(AuthUnit.value);
   }
 
   String _normalizeEmail(String email) {
@@ -210,6 +262,7 @@ final class AuthService {
       userId: user.id,
       email: (user.email ?? '').trim(),
       emailVerified: user.emailConfirmedAt != null,
+      pendingEmail: _normalizeOptionalEmail(user.newEmail),
     );
   }
 
@@ -227,12 +280,32 @@ final class AuthService {
       final code = (error.code ?? '').trim().toLowerCase();
       final message = error.message.toLowerCase();
 
+      if (kDebugMode) {
+        debugPrint(
+          '[AuthService] AuthException status=${error.statusCode} code=${error.code} message=${error.message}',
+        );
+      }
+
       if (statusCode == 408 ||
           statusCode == 504 ||
           code == 'request_timeout' ||
           code == 'hook_timeout' ||
           code == 'hook_timeout_after_retry') {
         return const TimeoutFailure();
+      }
+
+      if (statusCode == 429 ||
+          code == 'over_email_send_rate_limit' ||
+          code == 'over_request_rate_limit') {
+        return const EmailResendRateLimitedFailure();
+      }
+
+      if (code == 'email_address_not_authorized') {
+        return const EmailDeliveryRestrictedFailure();
+      }
+
+      if (code == 'email_address_invalid') {
+        return const EmailDeliveryRestrictedFailure();
       }
 
       if (code == 'session_not_found' ||
@@ -291,4 +364,17 @@ final class AuthService {
 
     return (hasTokenRef && hasInvalidRef) || hasRecoveryRef;
   }
+}
+
+@visibleForTesting
+bool emailChangeIsCompleted({
+  required AuthUserSnapshot snapshot,
+  required String expectedEmail,
+}) {
+  String normalize(String value) => value.trim().toLowerCase();
+
+  final pendingEmail = snapshot.pendingEmail?.trim();
+  return snapshot.emailVerified &&
+      normalize(snapshot.email) == normalize(expectedEmail) &&
+      (pendingEmail == null || pendingEmail.isEmpty);
 }

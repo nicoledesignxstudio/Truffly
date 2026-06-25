@@ -1,4 +1,5 @@
 import 'package:truffly_app/features/truffle/domain/truffle_type.dart';
+import 'package:truffly_app/l10n/app_localizations.dart';
 
 final class TruffleGuide {
   const TruffleGuide({
@@ -104,8 +105,9 @@ final class TruffleGuide {
     return const <String>[];
   }
 
-  String titleForLocale(String localeCode) =>
-      localeCode == 'en' ? titleEn : titleIt;
+  String titleForLocale(AppLocalizations l10n) {
+    return truffleType.chipLabel(l10n);
+  }
 
   String shortDescriptionForLocale(String localeCode) =>
       localeCode == 'en' ? shortDescriptionEn : shortDescriptionIt;

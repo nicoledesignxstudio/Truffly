@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,22 +9,36 @@ import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/account/application/account_providers.dart';
+import 'package:truffly_app/features/account/data/seller_stripe_onboarding_service.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/home/application/home_content_provider.dart';
 import 'package:truffly_app/features/home/application/seasonal_highlight_provider.dart';
 import 'package:truffly_app/features/home/presentation/widgets/home_nav_bar.dart';
 import 'package:truffly_app/features/home/presentation/widgets/seasonal_highlight_section.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_listing_card.dart';
+import 'package:truffly_app/features/notifications/application/notifications_providers.dart';
+import 'package:truffly_app/features/orders/application/orders_providers.dart';
+import 'package:truffly_app/features/orders/domain/orders_filter.dart';
+import 'package:truffly_app/features/orders/domain/orders_scope.dart';
 import 'package:truffly_app/features/sellers/presentation/widgets/seller_listing_card.dart';
 import 'package:truffly_app/features/truffle/application/truffle_providers.dart';
 import 'package:truffly_app/features/truffle/presentation/publish_truffle_page.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _stripeRefreshScheduled = false;
+  bool _stripeRefreshInFlight = false;
+  bool _welcomeNotificationCheckScheduled = false;
+
+  @override
+  Widget build(BuildContext context) {
     final profileAsync = ref.watch(currentUserAccountProfileProvider);
 
     return profileAsync.when(
@@ -30,7 +46,7 @@ class HomeScreen extends ConsumerWidget {
         backgroundColor: AppColors.white,
         body: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) {
+      error: (_, _) {
         final l10n = AppLocalizations.of(context)!;
         return Scaffold(
           backgroundColor: AppColors.white,
@@ -47,8 +63,30 @@ class HomeScreen extends ConsumerWidget {
         );
       },
       data: (profile) {
-        final isBuyer = profile.role == 'buyer';
-        final isSeller = profile.role == 'seller';
+        final sellerStripeStatusAsync = ref.watch(
+          currentSellerStripeStatusProvider,
+        );
+        final unreadNotificationCount =
+            ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
+        final sellerStripeStatus = sellerStripeStatusAsync.valueOrNull;
+        final showSellerChrome = profile.isSellerRequestApproved;
+        final showSellerDashboard =
+            showSellerChrome && sellerStripeStatus?.isReady == true;
+        final showSellerJourneyCard =
+            showSellerChrome &&
+            !profile.isSellerRequestPending &&
+            !showSellerDashboard;
+        final showStripeLoadingPlaceholder =
+            showSellerJourneyCard &&
+            (_stripeRefreshInFlight ||
+                (sellerStripeStatusAsync.isLoading &&
+                    sellerStripeStatus == null));
+
+        _maybeScheduleStripeRefresh(
+          profile: profile,
+          stripeStatus: sellerStripeStatus,
+        );
+        _maybeEnsureBuyerWelcomeNotification(profile);
 
         return Scaffold(
           backgroundColor: AppColors.white,
@@ -61,7 +99,15 @@ class HomeScreen extends ConsumerWidget {
                 ref.invalidate(homeLatestTrufflesProvider);
                 ref.invalidate(homeTopSellersProvider);
                 ref.invalidate(sellerHomeStatsProvider);
-                await ref.read(favoriteIdsNotifierProvider.notifier).load();
+                ref.invalidate(currentSellerStripeStatusProvider);
+                try {
+                  await Future.wait([
+                    ref.read(favoriteIdsNotifierProvider.notifier).load(),
+                    ref.read(currentSellerStripeStatusProvider.future),
+                  ]);
+                } catch (_) {
+                  // Refresh is best-effort; stale cards will update on the next successful fetch.
+                }
               },
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
@@ -71,19 +117,59 @@ class HomeScreen extends ConsumerWidget {
                   AppSpacing.spacingL,
                 ),
                 children: [
-                  if (isSeller)
-                    _SellerTopBar(profile: profile)
+                  if (showSellerChrome)
+                    _SellerTopBar(
+                      profile: profile,
+                      unreadNotificationCount: unreadNotificationCount,
+                    )
                   else
-                    const _BuyerTopBar(),
+                    _BuyerTopBar(
+                      unreadNotificationCount: unreadNotificationCount,
+                    ),
                   const SizedBox(height: AppSpacing.spacingM),
-                  if (isBuyer) ...[
+                  if (showSellerChrome) ...[
+                    if (profile.isSellerRequestPending)
+                      const _SellerRequestPendingCard()
+                    else if (showSellerDashboard) ...[
+                      _SellerOverview(profile: profile),
+                      const SizedBox(height: AppSpacing.spacingXS),
+                    ] else if (showStripeLoadingPlaceholder)
+                      const _SellerStripeStatusLoadingCard()
+                    else if (showSellerJourneyCard)
+                      _ApprovedSellerStripeCard(
+                        hasStripeAccount:
+                            sellerStripeStatus?.accountId?.trim().isNotEmpty ==
+                            true,
+                        isLoading:
+                            sellerStripeStatusAsync.isLoading &&
+                            sellerStripeStatusAsync.valueOrNull == null,
+                        onOpenStripe: () =>
+                            context.push(AppRoutes.accountBecomeSeller),
+                      )
+                    else
+                      const SeasonalHighlightSection(),
+                    const SizedBox(height: AppSpacing.spacingM),
+                  ] else ...[
                     _BuyerGreeting(profile: profile),
                     const SizedBox(height: AppSpacing.spacingM),
-                    const SeasonalHighlightSection(),
-                    const SizedBox(height: AppSpacing.spacingL),
-                  ] else if (isSeller) ...[
-                    _SellerOverview(profile: profile),
-                    const SizedBox(height: AppSpacing.spacingL),
+                    if (profile.isSellerRequestPending)
+                      const _SellerRequestPendingCard()
+                    else if (showStripeLoadingPlaceholder)
+                      const _SellerStripeStatusLoadingCard()
+                    else if (showSellerJourneyCard)
+                      _ApprovedSellerStripeCard(
+                        hasStripeAccount:
+                            sellerStripeStatus?.accountId?.trim().isNotEmpty ==
+                            true,
+                        isLoading:
+                            sellerStripeStatusAsync.isLoading &&
+                            sellerStripeStatusAsync.valueOrNull == null,
+                        onOpenStripe: () =>
+                            context.push(AppRoutes.accountBecomeSeller),
+                      )
+                    else
+                      const SeasonalHighlightSection(),
+                    const SizedBox(height: AppSpacing.spacingM),
                   ],
                   const _LatestTrufflesSection(),
                   const SizedBox(height: AppSpacing.spacingL),
@@ -96,10 +182,61 @@ class HomeScreen extends ConsumerWidget {
       },
     );
   }
+
+  void _maybeScheduleStripeRefresh({
+    required CurrentUserProfile profile,
+    required SellerStripeStatusSnapshot? stripeStatus,
+  }) {
+    if (_stripeRefreshScheduled) return;
+    if (!profile.isSellerRequestApproved) return;
+    if (stripeStatus?.isReady == true) return;
+
+    _stripeRefreshScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _stripeRefreshInFlight = true;
+      });
+    });
+    unawaited(() async {
+      try {
+        await ref
+            .read(sellerStripeOnboardingServiceProvider)
+            .refreshSellerStripeStatus();
+        ref.invalidate(currentSellerStripeStatusProvider);
+      } catch (_) {
+        // Best effort: the cached state is still usable while Stripe catches up.
+      } finally {
+        if (mounted) {
+          setState(() {
+            _stripeRefreshInFlight = false;
+          });
+        }
+      }
+    }());
+  }
+
+  void _maybeEnsureBuyerWelcomeNotification(CurrentUserProfile profile) {
+    if (_welcomeNotificationCheckScheduled) return;
+    if (!profile.onboardingCompleted) return;
+    if (profile.role != 'buyer') return;
+
+    _welcomeNotificationCheckScheduled = true;
+    unawaited(() async {
+      final created = await ref
+          .read(localNotificationsServiceProvider)
+          .ensureBuyerWelcomeNotification(userId: profile.userId);
+      if (created) {
+        ref.invalidate(notificationsInboxProvider);
+      }
+    }());
+  }
 }
 
 class _BuyerTopBar extends StatelessWidget {
-  const _BuyerTopBar();
+  const _BuyerTopBar({required this.unreadNotificationCount});
+
+  final int unreadNotificationCount;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +249,8 @@ class _BuyerTopBar extends StatelessWidget {
         const Spacer(),
         _HomeCircleIconButton(
           icon: Icons.notifications_none_rounded,
-          onPressed: () {},
+          badgeCount: unreadNotificationCount,
+          onPressed: () => context.push(AppRoutes.notifications),
         ),
         const SizedBox(width: AppSpacing.spacingXS),
         _HomeCircleIconButton(
@@ -125,9 +263,13 @@ class _BuyerTopBar extends StatelessWidget {
 }
 
 class _SellerTopBar extends StatelessWidget {
-  const _SellerTopBar({required this.profile});
+  const _SellerTopBar({
+    required this.profile,
+    required this.unreadNotificationCount,
+  });
 
   final CurrentUserProfile profile;
+  final int unreadNotificationCount;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +306,8 @@ class _SellerTopBar extends StatelessWidget {
         ),
         _HomeCircleIconButton(
           icon: Icons.notifications_none_rounded,
-          onPressed: () {},
+          badgeCount: unreadNotificationCount,
+          onPressed: () => context.push(AppRoutes.notifications),
         ),
         const SizedBox(width: AppSpacing.spacingXS),
         _HomeCircleIconButton(
@@ -184,29 +327,20 @@ class _BuyerGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final greetingStyle = AppTextStyles.bodyLarge.copyWith(
-      fontSize: 34,
+    final titleStyle =
+        Theme.of(context).textTheme.displayLarge ??
+        AppTextStyles.authScreenTitle;
+    final greetingStyle = titleStyle.copyWith(
       fontWeight: FontWeight.w400,
       color: AppColors.black80,
-      height: 1.05,
     );
-    final nameStyle = AppTextStyles.authScreenTitle.copyWith(
-      fontSize: 34,
-      fontWeight: FontWeight.w500,
-      height: 1.05,
-    );
+    final nameStyle = titleStyle.copyWith(fontWeight: FontWeight.w500);
 
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(
-            text: '${l10n.homeGreetingPrefix}, ',
-            style: greetingStyle,
-          ),
-          TextSpan(
-            text: _firstNameOrDisplay(profile),
-            style: nameStyle,
-          ),
+          TextSpan(text: '${l10n.homeGreetingPrefix}, ', style: greetingStyle),
+          TextSpan(text: _firstNameOrDisplay(profile), style: nameStyle),
         ],
       ),
       maxLines: 1,
@@ -223,6 +357,7 @@ class _SellerOverview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final isItalian = Localizations.localeOf(context).languageCode == 'it';
     final statsAsync = ref.watch(sellerHomeStatsProvider);
 
     return Column(
@@ -230,27 +365,40 @@ class _SellerOverview extends ConsumerWidget {
       children: [
         _PublishTruffleCard(
           label: l10n.publishTruffleTitle,
+          subtitle: isItalian
+              ? 'Condividi i tuoi tartufi freschi'
+              : 'Share your fresh truffles',
           onTap: () {
-            Navigator.of(context).push(
-              buildPublishTruffleRoute(initialRegion: profile.region),
-            );
+            Navigator.of(
+              context,
+            ).push(buildPublishTruffleRoute(initialRegion: profile.region));
           },
         ),
-        const SizedBox(height: AppSpacing.spacingS),
+        const SizedBox(height: AppSpacing.spacingXS),
         Row(
           children: [
             Expanded(
               child: _SellerStatCard(
                 title: l10n.homeSellerOrdersInProgress,
-                valueAsync: statsAsync.whenData((value) => value.inProgressOrdersCount),
-                onTap: () => context.push(AppRoutes.accountOrders),
+                valueAsync: statsAsync.whenData(
+                  (value) => value.inProgressOrdersCount,
+                ),
+                onTap: () {
+                  ref.read(ordersScopeProvider.notifier).state =
+                      OrdersScope.sales;
+                  ref.read(ordersFilterProvider.notifier).state =
+                      OrdersFilter.inProgress;
+                  context.push(AppRoutes.accountOrders);
+                },
               ),
             ),
-            const SizedBox(width: AppSpacing.spacingS),
+            const SizedBox(width: AppSpacing.spacingXS),
             Expanded(
               child: _SellerStatCard(
                 title: l10n.homeSellerActiveTruffles,
-                valueAsync: statsAsync.whenData((value) => value.activeTrufflesCount),
+                valueAsync: statsAsync.whenData(
+                  (value) => value.activeTrufflesCount,
+                ),
                 onTap: () => context.push(AppRoutes.accountMyTruffles),
               ),
             ),
@@ -261,13 +409,86 @@ class _SellerOverview extends ConsumerWidget {
   }
 }
 
+class _SellerRequestPendingCard extends StatelessWidget {
+  const _SellerRequestPendingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final isItalian = Localizations.localeOf(context).languageCode == 'it';
+
+    return _StatusNoticeCard(
+      icon: Icons.hourglass_bottom_rounded,
+      title: isItalian ? 'Richiesta in revisione' : 'Request under review',
+      body: isItalian
+          ? 'Stiamo verificando il tuo profilo per permetterti di iniziare a vendere su Truffly. Ti aggiorneremo il prima possibile.'
+          : 'We are reviewing your profile so you can start selling on Truffly. We will update you as soon as possible.',
+    );
+  }
+}
+
+class _ApprovedSellerStripeCard extends StatelessWidget {
+  const _ApprovedSellerStripeCard({
+    required this.hasStripeAccount,
+    required this.isLoading,
+    required this.onOpenStripe,
+  });
+
+  final bool hasStripeAccount;
+  final bool isLoading;
+  final VoidCallback onOpenStripe;
+
+  @override
+  Widget build(BuildContext context) {
+    final isItalian = Localizations.localeOf(context).languageCode == 'it';
+
+    return _StripeSetupCard(
+      title: isItalian ? 'Richiesta approvata!' : 'Request approved!',
+      body: isItalian
+          ? (hasStripeAccount
+                ? 'Stripe sta ancora verificando il tuo account. Puoi gestire la verifica da Stripe.'
+                : 'Come ultimo passaggio, completa la registrazione Stripe per attivare pagamenti, incassi e trasferimenti.')
+          : (hasStripeAccount
+                ? 'Stripe is still verifying your account. You can manage verification directly in Stripe.'
+                : 'As a final step, complete your Stripe registration to activate payments, payouts, and transfers.'),
+      actionLabel: isLoading
+          ? (isItalian ? 'Verifica in corso...' : 'Checking...')
+          : hasStripeAccount
+          ? (isItalian
+                ? 'Gestisci verifica Stripe'
+                : 'Manage Stripe verification')
+          : (isItalian ? 'Registrati' : 'Register'),
+      onActionTap: isLoading ? null : onOpenStripe,
+      isBusy: isLoading,
+    );
+  }
+}
+
+class _SellerStripeStatusLoadingCard extends StatelessWidget {
+  const _SellerStripeStatusLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final isItalian = Localizations.localeOf(context).languageCode == 'it';
+
+    return _StatusNoticeCard(
+      icon: Icons.hourglass_top_rounded,
+      title: isItalian ? 'Controllo Stripe...' : 'Checking Stripe...',
+      body: isItalian
+          ? 'Stiamo verificando lo stato del tuo account. Tra poco vedrai il layout corretto.'
+          : 'We are checking your account status. The correct layout will appear shortly.',
+    );
+  }
+}
+
 class _PublishTruffleCard extends StatelessWidget {
   const _PublishTruffleCard({
     required this.label,
+    required this.subtitle,
     required this.onTap,
   });
 
   final String label;
+  final String subtitle;
   final VoidCallback onTap;
 
   @override
@@ -282,12 +503,15 @@ class _PublishTruffleCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: AppShadows.authField,
         ),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingL),
-        child: Column(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.spacingM,
+          vertical: AppSpacing.spacingS,
+        ),
+        child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 48,
+              height: 48,
               decoration: const BoxDecoration(
                 color: AppColors.white,
                 shape: BoxShape.circle,
@@ -298,15 +522,216 @@ class _PublishTruffleCard extends StatelessWidget {
                 size: 24,
               ),
             ),
-            const SizedBox(height: AppSpacing.spacingS),
-            Text(
-              label,
-              style: AppTextStyles.sectionTitle.copyWith(
-                color: AppColors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+            const SizedBox(width: AppSpacing.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: AppColors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXXS),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.78),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusNoticeCard extends StatelessWidget {
+  const _StatusNoticeCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.black,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.black, size: 21),
+            ),
+            const SizedBox(width: AppSpacing.spacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    softWrap: true,
+                    maxLines: 2,
+                    style: AppTextStyles.cardTitle.copyWith(
+                      color: AppColors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXXS),
+                  Text(
+                    body,
+                    softWrap: true,
+                    maxLines: 4,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.8),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingXS),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StripeSetupCard extends StatelessWidget {
+  const _StripeSetupCard({
+    required this.title,
+    required this.body,
+    required this.actionLabel,
+    required this.onActionTap,
+    required this.isBusy,
+  });
+
+  final String title;
+  final String body;
+  final String actionLabel;
+  final VoidCallback? onActionTap;
+  final bool isBusy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.black,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.account_balance_wallet_outlined,
+                color: AppColors.black,
+                size: 21,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    softWrap: true,
+                    style: AppTextStyles.cardTitle.copyWith(
+                      color: AppColors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXXS),
+                  Text(
+                    body,
+                    softWrap: true,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.8),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingM),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton(
+                      onPressed: onActionTap,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.white,
+                        foregroundColor: AppColors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.spacingM,
+                          vertical: 14,
+                        ),
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      child: Text(
+                        actionLabel,
+                        style: AppTextStyles.buttonText.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isBusy) ...[
+              const SizedBox(width: AppSpacing.spacingXS),
+              const SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.white,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -330,7 +755,7 @@ class _SellerStatCard extends StatelessWidget {
     final valueText = valueAsync.when(
       data: (value) => value.toString(),
       loading: () => '--',
-      error: (_, __) => '--',
+      error: (_, _) => '--',
     );
 
     return InkWell(
@@ -343,42 +768,55 @@ class _SellerStatCard extends StatelessWidget {
           border: Border.all(color: AppColors.black10),
           boxShadow: AppShadows.authField,
         ),
-        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.spacingS,
+          vertical: AppSpacing.spacingS,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontSize: 16,
-                color: AppColors.black,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.spacingS),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded(
-                  child: Text(
-                    valueText,
-                    style: AppTextStyles.authScreenTitle.copyWith(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w400,
-                      height: 1,
-                    ),
-                  ),
-                ),
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 38,
+                  height: 38,
                   decoration: const BoxDecoration(
-                    color: AppColors.accent,
+                    color: AppColors.softGrey,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.north_east_rounded,
-                    color: AppColors.white,
+                  child: Icon(
+                    title ==
+                            AppLocalizations.of(
+                              context,
+                            )!.homeSellerOrdersInProgress
+                        ? Icons.local_mall_outlined
+                        : Icons.inventory_2_outlined,
                     size: 22,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.spacingXS),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontSize: 13,
+                          color: AppColors.black80,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        valueText,
+                        style: AppTextStyles.sectionTitle.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -410,8 +848,9 @@ class _LatestTrufflesSection extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.spacingS),
         trufflesAsync.when(
-          loading: () => const _HorizontalSkeletonList(itemCount: 2, itemWidth: 214),
-          error: (_, __) => _CompactSectionFallback(
+          loading: () =>
+              const _HorizontalSkeletonList(itemCount: 2, itemWidth: 202),
+          error: (_, _) => _CompactSectionFallback(
             message: l10n.homeSectionErrorText,
             retryLabel: l10n.homeSeasonalRetryLabel,
             onRetry: () => ref.invalidate(homeLatestTrufflesProvider),
@@ -422,21 +861,27 @@ class _LatestTrufflesSection extends ConsumerWidget {
             }
 
             return SizedBox(
-              height: 322,
+              height: 288,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.spacingS),
+                separatorBuilder: (_, _) =>
+                    const SizedBox(width: AppSpacing.spacingS),
                 itemBuilder: (context, index) {
                   final item = items[index];
                   return SizedBox(
-                    width: 214,
+                    width: 204,
                     child: TruffleListingCard(
+                      variant: TruffleListingCardVariant.home,
                       item: item,
                       isFavorite: favoritesState.ids.contains(item.id),
-                      isFavoritePending: favoritesState.pendingIds.contains(item.id),
-                      onTap: () => context.push(AppRoutes.truffleDetailPath(item.id)),
-                      onFavoriteTap: () => favoritesNotifier.toggleFavorite(item.id),
+                      isFavoritePending: favoritesState.pendingIds.contains(
+                        item.id,
+                      ),
+                      onTap: () =>
+                          context.push(AppRoutes.truffleDetailPath(item.id)),
+                      onFavoriteTap: () =>
+                          favoritesNotifier.toggleFavorite(item.id),
                     ),
                   );
                 },
@@ -467,8 +912,12 @@ class _TopSellersSection extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.spacingS),
         sellersAsync.when(
-          loading: () => const _HorizontalSkeletonList(itemCount: 3, itemWidth: 172, itemHeight: 248),
-          error: (_, __) => _CompactSectionFallback(
+          loading: () => const _HorizontalSkeletonList(
+            itemCount: 3,
+            itemWidth: 172,
+            itemHeight: 248,
+          ),
+          error: (_, _) => _CompactSectionFallback(
             message: l10n.homeSectionErrorText,
             retryLabel: l10n.homeSeasonalRetryLabel,
             onRetry: () => ref.invalidate(homeTopSellersProvider),
@@ -487,10 +936,13 @@ class _TopSellersSection extends ConsumerWidget {
                       width: 172,
                       child: SellerListingCard(
                         item: items[index],
-                        onTap: () => context.push(AppRoutes.sellerProfilePath(items[index].id)),
+                        onTap: () => context.push(
+                          AppRoutes.sellerProfilePath(items[index].id),
+                        ),
                       ),
                     ),
-                    if (index != items.length - 1) const SizedBox(width: AppSpacing.spacingS),
+                    if (index != items.length - 1)
+                      const SizedBox(width: AppSpacing.spacingS),
                   ],
                 ],
               ),
@@ -521,7 +973,7 @@ class _HomeSectionHeader extends StatelessWidget {
           child: Text(
             title,
             style: AppTextStyles.sectionTitle.copyWith(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -536,7 +988,7 @@ class _HomeSectionHeader extends StatelessWidget {
           child: Text(
             actionLabel,
             style: AppTextStyles.bodySmall.copyWith(
-              fontSize: 14,
+              fontSize: 13,
               color: AppColors.accent,
               fontWeight: FontWeight.w500,
             ),
@@ -578,10 +1030,7 @@ class _CompactSectionFallback extends StatelessWidget {
             ),
           ),
           if (retryLabel != null && onRetry != null)
-            TextButton(
-              onPressed: onRetry,
-              child: Text(retryLabel!),
-            ),
+            TextButton(onPressed: onRetry, child: Text(retryLabel!)),
         ],
       ),
     );
@@ -606,7 +1055,7 @@ class _HorizontalSkeletonList extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: itemCount,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.spacingS),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.spacingS),
         itemBuilder: (context, index) {
           return Container(
             width: itemWidth,
@@ -626,41 +1075,58 @@ class _HomeCircleIconButton extends StatelessWidget {
   const _HomeCircleIconButton({
     required this.icon,
     required this.onPressed,
+    this.badgeCount = 0,
   });
 
   final IconData icon;
   final VoidCallback onPressed;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 50,
-      height: 50,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: AppColors.softGrey,
-          shape: BoxShape.circle,
-          boxShadow: AppShadows.authField,
-        ),
-        child: IconButton(
-          onPressed: onPressed,
-          padding: EdgeInsets.zero,
-          icon: Icon(
-            icon,
-            size: 24,
-            color: AppColors.black,
+      width: AppSpacing.circularIconButtonSize,
+      height: AppSpacing.circularIconButtonSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              color: AppColors.softGrey,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                icon,
+                size: AppSpacing.circularIconSize,
+                color: AppColors.black,
+              ),
+            ),
           ),
-        ),
+          if (badgeCount > 0)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.white, width: 1.5),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({
-    required this.profile,
-    required this.size,
-  });
+  const _ProfileAvatar({required this.profile, required this.size});
 
   final CurrentUserProfile profile;
   final double size;
@@ -668,7 +1134,8 @@ class _ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = profile.profileImageUrl?.trim();
-    final canUseImage = url != null && url.isNotEmpty && Uri.tryParse(url)?.hasScheme == true;
+    final canUseImage =
+        url != null && url.isNotEmpty && Uri.tryParse(url)?.hasScheme == true;
 
     return Container(
       width: size,
@@ -681,9 +1148,10 @@ class _ProfileAvatar extends StatelessWidget {
       ),
       child: canUseImage
           ? Image.network(
-              url!,
+              url,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _AvatarFallback(initials: profile.initials),
+              errorBuilder: (_, _, _) =>
+                  _AvatarFallback(initials: profile.initials),
             )
           : _AvatarFallback(initials: profile.initials),
     );

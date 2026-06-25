@@ -8,11 +8,7 @@ import 'package:truffly_app/features/truffle/domain/truffle_list_item.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_quality.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_type.dart';
 
-enum SellerProfileFailure {
-  network,
-  notFound,
-  unknown,
-}
+enum SellerProfileFailure { network, notFound, unknown }
 
 final class SellerProfileServiceException implements Exception {
   const SellerProfileServiceException(this.failure);
@@ -22,7 +18,7 @@ final class SellerProfileServiceException implements Exception {
 
 final class SellerProfileService {
   SellerProfileService(this._supabaseClient)
-      : _imageUrlResolver = TruffleImageUrlResolver(_supabaseClient);
+    : _imageUrlResolver = TruffleImageUrlResolver(_supabaseClient);
 
   final SupabaseClient _supabaseClient;
   final TruffleImageUrlResolver _imageUrlResolver;
@@ -41,13 +37,12 @@ final class SellerProfileService {
           .maybeSingle();
 
       if (profileRow == null) {
-        throw const SellerProfileServiceException(SellerProfileFailure.notFound);
+        throw const SellerProfileServiceException(
+          SellerProfileFailure.notFound,
+        );
       }
 
-      final reviews = await fetchSellerReviews(
-        normalizedSellerId,
-        limit: 3,
-      );
+      final reviews = await fetchSellerReviews(normalizedSellerId, limit: 3);
       final truffles = await _fetchSellerActiveTruffles(normalizedSellerId);
 
       return SellerProfileDetail(
@@ -55,6 +50,7 @@ final class SellerProfileService {
         firstName: profileRow['first_name'] as String?,
         lastName: profileRow['last_name'] as String?,
         profileImageUrl: profileRow['profile_image_url'] as String?,
+        joinedAt: null,
         region: profileRow['region'] as String?,
         bio: profileRow['bio'] as String?,
         ratingAverage: _toDouble(profileRow['seller_rating_avg']),
@@ -101,12 +97,16 @@ final class SellerProfileService {
     }
   }
 
-  Future<List<TruffleListItem>> _fetchSellerActiveTruffles(String sellerId) async {
-    final rows = await _supabaseClient
-        .from('seller_active_truffle_cards')
-        .select()
-        .eq('seller_id', sellerId)
-        .order('created_at', ascending: false) as List<dynamic>;
+  Future<List<TruffleListItem>> _fetchSellerActiveTruffles(
+    String sellerId,
+  ) async {
+    final rows =
+        await _supabaseClient
+                .from('active_truffle_cards')
+                .select()
+                .eq('seller_id', sellerId)
+                .order('created_at', ascending: false)
+            as List<dynamic>;
 
     final typedRows = rows.cast<Map<String, dynamic>>();
     final primaryImageUrls = await _imageUrlResolver.resolveOrderedUrls(
@@ -143,6 +143,7 @@ final class SellerProfileService {
       rating: row['rating'] as int,
       comment: row['comment'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
+      isAuto: row['is_auto'] == true,
     );
   }
 

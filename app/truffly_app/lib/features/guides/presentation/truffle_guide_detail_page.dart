@@ -67,42 +67,28 @@ class TruffleGuideDetailPage extends ConsumerWidget {
               _GuideHeroImage(
                 imageAssetPath: guide.truffleType.guideAssetImagePath,
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _RarityStars(rarity: guide.rarity),
-              const SizedBox(height: AppSpacing.spacingXS),
+              const SizedBox(height: AppSpacing.spacingS),
               Text(
-                guide.titleForLocale(localeCode),
-                style: AppTextStyles.authScreenTitle.copyWith(
-                  fontSize: 30,
+                guide.titleForLocale(l10n),
+                style: AppTextStyles.sectionTitle.copyWith(
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  height: 1.05,
+                  height: 1.08,
                 ),
               ),
               const SizedBox(height: AppSpacing.spacingXXS),
               Text(guide.latinName, style: AppTextStyles.cardSubtitle),
-              const SizedBox(height: AppSpacing.spacingL),
-              Row(
-                children: [
-                  Expanded(
-                    child: _GuideMetricBox(
-                      icon: Icons.star_outline_rounded,
-                      value: '${guide.rarity}',
-                      label: l10n.guidesTruffleQualityMetric,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.spacingXS),
-                  Expanded(
-                    flex: 2,
-                    child: _GuideMetricBox(
-                      icon: Icons.balance_rounded,
-                      value:
-                          '${guide.priceMinEur} - ${guide.priceMaxEur} EUR/Kg',
-                      label: l10n.guidesPriceRangeMetric,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: AppSpacing.spacingM),
+              _GuideStatsCard(
+                rarity: guide.rarity,
+                priceRange:
+                    '${guide.priceMinEur} - ${guide.priceMaxEur} EUR/Kg',
+                rarityLabel: l10n.guidesTruffleQualityMetric,
+                priceLabel: l10n.guidesPriceRangeMetric,
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _ActionCard(
                 title: l10n.guidesDescription,
                 onTap: () => _showContentSheet(
@@ -433,7 +419,7 @@ class _GuideHeroImage extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
-        height: 300,
+        height: 250,
         width: double.infinity,
         child: Image.asset(
           imageAssetPath,
@@ -468,64 +454,109 @@ class _RarityStars extends StatelessWidget {
         for (var index = 0; index < 5; index++) ...[
           Icon(
             index < rarity ? Icons.star_rounded : Icons.star_border_rounded,
-            size: 22,
+            size: 19,
             color: AppColors.accent,
           ),
-          if (index < 4) const SizedBox(width: 2),
+          if (index < 4) const SizedBox(width: 1),
         ],
       ],
     );
   }
 }
 
-class _GuideMetricBox extends StatelessWidget {
-  const _GuideMetricBox({
-    required this.icon,
-    required this.value,
-    required this.label,
+class _GuideStatsCard extends StatelessWidget {
+  const _GuideStatsCard({
+    required this.rarity,
+    required this.priceRange,
+    required this.rarityLabel,
+    required this.priceLabel,
   });
 
-  final IconData icon;
-  final String value;
-  final String label;
+  final int rarity;
+  final String priceRange;
+  final String rarityLabel;
+  final String priceLabel;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.accent,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.black10),
         boxShadow: AppShadows.authField,
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.spacingM),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 22, color: AppColors.white),
-            const SizedBox(height: 20),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.cardPrice.copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-                color: AppColors.white,
-              ),
+            _GuideStatRow(
+              icon: Icons.star_rounded,
+              label: rarityLabel,
+              value: rarity.toString(),
             ),
-            const SizedBox(height: AppSpacing.spacingXXS),
-            Text(
-              label,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.white.withValues(alpha: 0.86),
-                fontSize: 14,
-              ),
+            const SizedBox(height: AppSpacing.spacingS),
+            _GuideStatRow(
+              icon: Icons.balance_rounded,
+              label: priceLabel,
+              value: priceRange,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _GuideStatRow extends StatelessWidget {
+  const _GuideStatRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF1EA),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: AppColors.accent,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.spacingS),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                value,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.black80,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

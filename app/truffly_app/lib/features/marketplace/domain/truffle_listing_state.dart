@@ -1,10 +1,7 @@
 import 'package:truffly_app/features/marketplace/domain/truffle_listing_filters.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_list_item.dart';
 
-enum TruffleListingFailure {
-  network,
-  unknown,
-}
+enum TruffleListingFailure { network, unknown }
 
 final class TruffleListingState {
   const TruffleListingState({

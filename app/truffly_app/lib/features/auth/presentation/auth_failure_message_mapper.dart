@@ -1,10 +1,7 @@
 import 'package:truffly_app/l10n/app_localizations.dart';
 import 'package:truffly_app/features/auth/domain/auth_failure.dart';
 
-String loginFailureMessage(
-  AuthFailure failure,
-  AppLocalizations l10n,
-) {
+String loginFailureMessage(AuthFailure failure, AppLocalizations l10n) {
   return switch (failure) {
     InvalidCredentialsFailure() => l10n.authErrorInvalidCredentials,
     EmailNotVerifiedFailure() => l10n.authErrorEmailNotVerified,
@@ -21,10 +18,12 @@ String signupFailureMessage(
 ) {
   return switch (failure) {
     EmailAlreadyUsedFailure() => l10n.authErrorEmailAlreadyUsed,
+    EmailResendRateLimitedFailure() => l10n.authErrorEmailResendRateLimited,
+    EmailDeliveryRestrictedFailure() =>
+      l10n.authErrorEmailDeliveryRestricted,
     NetworkErrorFailure() => l10n.authErrorNetwork,
     TimeoutFailure() => l10n.authErrorTimeout,
     UnknownAuthFailure() => l10n.authErrorUnknown,
     _ => l10n.authErrorSignupFallback,
   };
 }
-

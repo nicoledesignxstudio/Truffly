@@ -47,7 +47,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    final result = await ref.read(authNotifierProvider.notifier).signIn(
+    final result = await ref
+        .read(authNotifierProvider.notifier)
+        .signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -68,9 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return AuthScaffold(
       children: [
-        AuthBackButton(
-          onPressed: () => context.go(AppRoutes.welcome),
-        ),
+        AuthBackButton(onPressed: () => context.go(AppRoutes.welcome)),
         const SizedBox(height: AppSpacing.authGroupGap),
         AuthTextBlock(
           child: Text(
@@ -78,7 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             style: AppTextStyles.authScreenTitle,
           ),
         ),
-        const SizedBox(height: AppSpacing.authFieldGap),
+        const SizedBox(height: AppSpacing.authTitleSubtitleGap),
         AuthTextBlock(
           child: Text(
             l10n.authLoginSubtitle,
@@ -102,7 +102,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     AutofillHints.email,
                   ],
                   prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
-                  validator: (value) => AuthValidators.validateEmail(value, l10n),
+                  validator: (value) =>
+                      AuthValidators.validateEmail(value, l10n),
                 ),
                 const SizedBox(height: AppSpacing.authFieldGap),
                 AuthPasswordField(
@@ -116,7 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: AppSpacing.authFieldGap),
                 AuthErrorMessage(message: _errorMessage),
-                const SizedBox(height: AppSpacing.authGroupGap),
+                const SizedBox(height: AppSpacing.authSubmitGap),
                 AuthPrimaryButton(
                   label: l10n.authLoginButton,
                   isLoading: _isSubmitting,
@@ -131,8 +132,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Align(
           alignment: Alignment.center,
           child: TextButton(
-            onPressed:
-                _isSubmitting ? null : () => context.go(AppRoutes.forgotPassword),
+            onPressed: _isSubmitting
+                ? null
+                : () => context.go(AppRoutes.forgotPassword),
             child: Text(l10n.authForgotPasswordLink),
           ),
         ),

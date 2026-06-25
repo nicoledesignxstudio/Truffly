@@ -8,6 +8,7 @@ final class AccountDetailsFormData {
     required this.bio,
     required this.profileImageUrl,
     required this.isSeller,
+    required this.sellerStatus,
   });
 
   final String firstName;
@@ -18,8 +19,10 @@ final class AccountDetailsFormData {
   final String? bio;
   final String? profileImageUrl;
   final bool isSeller;
+  final String sellerStatus;
 
   bool get requiresRegion => normalizedCountryCode == 'IT';
+  bool get hasStartedSellerJourney => sellerStatus != 'not_requested';
 
   String get normalizedCountryCode => countryCode.trim().toUpperCase();
 
@@ -36,6 +39,7 @@ final class AccountDetailsFormData {
       bio: isSeller ? _normalizeOptional(bio) : null,
       profileImageUrl: isSeller ? _normalizeOptional(profileImageUrl) : null,
       isSeller: isSeller,
+      sellerStatus: sellerStatus,
     );
   }
 
@@ -49,7 +53,9 @@ final class AccountDetailsFormData {
         current.countryCode != baseline.countryCode ||
         current.region != baseline.region ||
         current.bio != baseline.bio ||
-        current.profileImageUrl != baseline.profileImageUrl;
+        current.profileImageUrl != baseline.profileImageUrl ||
+        current.isSeller != baseline.isSeller ||
+        current.sellerStatus != baseline.sellerStatus;
   }
 
   AccountDetailsFormData copyWith({
@@ -61,6 +67,7 @@ final class AccountDetailsFormData {
     Object? bio = _sentinel,
     Object? profileImageUrl = _sentinel,
     bool? isSeller,
+    String? sellerStatus,
   }) {
     return AccountDetailsFormData(
       firstName: firstName ?? this.firstName,
@@ -73,6 +80,7 @@ final class AccountDetailsFormData {
           ? this.profileImageUrl
           : profileImageUrl as String?,
       isSeller: isSeller ?? this.isSeller,
+      sellerStatus: sellerStatus ?? this.sellerStatus,
     );
   }
 
@@ -93,7 +101,8 @@ final class AccountDetailsFormData {
             other.region == region &&
             other.bio == bio &&
             other.profileImageUrl == profileImageUrl &&
-            other.isSeller == isSeller;
+            other.isSeller == isSeller &&
+            other.sellerStatus == sellerStatus;
   }
 
   @override
@@ -106,6 +115,7 @@ final class AccountDetailsFormData {
     bio,
     profileImageUrl,
     isSeller,
+    sellerStatus,
   );
 }
 

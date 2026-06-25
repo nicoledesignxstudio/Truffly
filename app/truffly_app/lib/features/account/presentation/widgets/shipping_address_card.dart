@@ -52,7 +52,7 @@ class ShippingAddressCard extends StatelessWidget {
                             child: Text(
                               address.fullName,
                               style: AppTextStyles.sectionTitle.copyWith(
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -61,13 +61,13 @@ class ShippingAddressCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.spacingXS),
-                      Text(address.street, style: AppTextStyles.bodyLarge),
+                      Text(address.street, style: AppTextStyles.bodySmall),
                       const SizedBox(height: 2),
-                      Text(address.cityLine, style: AppTextStyles.bodyLarge),
+                      Text(address.cityLine, style: AppTextStyles.bodySmall),
                       const SizedBox(height: 2),
                       Text(
                         shippingCountryLabel(l10n, address.countryCode),
-                        style: AppTextStyles.bodyLarge,
+                        style: AppTextStyles.bodySmall,
                       ),
                       const SizedBox(height: AppSpacing.spacingXS),
                       Text(

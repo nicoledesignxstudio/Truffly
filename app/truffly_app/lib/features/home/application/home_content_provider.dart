@@ -9,19 +9,21 @@ import 'package:truffly_app/features/truffle/domain/truffle_list_item.dart';
 final homeLatestTrufflesProvider = FutureProvider<List<TruffleListItem>>((
   ref,
 ) async {
-  return ref.read(homeRepositoryProvider).fetchLatestTruffles(
-        localeCode: ref.read(appLocaleCodeProvider),
-      );
+  return ref
+      .read(homeRepositoryProvider)
+      .fetchLatestTruffles(localeCode: ref.read(appLocaleCodeProvider));
 });
 
-final homeTopSellersProvider = FutureProvider<List<SellerListItem>>((ref) async {
+final homeTopSellersProvider = FutureProvider<List<SellerListItem>>((
+  ref,
+) async {
   return ref.read(homeRepositoryProvider).fetchTopSellers();
 });
 
 final sellerHomeStatsProvider = FutureProvider<SellerHomeStats>((ref) async {
   final profile = await ref.read(currentUserAccountProfileProvider.future);
   if (profile.role != 'seller') return const SellerHomeStats.empty();
-  return ref.read(homeRepositoryProvider).fetchSellerHomeStats(
-        sellerId: profile.userId,
-      );
+  return ref
+      .read(homeRepositoryProvider)
+      .fetchSellerHomeStats(sellerId: profile.userId);
 });

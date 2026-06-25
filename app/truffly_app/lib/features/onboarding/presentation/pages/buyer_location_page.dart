@@ -20,16 +20,16 @@ class BuyerLocationPage extends ConsumerWidget {
     final onboardingState = ref.watch(onboardingNotifierProvider);
     final notifier = ref.read(onboardingNotifierProvider.notifier);
     final requiresRegion = onboardingState.draft.requiresRegion;
-    final selectedCountry = _selectedCountryValue(onboardingState.draft.countryCode);
+    final selectedCountry = _selectedCountryValue(
+      onboardingState.draft.countryCode,
+    );
     final selectedRegion = _selectedRegionValue(onboardingState.draft.region);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 30,
-          ),
+          padding: const EdgeInsets.only(bottom: AppSpacing.spacingL),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Align(

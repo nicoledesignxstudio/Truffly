@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
-import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_quality.dart';
-import 'package:truffly_app/l10n/app_localizations.dart';
 
 class TruffleQualityBadge extends StatelessWidget {
   const TruffleQualityBadge({
@@ -20,8 +18,6 @@ class TruffleQualityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -29,14 +25,14 @@ class TruffleQualityBadge extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.spacingS,
-          vertical: 6,
+          horizontal: AppSpacing.spacingXS,
+          vertical: AppSpacing.spacingXXS + 1,
         ),
         child: Text(
-          quality.choiceLabel(l10n),
-          style: AppTextStyles.bodySmall.copyWith(
+          quality.badgeLabel,
+          style: AppTextStyles.micro.copyWith(
             color: textColor,
-            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

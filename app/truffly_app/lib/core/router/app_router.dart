@@ -12,8 +12,9 @@ import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/features/account/application/account_providers.dart';
 import 'package:truffly_app/features/account/presentation/account_favorites_page.dart';
 import 'package:truffly_app/features/account/presentation/account_privacy_policy_page.dart';
+import 'package:truffly_app/features/account/presentation/account_refund_and_cancellation_page.dart';
+import 'package:truffly_app/features/account/presentation/account_legal_information_page.dart';
 import 'package:truffly_app/features/account/presentation/account_details_page.dart';
-import 'package:truffly_app/features/account/presentation/account_destination_placeholder_page.dart';
 import 'package:truffly_app/features/account/presentation/account_become_seller_page.dart';
 import 'package:truffly_app/features/account/presentation/account_page.dart';
 import 'package:truffly_app/features/account/presentation/account_settings_page.dart';
@@ -35,8 +36,10 @@ import 'package:truffly_app/features/checkout/presentation/checkout_page.dart';
 import 'package:truffly_app/features/guides/presentation/truffle_guide_detail_page.dart';
 import 'package:truffly_app/features/guides/presentation/truffle_guides_page.dart';
 import 'package:truffly_app/features/home/presentation/home_screen.dart';
+import 'package:truffly_app/features/notifications/presentation/notifications_inbox_page.dart';
 import 'package:truffly_app/features/marketplace/presentation/truffles_page.dart';
 import 'package:truffly_app/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:truffly_app/features/onboarding/presentation/account_seller_onboarding_page.dart';
 import 'package:truffly_app/features/orders/presentation/order_detail_page.dart';
 import 'package:truffly_app/features/orders/presentation/orders_page.dart';
 import 'package:truffly_app/features/profile/presentation/seller_profile_page.dart';
@@ -70,13 +73,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.signup,
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) =>
+            SignupScreen(prefilledEmail: state.uri.queryParameters['email']),
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,
-        builder: (context, state) => VerifyEmailScreen(
-          prefilledEmail: AuthCallbackContext.fromUri(state.uri).prefilledEmail,
-        ),
+        builder: (context, state) {
+          final callbackContext = AuthCallbackContext.fromUri(state.uri);
+          final isEmailChange =
+              state.uri.queryParameters['source'] == 'email_change' ||
+              callbackContext.type == 'email_change';
+
+          return VerifyEmailScreen(
+            prefilledEmail: callbackContext.prefilledEmail,
+            manualVerificationFlow: isEmailChange,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
@@ -97,6 +109,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsInboxPage(),
+      ),
+      GoRoute(
         path: AppRoutes.account,
         builder: (context, state) => const AccountPage(),
       ),
@@ -106,8 +122,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.accountOrderDetail,
-        builder: (context, state) =>
-            OrderDetailPage(orderId: state.pathParameters['orderId'] ?? ''),
+        builder: (context, state) => OrderDetailPage(
+          orderId: state.pathParameters['orderId'] ?? '',
+          openReviewOnLoad: state.uri.queryParameters['openReview'] == 'true',
+        ),
       ),
       GoRoute(
         path: AppRoutes.accountFavorites,
@@ -132,21 +150,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: AppRoutes.accountPayments,
-        builder: (context, state) => const AccountDestinationPlaceholderPage(
-          titleIt: 'Pagamenti',
-          titleEn: 'Payments',
-          descriptionIt:
-              'I metodi di pagamento saranno integrati qui con il flusso Stripe dedicato.',
-          descriptionEn:
-              'Payment methods will be integrated here with the dedicated Stripe flow.',
-        ),
-      ),
-      GoRoute(
         path: AppRoutes.accountBecomeSeller,
         builder: (context, state) => AccountBecomeSellerPage(
           stripeCallbackHint: state.uri.queryParameters['stripe'],
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.accountSellerOnboarding,
+        builder: (context, state) => const AccountSellerOnboardingPage(),
       ),
       GoRoute(
         path: AppRoutes.accountMyTruffles,
@@ -172,6 +183,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.accountTerms,
         builder: (context, state) => const AccountTermsAndConditionsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountRefundAndCancellation,
+        builder: (context, state) => const AccountRefundAndCancellationPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountLegalInformation,
+        builder: (context, state) => const AccountLegalInformationPage(),
       ),
       GoRoute(
         path: AppRoutes.truffles,
@@ -238,8 +257,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final authState = ref.read(authNotifierProvider);
+      final recoveryFlowActive = ref.read(passwordRecoveryFlowProvider);
 
-      return _redirectForAuthState(authState: authState, routeState: state);
+      return _redirectForAuthState(
+        authState: authState,
+        routeState: state,
+        recoveryFlowActive: recoveryFlowActive,
+      );
     },
   );
 });
@@ -265,6 +289,10 @@ void _registerRouterRefreshSources(
   });
 
   ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+    refreshListenable.refresh();
+  });
+
+  ref.listen<bool>(passwordRecoveryFlowProvider, (previous, next) {
     refreshListenable.refresh();
   });
 }
@@ -310,11 +338,13 @@ String? _redirectForStartupGate({
 String? _redirectForAuthState({
   required AuthState authState,
   required GoRouterState routeState,
+  required bool recoveryFlowActive,
 }) {
   return resolveAuthRedirectForTesting(
     authState: authState,
     location: routeState.matchedLocation,
     uri: routeState.uri,
+    recoveryFlowActive: recoveryFlowActive,
   );
 }
 
@@ -323,16 +353,24 @@ String? resolveAuthRedirectForTesting({
   required AuthState authState,
   required String location,
   required Uri uri,
+  bool? recoveryFlowActive,
 }) {
   final isResetPasswordRoute = location == AppRoutes.resetPassword;
   final callbackContext = AuthCallbackContext.fromUri(uri);
+  final hasRecoveryFlow = recoveryFlowActive ?? false;
   final canAccessResetPassword =
-      isResetPasswordRoute && callbackContext.hasValidRecoveryContext;
+      isResetPasswordRoute &&
+      (callbackContext.hasValidRecoveryContext || hasRecoveryFlow);
   final canAccessVerifyEmail =
-      location == AppRoutes.verifyEmail && callbackContext.hasValidVerifyContext;
+      location == AppRoutes.verifyEmail &&
+      callbackContext.hasValidVerifyContext;
 
   if (canAccessResetPassword) {
     return null;
+  }
+
+  if (callbackContext.hasValidRecoveryContext || hasRecoveryFlow) {
+    return AppRoutes.resetPassword;
   }
 
   return switch (authState) {
@@ -396,11 +434,14 @@ String? _redirectVerifiedEmailRequired(String location) {
 }
 
 String? _redirectOnboardingRequired(String location) {
-  if (location == AppRoutes.onboarding) return null;
+  if (location == AppRoutes.onboarding || location == AppRoutes.welcome) {
+    return null;
+  }
   return AppRoutes.onboarding;
 }
 
 String? _redirectAuthenticatedReady(String location) {
+  if (location == AppRoutes.verifyEmail) return null;
   if (_authenticatedReadyAllowedRoutes.contains(location) ||
       location.startsWith('${AppRoutes.account}/') ||
       location.startsWith('/checkout/') ||
@@ -429,14 +470,17 @@ const Set<String> _authenticatedReadyAllowedRoutes = {
   AppRoutes.accountShipping,
   AppRoutes.accountShippingAdd,
   AppRoutes.accountShippingEdit,
-  AppRoutes.accountPayments,
   AppRoutes.accountBecomeSeller,
+  AppRoutes.accountSellerOnboarding,
   AppRoutes.accountMyTruffles,
   AppRoutes.accountGuide,
   AppRoutes.accountSupport,
   AppRoutes.accountSettings,
   AppRoutes.accountPrivacyPolicy,
   AppRoutes.accountTerms,
+  AppRoutes.accountRefundAndCancellation,
+  AppRoutes.accountLegalInformation,
+  AppRoutes.notifications,
   AppRoutes.truffles,
   AppRoutes.checkout,
   AppRoutes.sellers,

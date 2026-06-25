@@ -266,6 +266,30 @@ abstract class AppLocalizations {
   /// **'This email is already in use.'**
   String get authErrorEmailAlreadyUsed;
 
+  /// No description provided for @authErrorEmailResendRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'You requested too many verification emails. Wait a few minutes and try again.'**
+  String get authErrorEmailResendRateLimited;
+
+  /// No description provided for @authErrorEmailDeliveryRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'We cannot send the verification email to this address. Check the email you entered or configure custom SMTP.'**
+  String get authErrorEmailDeliveryRestricted;
+
+  /// No description provided for @authPasswordResetRateLimitedError.
+  ///
+  /// In en, this message translates to:
+  /// **'You requested too many reset links. Wait a few minutes and try again.'**
+  String get authPasswordResetRateLimitedError;
+
+  /// No description provided for @authPasswordResetDeliveryRestrictedError.
+  ///
+  /// In en, this message translates to:
+  /// **'We cannot send the reset email to this address. Check the email you entered or configure custom SMTP.'**
+  String get authPasswordResetDeliveryRestrictedError;
+
   /// No description provided for @authErrorLoginFallback.
   ///
   /// In en, this message translates to:
@@ -302,6 +326,12 @@ abstract class AppLocalizations {
   /// **'I verified my email'**
   String get authVerifyEmailRecheckButton;
 
+  /// No description provided for @authVerifyEmailWrongEmailCta.
+  ///
+  /// In en, this message translates to:
+  /// **'I entered the wrong email'**
+  String get authVerifyEmailWrongEmailCta;
+
   /// No description provided for @authVerifyEmailNotYetVerified.
   ///
   /// In en, this message translates to:
@@ -323,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @authVerifyEmailResendSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Verification email sent again.'**
+  /// **'We sent you a new verification email. Check your inbox.'**
   String get authVerifyEmailResendSuccess;
 
   /// No description provided for @authVerifyEmailMissingEmail.
@@ -371,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @authForgotPasswordSuccess.
   ///
   /// In en, this message translates to:
-  /// **'If the email exists, a reset link has been sent.'**
+  /// **'Check your email: we sent you a link to reset your password.'**
   String get authForgotPasswordSuccess;
 
   /// No description provided for @authForgotPasswordErrorFallback.
@@ -452,41 +482,71 @@ abstract class AppLocalizations {
   /// **'Back to login'**
   String get authResetPasswordSuccessButton;
 
-  /// No description provided for @authWelcomeTitleLeading.
+  /// No description provided for @authWelcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Buy and sell'**
-  String get authWelcomeTitleLeading;
-
-  /// No description provided for @authWelcomeTitleAccent.
-  ///
-  /// In en, this message translates to:
-  /// **'premium truffles'**
-  String get authWelcomeTitleAccent;
+  /// **'Bring the authentic taste of truffles home'**
+  String get authWelcomeTitle;
 
   /// No description provided for @authWelcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Join a trusted marketplace built around\nquality, transparency, and real reviews.'**
+  /// **'The first marketplace dedicated to fresh truffles'**
   String get authWelcomeSubtitle;
 
   /// No description provided for @authWelcomeCreateAccountButton.
   ///
   /// In en, this message translates to:
-  /// **'Create account'**
+  /// **'Sign up to Truffly'**
   String get authWelcomeCreateAccountButton;
-
-  /// No description provided for @authWelcomeGoogleButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Google'**
-  String get authWelcomeGoogleButton;
 
   /// No description provided for @authWelcomeLoginButton.
   ///
   /// In en, this message translates to:
   /// **'I already have an account'**
   String get authWelcomeLoginButton;
+
+  /// No description provided for @authWelcomeFooterInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'About Truffly: Our platform'**
+  String get authWelcomeFooterInfo;
+
+  /// No description provided for @welcomeFreshTrufflesHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh truffles at your door'**
+  String get welcomeFreshTrufflesHome;
+
+  /// No description provided for @welcomeRealFreshTruffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Real fresh truffle'**
+  String get welcomeRealFreshTruffle;
+
+  /// No description provided for @welcomeDiscoverNewFlavors.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover new flavors'**
+  String get welcomeDiscoverNewFlavors;
+
+  /// No description provided for @welcomeVerifiedHunters.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified truffle hunters'**
+  String get welcomeVerifiedHunters;
+
+  /// No description provided for @welcomeSelectedQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected quality'**
+  String get welcomeSelectedQuality;
+
+  /// No description provided for @welcomeProtectedPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected purchases'**
+  String get welcomeProtectedPurchases;
 
   /// No description provided for @onboardingNameTitle.
   ///
@@ -737,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSellerRegionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Seller country is treated as Italy in this onboarding flow, so only region is required here.'**
+  /// **'At the moment, only truffle hunters residing in Italy can sell on Truffly. By continuing, you confirm that you reside in Italy.'**
   String get onboardingSellerRegionSubtitle;
 
   /// No description provided for @onboardingSellerDocumentsTitle.
@@ -878,52 +938,76 @@ abstract class AppLocalizations {
   /// **'Files stay local on this device for now. Upload happens only at final submit.'**
   String get onboardingSellerDocumentsLocalOnlyHelper;
 
-  /// No description provided for @onboardingNotificationsTitle.
+  /// No description provided for @onboardingNotificationsBuyerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Stay updated with notifications'**
-  String get onboardingNotificationsTitle;
+  /// **'Enable notifications'**
+  String get onboardingNotificationsBuyerTitle;
 
-  /// No description provided for @onboardingNotificationsSubtitle.
+  /// No description provided for @onboardingNotificationsBuyerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Notifications help you follow the most important moments of your Truffly experience.'**
-  String get onboardingNotificationsSubtitle;
+  /// **'Receive updates about your orders, shipments, and favorite truffles.'**
+  String get onboardingNotificationsBuyerSubtitle;
 
-  /// No description provided for @onboardingNotificationsBenefitOrderUpdates.
+  /// No description provided for @onboardingNotificationsBuyerBenefit1.
   ///
   /// In en, this message translates to:
-  /// **'Order updates from purchase to completion.'**
-  String get onboardingNotificationsBenefitOrderUpdates;
+  /// **'Order confirmations and shipping updates.'**
+  String get onboardingNotificationsBuyerBenefit1;
 
-  /// No description provided for @onboardingNotificationsBenefitShippingUpdates.
+  /// No description provided for @onboardingNotificationsBuyerBenefit2.
   ///
   /// In en, this message translates to:
-  /// **'Shipping and delivery updates for active orders.'**
-  String get onboardingNotificationsBenefitShippingUpdates;
+  /// **'Delivery and tracking notifications.'**
+  String get onboardingNotificationsBuyerBenefit2;
 
-  /// No description provided for @onboardingNotificationsBenefitSellerApproval.
+  /// No description provided for @onboardingNotificationsBuyerBenefit3.
   ///
   /// In en, this message translates to:
-  /// **'Seller approval updates if you apply to sell on Truffly.'**
-  String get onboardingNotificationsBenefitSellerApproval;
+  /// **'New truffles matching your interests.'**
+  String get onboardingNotificationsBuyerBenefit3;
 
-  /// No description provided for @onboardingNotificationsBenefitPayments.
+  /// No description provided for @onboardingNotificationsSellerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Payment and payout related updates when relevant.'**
-  String get onboardingNotificationsBenefitPayments;
+  /// **'Never miss a sale'**
+  String get onboardingNotificationsSellerTitle;
+
+  /// No description provided for @onboardingNotificationsSellerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications to stay updated on orders, shipments, payments, and seller activity.'**
+  String get onboardingNotificationsSellerSubtitle;
+
+  /// No description provided for @onboardingNotificationsSellerBenefit1.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant notifications for new orders.'**
+  String get onboardingNotificationsSellerBenefit1;
+
+  /// No description provided for @onboardingNotificationsSellerBenefit2.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping reminders for active orders.'**
+  String get onboardingNotificationsSellerBenefit2;
+
+  /// No description provided for @onboardingNotificationsSellerBenefit3.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment and payout updates.'**
+  String get onboardingNotificationsSellerBenefit3;
 
   /// No description provided for @onboardingNotificationsEnableButton.
   ///
   /// In en, this message translates to:
-  /// **'Enable Notifications'**
+  /// **'Enable notifications'**
   String get onboardingNotificationsEnableButton;
 
   /// No description provided for @onboardingNotificationsContinueWithoutButton.
   ///
   /// In en, this message translates to:
-  /// **'Continue Without Notifications'**
+  /// **'Not now'**
   String get onboardingNotificationsContinueWithoutButton;
 
   /// No description provided for @onboardingNotificationsFooter.
@@ -950,6 +1034,18 @@ abstract class AppLocalizations {
   /// **'Notifications enabled successfully.'**
   String get onboardingNotificationsStatusGranted;
 
+  /// No description provided for @onboardingNotificationsStatusProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are provisionally enabled on iOS.'**
+  String get onboardingNotificationsStatusProvisional;
+
+  /// No description provided for @onboardingNotificationsStatusNotDetermined.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission has not been decided yet.'**
+  String get onboardingNotificationsStatusNotDetermined;
+
   /// No description provided for @onboardingNotificationsStatusDenied.
   ///
   /// In en, this message translates to:
@@ -971,7 +1067,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeBuyerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Truffly'**
+  /// **'Your truffle journey starts here'**
   String get onboardingWelcomeBuyerTitle;
 
   /// No description provided for @onboardingWelcomeBuyerSubtitle.
@@ -983,25 +1079,31 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeBuyerMessage.
   ///
   /// In en, this message translates to:
-  /// **'You are ready to start exploring premium truffles, trusted sellers, and secure purchases in the app.'**
+  /// **'Discover freshly harvested truffles, meet passionate hunters, and experience the authentic world of truffles.'**
   String get onboardingWelcomeBuyerMessage;
+
+  /// No description provided for @onboardingWelcomeBuyerReadyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re ready'**
+  String get onboardingWelcomeBuyerReadyLabel;
 
   /// No description provided for @onboardingWelcomeSellerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your Truffly profile is ready'**
+  /// **'Application submitted'**
   String get onboardingWelcomeSellerTitle;
 
   /// No description provided for @onboardingWelcomeSellerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You are ready to complete seller onboarding.'**
+  /// **'Your seller request is under review.'**
   String get onboardingWelcomeSellerSubtitle;
 
   /// No description provided for @onboardingWelcomeSellerMessage.
   ///
   /// In en, this message translates to:
-  /// **'Enter the app to continue with your account. We will keep the seller review flow separate from approval and update you as it progresses.'**
+  /// **'Your seller request has been successfully submitted and is now under review.\nYou’ll receive a notification as your application status progresses.'**
   String get onboardingWelcomeSellerMessage;
 
   /// No description provided for @onboardingWelcomeDefaultTitle.
@@ -1025,85 +1127,85 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingBuyerInfo1Title.
   ///
   /// In en, this message translates to:
-  /// **'Fresh truffles, selected for quality'**
+  /// **'The true taste of fresh truffles'**
   String get onboardingBuyerInfo1Title;
 
   /// No description provided for @onboardingBuyerInfo1Description.
   ///
   /// In en, this message translates to:
-  /// **'Truffly is built for people who want access to premium truffles with a simple mobile experience focused on freshness, origin, and product quality.'**
+  /// **'Discover the taste and aroma of freshly harvested truffles, shipped directly from truffle hunters.'**
   String get onboardingBuyerInfo1Description;
 
   /// No description provided for @onboardingBuyerInfo2Title.
   ///
   /// In en, this message translates to:
-  /// **'Secure purchases with escrow logic'**
+  /// **'Verified hunters, real reviews'**
   String get onboardingBuyerInfo2Title;
 
   /// No description provided for @onboardingBuyerInfo2Description.
   ///
   /// In en, this message translates to:
-  /// **'Payments are designed to follow a protected order flow. Truffly keeps the purchase experience clear and secure while the order moves from payment to shipment to completion.'**
+  /// **'Buy with confidence from verified truffle hunters and discover authentic reviews shared by other buyers.'**
   String get onboardingBuyerInfo2Description;
 
   /// No description provided for @onboardingBuyerInfo3Title.
   ///
   /// In en, this message translates to:
-  /// **'Verified sellers and trust signals'**
+  /// **'We\'ve got the security covered'**
   String get onboardingBuyerInfo3Title;
 
   /// No description provided for @onboardingBuyerInfo3Description.
   ///
   /// In en, this message translates to:
-  /// **'Buyers can explore a marketplace built around verified sellers, transparent profiles, reviews, and a stronger sense of trust across the community.'**
+  /// **'With Truffly, your payment remains protected until your order reaches its destination.'**
   String get onboardingBuyerInfo3Description;
 
   /// No description provided for @onboardingSellerInfo1Title.
   ///
   /// In en, this message translates to:
-  /// **'Sell your truffles to a focused market'**
+  /// **'Give your truffles the value they deserve'**
   String get onboardingSellerInfo1Title;
 
   /// No description provided for @onboardingSellerInfo1Description.
   ///
   /// In en, this message translates to:
-  /// **'Truffly helps truffle hunters reach buyers through a dedicated mobile marketplace designed around quality, trust, and clear order management.'**
+  /// **'Sell directly to a community of truffle enthusiasts, without intermediaries. Set your own price and reach buyers ready to purchase.'**
   String get onboardingSellerInfo1Description;
 
   /// No description provided for @onboardingSellerInfo2Title.
   ///
   /// In en, this message translates to:
-  /// **'A clear commission model'**
+  /// **'No upfront costs'**
   String get onboardingSellerInfo2Title;
 
   /// No description provided for @onboardingSellerInfo2Description.
   ///
   /// In en, this message translates to:
-  /// **'Truffly applies a 10% commission on completed sales. The goal is to keep seller economics simple and predictable from the beginning.'**
+  /// **'No registration fees and no upfront costs. We retain a 10% commission only on completed sales.'**
   String get onboardingSellerInfo2Description;
 
   /// No description provided for @onboardingSellerInfo3Title.
   ///
   /// In en, this message translates to:
-  /// **'Shipping timing matters'**
+  /// **'A marketplace built around freshness'**
   String get onboardingSellerInfo3Title;
 
   /// No description provided for @onboardingSellerInfo3Description.
   ///
   /// In en, this message translates to:
-  /// **'Orders follow strict timing expectations. Sellers are expected to ship quickly, and the current MVP flow is built around a 48-hour shipping rule.'**
+  /// **'To preserve quality and freshness, listings remain active for 5 days and orders must be shipped within 2 business days of the sale.'**
   String get onboardingSellerInfo3Description;
 
   /// No description provided for @onboardingSellerInfo4Title.
   ///
   /// In en, this message translates to:
-  /// **'Approval, escrow, and payout expectations'**
+  /// **'A verified community'**
   String get onboardingSellerInfo4Title;
 
   /// No description provided for @onboardingSellerInfo4Description.
   ///
   /// In en, this message translates to:
-  /// **'Seller onboarding includes review and approval steps. Payments and payouts follow a structured flow, and Stripe-related setup happens only after approval.'**
+  /// **'To sell on Truffly, you\'ll need to verify your identity and truffle license. Payments are transferred through Stripe after the buyer confirms delivery.'**
   String get onboardingSellerInfo4Description;
 
   /// No description provided for @onboardingFlowTitleBuyer.
@@ -1283,13 +1385,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingRoleSelectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'How would you like to use Truffly'**
+  /// **'How would you like to use Truffly?'**
   String get onboardingRoleSelectionTitle;
 
   /// No description provided for @onboardingRoleSelectionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose how you want to get started.\nYou can always change this later.'**
+  /// **'Buy fresh truffles from the best truffle hunters or start selling yours directly to the community.'**
   String get onboardingRoleSelectionSubtitle;
 
   /// No description provided for @onboardingRoleSelectionBuyerTitle.
@@ -1385,7 +1487,7 @@ abstract class AppLocalizations {
   /// No description provided for @truffleSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search by name or Latin name'**
+  /// **'What are you looking for?'**
   String get truffleSearchHint;
 
   /// No description provided for @truffleSearchApply.
@@ -1409,13 +1511,13 @@ abstract class AppLocalizations {
   /// No description provided for @truffleEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No products match your search'**
+  /// **'No matching products'**
   String get truffleEmptyTitle;
 
   /// No description provided for @truffleEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Try changing filters or check again later.'**
+  /// **'Try changing filters\nor check again later.'**
   String get truffleEmptySubtitle;
 
   /// No description provided for @truffleFiltersTitle.
@@ -1553,19 +1655,19 @@ abstract class AppLocalizations {
   /// No description provided for @truffleTypeMacrosporum.
   ///
   /// In en, this message translates to:
-  /// **'Smooth Black Truffle'**
+  /// **'Smooth Black'**
   String get truffleTypeMacrosporum;
 
   /// No description provided for @truffleTypeBrumaleMoschatum.
   ///
   /// In en, this message translates to:
-  /// **'Musky Brumal Truffle'**
+  /// **'Musky Brumal'**
   String get truffleTypeBrumaleMoschatum;
 
   /// No description provided for @truffleTypeMesentericum.
   ///
   /// In en, this message translates to:
-  /// **'Mesenteric Truffle'**
+  /// **'Mesenteric'**
   String get truffleTypeMesentericum;
 
   /// No description provided for @homeTitle.
@@ -1988,6 +2090,120 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0 {0 orders} =1 {1 order} other {{count} orders}}'**
   String sellerCompletedOrdersShort(int count);
 
+  /// No description provided for @sellerProfileInfoTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get sellerProfileInfoTab;
+
+  /// No description provided for @sellerProfileReviewsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get sellerProfileReviewsTab;
+
+  /// No description provided for @sellerProfileTrufflesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffles'**
+  String get sellerProfileTrufflesTab;
+
+  /// No description provided for @sellerProfileRatingStarsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get sellerProfileRatingStarsLabel;
+
+  /// No description provided for @sellerProfileOrdersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get sellerProfileOrdersLabel;
+
+  /// No description provided for @sellerProfileActiveTrufflesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active truffles'**
+  String get sellerProfileActiveTrufflesLabel;
+
+  /// No description provided for @sellerProfileBioFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'This seller has not added a description yet.'**
+  String get sellerProfileBioFallback;
+
+  /// No description provided for @sellerProfileJoinedPlatformLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined the platform'**
+  String get sellerProfileJoinedPlatformLabel;
+
+  /// No description provided for @sellerProfileSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller summary'**
+  String get sellerProfileSummaryTitle;
+
+  /// No description provided for @sellerProfileJoinedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get sellerProfileJoinedLabel;
+
+  /// No description provided for @sellerProfileRegionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get sellerProfileRegionLabel;
+
+  /// No description provided for @sellerProfileUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get sellerProfileUnavailable;
+
+  /// No description provided for @sellerProfileRecentReviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent reviews'**
+  String get sellerProfileRecentReviewsTitle;
+
+  /// No description provided for @sellerProfileReadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Read all'**
+  String get sellerProfileReadAll;
+
+  /// No description provided for @sellerProfileNoReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews for this seller yet.'**
+  String get sellerProfileNoReviews;
+
+  /// No description provided for @sellerProfileActiveTrufflesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active truffles'**
+  String get sellerProfileActiveTrufflesTitle;
+
+  /// No description provided for @sellerProfileNoActiveTruffles.
+  ///
+  /// In en, this message translates to:
+  /// **'This seller has no active truffles right now.'**
+  String get sellerProfileNoActiveTruffles;
+
+  /// No description provided for @sellerProfileUnableToLoadReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load reviews right now.'**
+  String get sellerProfileUnableToLoadReviews;
+
+  /// No description provided for @sellerProfileLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load this seller profile right now.'**
+  String get sellerProfileLoadError;
+
   /// No description provided for @accountDetailsTitle.
   ///
   /// In en, this message translates to:
@@ -2075,14 +2291,86 @@ abstract class AppLocalizations {
   /// No description provided for @accountDetailsPhotoHelper.
   ///
   /// In en, this message translates to:
-  /// **'You can update the seller avatar from camera or gallery. If you remove the current photo, the profile falls back to initials.'**
+  /// **'You can update your profile photo from camera or gallery. The new image uploads right away after selection.'**
   String get accountDetailsPhotoHelper;
 
-  /// No description provided for @accountDetailsPhotoPendingHelper.
+  /// No description provided for @accountDetailsPhotoUploadPending.
   ///
   /// In en, this message translates to:
-  /// **'You selected a new photo locally. The final upload connection will be added in the next step without polluting the current data model.'**
-  String get accountDetailsPhotoPendingHelper;
+  /// **'Uploading profile photo...'**
+  String get accountDetailsPhotoUploadPending;
+
+  /// No description provided for @accountDetailsPhotoUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated successfully.'**
+  String get accountDetailsPhotoUploadSuccess;
+
+  /// No description provided for @accountDetailsPhotoRemoveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo removed.'**
+  String get accountDetailsPhotoRemoveSuccess;
+
+  /// No description provided for @accountDetailsPhotoPickerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to pick an image right now.'**
+  String get accountDetailsPhotoPickerUnavailable;
+
+  /// No description provided for @accountDetailsPhotoPermissionDeniedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied. Allow access to your photos and try again.'**
+  String get accountDetailsPhotoPermissionDeniedError;
+
+  /// No description provided for @accountDetailsPhotoCameraUnavailableError.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera unavailable right now.'**
+  String get accountDetailsPhotoCameraUnavailableError;
+
+  /// No description provided for @accountDetailsPhotoGalleryUnavailableError.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery unavailable right now.'**
+  String get accountDetailsPhotoGalleryUnavailableError;
+
+  /// No description provided for @accountDetailsPhotoFileNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected file could not be found.'**
+  String get accountDetailsPhotoFileNotFoundError;
+
+  /// No description provided for @accountDetailsPhotoTooLargeError.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected image must be 5 MB or smaller.'**
+  String get accountDetailsPhotoTooLargeError;
+
+  /// No description provided for @accountDetailsPhotoUnsupportedFormatError.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a JPG, PNG, or WebP image.'**
+  String get accountDetailsPhotoUnsupportedFormatError;
+
+  /// No description provided for @accountDetailsPhotoInvalidFileError.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected image could not be read.'**
+  String get accountDetailsPhotoInvalidFileError;
+
+  /// No description provided for @accountDetailsPhotoUploadFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to upload the profile photo right now. Please try again.'**
+  String get accountDetailsPhotoUploadFailedError;
+
+  /// No description provided for @accountDetailsPhotoDeleteFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to remove the profile photo right now. Please try again.'**
+  String get accountDetailsPhotoDeleteFailedError;
 
   /// No description provided for @accountDetailsChangePhotoCta.
   ///
@@ -2113,12 +2401,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get accountDetailsPhotoSourceCancelOption;
-
-  /// No description provided for @accountDetailsPhotoUploadPending.
-  ///
-  /// In en, this message translates to:
-  /// **'The new photo is ready as a local preview. We will connect the final upload in the next technical step.'**
-  String get accountDetailsPhotoUploadPending;
 
   /// No description provided for @accountDetailsSellerCountryLockedHelper.
   ///
@@ -2177,19 +2459,19 @@ abstract class AppLocalizations {
   /// No description provided for @accountDetailsEmailVerificationSent.
   ///
   /// In en, this message translates to:
-  /// **'We sent a verification link to your new email address. Verify your email to continue.'**
+  /// **'Check both your current and new email addresses and confirm both links to complete the change.'**
   String get accountDetailsEmailVerificationSent;
 
   /// No description provided for @shippingAddressesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Shipping addresses'**
+  /// **'Shipping'**
   String get shippingAddressesTitle;
 
   /// No description provided for @shippingAddressesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose which address to keep ready for checkout and update it whenever your delivery details change.'**
+  /// **'Add and manage shipping addresses for your orders.'**
   String get shippingAddressesSubtitle;
 
   /// No description provided for @shippingAddressesSectionTitle.
@@ -2765,8 +3047,20 @@ abstract class AppLocalizations {
   /// No description provided for @publishTruffleSubmitNotAllowed.
   ///
   /// In en, this message translates to:
-  /// **'Only approved sellers with Stripe onboarding completed can publish truffles.'**
+  /// **'You cannot publish this truffle right now.'**
   String get publishTruffleSubmitNotAllowed;
+
+  /// No description provided for @publishTruffleSubmitStripeVerificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripe is still verifying your account. You can manage verification directly in Stripe.'**
+  String get publishTruffleSubmitStripeVerificationPending;
+
+  /// No description provided for @publishTruffleSubmitStripeOnboardingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Stripe registration to publish this truffle.'**
+  String get publishTruffleSubmitStripeOnboardingRequired;
 
   /// No description provided for @publishTruffleSubmitInProgress.
   ///
@@ -3005,86 +3299,374 @@ abstract class AppLocalizations {
   /// No description provided for @accountSupportIntro.
   ///
   /// In en, this message translates to:
-  /// **'Find quick answers about orders, shipping, and delivery support.'**
+  /// **'Find quick answers about buying, selling, payments, shipping, and your account.'**
   String get accountSupportIntro;
 
-  /// No description provided for @accountSupportFaqSection.
+  /// No description provided for @accountSupportFaqBuyingOrdersSection.
   ///
   /// In en, this message translates to:
-  /// **'FAQ'**
-  String get accountSupportFaqSection;
+  /// **'Buying & Orders'**
+  String get accountSupportFaqBuyingOrdersSection;
 
-  /// No description provided for @accountSupportFaqOrderFlowQuestion.
+  /// No description provided for @accountSupportFaqBuyTruffleQuestion.
   ///
   /// In en, this message translates to:
-  /// **'How does an order work on Truffly?'**
-  String get accountSupportFaqOrderFlowQuestion;
+  /// **'How do I buy a truffle?'**
+  String get accountSupportFaqBuyTruffleQuestion;
 
-  /// No description provided for @accountSupportFaqOrderFlowAnswer.
+  /// No description provided for @accountSupportFaqBuyTruffleAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Choose your truffle, confirm the order, and we will keep you updated until delivery.'**
-  String get accountSupportFaqOrderFlowAnswer;
+  /// **'Browse available truffles, open a listing, review the product details, select a shipping address, and complete payment securely through Truffly.'**
+  String get accountSupportFaqBuyTruffleAnswer;
 
-  /// No description provided for @accountSupportFaqShippingTimingQuestion.
+  /// No description provided for @accountSupportFaqTrackOrderQuestion.
   ///
   /// In en, this message translates to:
-  /// **'When is the truffle shipped?'**
-  String get accountSupportFaqShippingTimingQuestion;
+  /// **'How can I track my order?'**
+  String get accountSupportFaqTrackOrderQuestion;
 
-  /// No description provided for @accountSupportFaqShippingTimingAnswer.
+  /// No description provided for @accountSupportFaqTrackOrderAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Fresh truffles are prepared and shipped as quickly as possible after order confirmation.'**
-  String get accountSupportFaqShippingTimingAnswer;
+  /// **'Once the seller ships your order and provides a tracking number, it will appear on the Order Details page.'**
+  String get accountSupportFaqTrackOrderAnswer;
 
-  /// No description provided for @accountSupportFaqOrderTrackingQuestion.
+  /// No description provided for @accountSupportFaqAfterOrderQuestion.
   ///
   /// In en, this message translates to:
-  /// **'How can I follow my order status?'**
-  String get accountSupportFaqOrderTrackingQuestion;
+  /// **'What happens after I place an order?'**
+  String get accountSupportFaqAfterOrderQuestion;
 
-  /// No description provided for @accountSupportFaqOrderTrackingAnswer.
+  /// No description provided for @accountSupportFaqAfterOrderAnswer.
   ///
   /// In en, this message translates to:
-  /// **'You can check the latest order status from the My orders section in your account.'**
-  String get accountSupportFaqOrderTrackingAnswer;
+  /// **'After payment, the seller has up to 48 hours to ship the truffles and provide tracking information. You will receive updates through the app and, if enabled, push notifications.'**
+  String get accountSupportFaqAfterOrderAnswer;
 
-  /// No description provided for @accountSupportFaqCancellationQuestion.
+  /// No description provided for @accountSupportFaqSellerDoesNotShipQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Can I cancel an order?'**
-  String get accountSupportFaqCancellationQuestion;
+  /// **'What happens if the seller does not ship?'**
+  String get accountSupportFaqSellerDoesNotShipQuestion;
 
-  /// No description provided for @accountSupportFaqCancellationAnswer.
+  /// No description provided for @accountSupportFaqSellerDoesNotShipAnswer.
   ///
   /// In en, this message translates to:
-  /// **'If you need to cancel an order, contact support as soon as possible and we will review the request.'**
-  String get accountSupportFaqCancellationAnswer;
+  /// **'If the seller does not provide tracking information within the required timeframe, the order may be automatically cancelled and refunded.'**
+  String get accountSupportFaqSellerDoesNotShipAnswer;
 
-  /// No description provided for @accountSupportFaqDeliveryIssueQuestion.
+  /// No description provided for @accountSupportFaqConfirmDeliveryQuestion.
   ///
   /// In en, this message translates to:
-  /// **'What happens if there is a delivery problem?'**
-  String get accountSupportFaqDeliveryIssueQuestion;
+  /// **'How do I confirm delivery?'**
+  String get accountSupportFaqConfirmDeliveryQuestion;
 
-  /// No description provided for @accountSupportFaqDeliveryIssueAnswer.
+  /// No description provided for @accountSupportFaqConfirmDeliveryAnswer.
   ///
   /// In en, this message translates to:
-  /// **'Write to support with your order details and we will help you resolve the issue quickly.'**
-  String get accountSupportFaqDeliveryIssueAnswer;
+  /// **'When your order arrives, open the Order Details page and tap \"Confirm Delivery\". This confirms that the order was received successfully.'**
+  String get accountSupportFaqConfirmDeliveryAnswer;
 
-  /// No description provided for @accountSupportFaqContactQuestion.
+  /// No description provided for @accountSupportFaqTrufflesQualitySection.
   ///
   /// In en, this message translates to:
-  /// **'How can I contact support?'**
-  String get accountSupportFaqContactQuestion;
+  /// **'Truffles & Quality'**
+  String get accountSupportFaqTrufflesQualitySection;
 
-  /// No description provided for @accountSupportFaqContactAnswer.
+  /// No description provided for @accountSupportFaqTrufflesFreshQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Use the email below to contact the Truffly team directly.'**
-  String get accountSupportFaqContactAnswer;
+  /// **'Are the truffles fresh?'**
+  String get accountSupportFaqTrufflesFreshQuestion;
+
+  /// No description provided for @accountSupportFaqTrufflesFreshAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. Sellers are required to publish freshly harvested truffles and provide the harvest date for each listing.'**
+  String get accountSupportFaqTrufflesFreshAnswer;
+
+  /// No description provided for @accountSupportFaqQualityGradesQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What do the quality grades mean?'**
+  String get accountSupportFaqQualityGradesQuestion;
+
+  /// No description provided for @accountSupportFaqQualityGradesAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality grades help describe the appearance and condition of the truffles. First Quality generally includes the most regular and visually appealing truffles, while lower grades may have cosmetic imperfections but remain suitable for consumption.'**
+  String get accountSupportFaqQualityGradesAnswer;
+
+  /// No description provided for @accountSupportFaqStoreTrufflesQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How should I store fresh truffles?'**
+  String get accountSupportFaqStoreTrufflesQuestion;
+
+  /// No description provided for @accountSupportFaqStoreTrufflesAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh truffles should be stored in the refrigerator in a sealed container with absorbent paper. Replace the paper daily and consume the truffles as soon as possible for the best experience.'**
+  String get accountSupportFaqStoreTrufflesAnswer;
+
+  /// No description provided for @accountSupportFaqDamagedOrderQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I do if my order arrives damaged?'**
+  String get accountSupportFaqDamagedOrderQuestion;
+
+  /// No description provided for @accountSupportFaqDamagedOrderAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support as soon as possible and provide photos of the product, packaging, and shipping label. We will review the situation and assist where possible.'**
+  String get accountSupportFaqDamagedOrderAnswer;
+
+  /// No description provided for @accountSupportFaqShippingDeliverySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping & Delivery'**
+  String get accountSupportFaqShippingDeliverySection;
+
+  /// No description provided for @accountSupportFaqSupportedCountriesQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which countries can I order from?'**
+  String get accountSupportFaqSupportedCountriesQuestion;
+
+  /// No description provided for @accountSupportFaqSupportedCountriesAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Buyers located within supported European countries can place orders through Truffly.'**
+  String get accountSupportFaqSupportedCountriesAnswer;
+
+  /// No description provided for @accountSupportFaqShippingCostQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How much does shipping cost?'**
+  String get accountSupportFaqShippingCostQuestion;
+
+  /// No description provided for @accountSupportFaqShippingCostAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping costs are determined by the seller and are displayed before checkout.'**
+  String get accountSupportFaqShippingCostAnswer;
+
+  /// No description provided for @accountSupportFaqTrackingNumberQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Will I receive a tracking number?'**
+  String get accountSupportFaqTrackingNumberQuestion;
+
+  /// No description provided for @accountSupportFaqTrackingNumberAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. Sellers must provide tracking information when shipping an order.'**
+  String get accountSupportFaqTrackingNumberAnswer;
+
+  /// No description provided for @accountSupportFaqPackageDelayedQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens if my package is delayed?'**
+  String get accountSupportFaqPackageDelayedQuestion;
+
+  /// No description provided for @accountSupportFaqPackageDelayedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery times depend on the shipping carrier. If your package appears delayed, check the tracking information first. If the issue persists, contact support.'**
+  String get accountSupportFaqPackageDelayedAnswer;
+
+  /// No description provided for @accountSupportFaqPaymentsRefundsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments & Refunds'**
+  String get accountSupportFaqPaymentsRefundsSection;
+
+  /// No description provided for @accountSupportFaqSecurePaymentsQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are payments secure?'**
+  String get accountSupportFaqSecurePaymentsQuestion;
+
+  /// No description provided for @accountSupportFaqSecurePaymentsAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. Payments are processed securely through Stripe. Truffly does not store your full payment card details.'**
+  String get accountSupportFaqSecurePaymentsAnswer;
+
+  /// No description provided for @accountSupportFaqPaymentChargedQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'When is my payment charged?'**
+  String get accountSupportFaqPaymentChargedQuestion;
+
+  /// No description provided for @accountSupportFaqPaymentChargedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is charged when the order is successfully placed.'**
+  String get accountSupportFaqPaymentChargedAnswer;
+
+  /// No description provided for @accountSupportFaqRefundsWorkQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How do refunds work?'**
+  String get accountSupportFaqRefundsWorkQuestion;
+
+  /// No description provided for @accountSupportFaqRefundsWorkAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds may be issued in accordance with the Refund & Cancellation Policy. Refund eligibility depends on the order status and the circumstances of the request.'**
+  String get accountSupportFaqRefundsWorkAnswer;
+
+  /// No description provided for @accountSupportFaqRefundTimingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How long does a refund take?'**
+  String get accountSupportFaqRefundTimingQuestion;
+
+  /// No description provided for @accountSupportFaqRefundTimingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund processing times vary depending on your bank and payment provider. Most refunds are completed within a few business days.'**
+  String get accountSupportFaqRefundTimingAnswer;
+
+  /// No description provided for @accountSupportFaqSellingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Selling on Truffly'**
+  String get accountSupportFaqSellingSection;
+
+  /// No description provided for @accountSupportFaqBecomeSellerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I become a seller?'**
+  String get accountSupportFaqBecomeSellerQuestion;
+
+  /// No description provided for @accountSupportFaqBecomeSellerAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the seller application process, upload the required documents, and wait for approval from the Truffly team.'**
+  String get accountSupportFaqBecomeSellerAnswer;
+
+  /// No description provided for @accountSupportFaqVerifyIdentityQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Why do I need to verify my identity?'**
+  String get accountSupportFaqVerifyIdentityQuestion;
+
+  /// No description provided for @accountSupportFaqVerifyIdentityAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification helps maintain trust and safety on the platform and ensures that only eligible sellers can publish products.'**
+  String get accountSupportFaqVerifyIdentityAnswer;
+
+  /// No description provided for @accountSupportFaqSellerApprovalTimingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How long does seller approval take?'**
+  String get accountSupportFaqSellerApprovalTimingQuestion;
+
+  /// No description provided for @accountSupportFaqSellerApprovalTimingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Most applications are reviewed within a few business days, although processing times may vary.'**
+  String get accountSupportFaqSellerApprovalTimingAnswer;
+
+  /// No description provided for @accountSupportFaqPublishAfterApprovalQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I publish truffles immediately after approval?'**
+  String get accountSupportFaqPublishAfterApprovalQuestion;
+
+  /// No description provided for @accountSupportFaqPublishAfterApprovalAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Before publishing, approved sellers must complete the required Stripe onboarding process for receiving payouts.'**
+  String get accountSupportFaqPublishAfterApprovalAnswer;
+
+  /// No description provided for @accountSupportFaqSellerPaymentsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller Payments'**
+  String get accountSupportFaqSellerPaymentsSection;
+
+  /// No description provided for @accountSupportFaqSellerPaymentTimingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'When do I receive payment?'**
+  String get accountSupportFaqSellerPaymentTimingQuestion;
+
+  /// No description provided for @accountSupportFaqSellerPaymentTimingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments are released after the order has been completed according to the Truffly payment process.'**
+  String get accountSupportFaqSellerPaymentTimingAnswer;
+
+  /// No description provided for @accountSupportFaqStripeAccountQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Why do I need a Stripe account?'**
+  String get accountSupportFaqStripeAccountQuestion;
+
+  /// No description provided for @accountSupportFaqStripeAccountAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripe securely handles seller payouts and helps verify payment information and identity requirements.'**
+  String get accountSupportFaqStripeAccountAnswer;
+
+  /// No description provided for @accountSupportFaqCommissionQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How much commission does Truffly charge?'**
+  String get accountSupportFaqCommissionQuestion;
+
+  /// No description provided for @accountSupportFaqCommissionAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffly charges a fixed commission on completed sales. The current commission is displayed during the seller onboarding process.'**
+  String get accountSupportFaqCommissionAnswer;
+
+  /// No description provided for @accountSupportFaqAccountPrivacySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & Privacy'**
+  String get accountSupportFaqAccountPrivacySection;
+
+  /// No description provided for @accountSupportFaqDeleteAccountQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I delete my account?'**
+  String get accountSupportFaqDeleteAccountQuestion;
+
+  /// No description provided for @accountSupportFaqDeleteAccountAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request account deletion from the Settings page inside the app.'**
+  String get accountSupportFaqDeleteAccountAnswer;
+
+  /// No description provided for @accountSupportFaqAfterDeleteAccountQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens when I delete my account?'**
+  String get accountSupportFaqAfterDeleteAccountQuestion;
+
+  /// No description provided for @accountSupportFaqAfterDeleteAccountAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal data will be deleted or anonymized where possible. Certain records may be retained where required by law or necessary for security, accounting, or fraud prevention purposes.'**
+  String get accountSupportFaqAfterDeleteAccountAnswer;
+
+  /// No description provided for @accountSupportFaqProtectDataQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How does Truffly protect my data?'**
+  String get accountSupportFaqProtectDataQuestion;
+
+  /// No description provided for @accountSupportFaqProtectDataAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffly uses secure authentication, protected storage, access controls, and other technical measures designed to protect user information.'**
+  String get accountSupportFaqProtectDataAnswer;
 
   /// No description provided for @accountSupportContactTitle.
   ///
@@ -3191,7 +3773,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountSettingsDeleteAccountDialogBody.
   ///
   /// In en, this message translates to:
-  /// **'This action is not available yet from the app. Confirm only if you want to continue as soon as the flow is ready.'**
+  /// **'We will delete your account if there is no transaction history. If you have orders or sold truffles, we will deactivate and anonymize it instead.'**
   String get accountSettingsDeleteAccountDialogBody;
 
   /// No description provided for @accountSettingsDeleteAccountDialogCancel.
@@ -3206,11 +3788,866 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get accountSettingsDeleteAccountDialogConfirm;
 
-  /// No description provided for @accountSettingsDeleteAccountPendingMessage.
+  /// No description provided for @accountSettingsDeleteAccountDeletedMessage.
   ///
   /// In en, this message translates to:
-  /// **'Account deletion is not available in-app yet. Contact support if you need immediate help.'**
-  String get accountSettingsDeleteAccountPendingMessage;
+  /// **'Your account was deleted. You have been signed out.'**
+  String get accountSettingsDeleteAccountDeletedMessage;
+
+  /// No description provided for @accountSettingsDeleteAccountDeactivatedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was deactivated for compliance. You have been signed out.'**
+  String get accountSettingsDeleteAccountDeactivatedMessage;
+
+  /// No description provided for @accountSettingsDeleteAccountUnauthorizedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again to delete your account.'**
+  String get accountSettingsDeleteAccountUnauthorizedMessage;
+
+  /// No description provided for @accountSettingsDeleteAccountInactiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already inactive.'**
+  String get accountSettingsDeleteAccountInactiveMessage;
+
+  /// No description provided for @accountSettingsDeleteAccountErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to process your account request right now. Please try again.'**
+  String get accountSettingsDeleteAccountErrorMessage;
+
+  /// No description provided for @notificationsInboxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsInboxTitle;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsUnreadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notificationsUnreadLabel;
+
+  /// No description provided for @notificationsReadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get notificationsReadLabel;
+
+  /// No description provided for @notificationsEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'You are all caught up. New updates will appear here.'**
+  String get notificationsEmptyState;
+
+  /// No description provided for @notificationsErrorState.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load notifications right now.'**
+  String get notificationsErrorState;
+
+  /// No description provided for @notificationsRetryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get notificationsRetryButton;
+
+  /// No description provided for @notificationGenericTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notificationGenericTitle;
+
+  /// No description provided for @notificationGenericMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the notification center to view the latest update.'**
+  String get notificationGenericMessage;
+
+  /// No description provided for @notificationFallbackTruffleName.
+  ///
+  /// In en, this message translates to:
+  /// **'your truffle'**
+  String get notificationFallbackTruffleName;
+
+  /// No description provided for @notificationFallbackSellerName.
+  ///
+  /// In en, this message translates to:
+  /// **'the seller'**
+  String get notificationFallbackSellerName;
+
+  /// No description provided for @notificationFallbackTrackingCode.
+  ///
+  /// In en, this message translates to:
+  /// **'tracking unavailable'**
+  String get notificationFallbackTrackingCode;
+
+  /// No description provided for @notificationFallbackSellerAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'your payout'**
+  String get notificationFallbackSellerAmount;
+
+  /// No description provided for @notificationOrderConfirmedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order confirmed'**
+  String get notificationOrderConfirmedTitle;
+
+  /// No description provided for @notificationOrderConfirmedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order “{truffleName}” has been confirmed. The seller has 48 hours to ship it.'**
+  String notificationOrderConfirmedMessage(Object truffleName);
+
+  /// No description provided for @notificationPaymentFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
+  String get notificationPaymentFailedTitle;
+
+  /// No description provided for @notificationPaymentFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment for “{truffleName}” failed. You can try again from checkout.'**
+  String notificationPaymentFailedMessage(Object truffleName);
+
+  /// No description provided for @notificationOrderShippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order shipped'**
+  String get notificationOrderShippedTitle;
+
+  /// No description provided for @notificationOrderShippedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order “{truffleName}” has been shipped.'**
+  String notificationOrderShippedMessage(Object truffleName);
+
+  /// No description provided for @notificationTrackingAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking available'**
+  String get notificationTrackingAvailableTitle;
+
+  /// No description provided for @notificationTrackingAvailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking is available for “{truffleName}”: {trackingCode}.'**
+  String notificationTrackingAvailableMessage(
+    Object truffleName,
+    Object trackingCode,
+  );
+
+  /// No description provided for @notificationDeliveryConfirmationReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delivery'**
+  String get notificationDeliveryConfirmationReminderTitle;
+
+  /// No description provided for @notificationDeliveryConfirmationReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Have you received “{truffleName}”? Confirm delivery to complete the order.'**
+  String notificationDeliveryConfirmationReminderMessage(Object truffleName);
+
+  /// No description provided for @notificationOrderCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order completed'**
+  String get notificationOrderCompletedTitle;
+
+  /// No description provided for @notificationOrderCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The order “{truffleName}” has been completed.'**
+  String notificationOrderCompletedMessage(Object truffleName);
+
+  /// No description provided for @notificationOrderAutoCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order automatically completed'**
+  String get notificationOrderAutoCompletedTitle;
+
+  /// No description provided for @notificationOrderAutoCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The order “{truffleName}” was automatically completed.'**
+  String notificationOrderAutoCompletedMessage(Object truffleName);
+
+  /// No description provided for @notificationOrderCancelledBySellerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get notificationOrderCancelledBySellerTitle;
+
+  /// No description provided for @notificationOrderCancelledBySellerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The order “{truffleName}” was cancelled by the seller. Your refund will be started.'**
+  String notificationOrderCancelledBySellerMessage(Object truffleName);
+
+  /// No description provided for @notificationOrderAutoCancelledUnshippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get notificationOrderAutoCancelledUnshippedTitle;
+
+  /// No description provided for @notificationOrderAutoCancelledUnshippedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The order “{truffleName}” was cancelled because it was not shipped within 48 hours.'**
+  String notificationOrderAutoCancelledUnshippedMessage(Object truffleName);
+
+  /// No description provided for @notificationRefundStartedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund started'**
+  String get notificationRefundStartedTitle;
+
+  /// No description provided for @notificationRefundStartedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The refund for “{truffleName}” has been started.'**
+  String notificationRefundStartedMessage(Object truffleName);
+
+  /// No description provided for @notificationRefundCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund completed'**
+  String get notificationRefundCompletedTitle;
+
+  /// No description provided for @notificationRefundCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The refund for “{truffleName}” has been completed.'**
+  String notificationRefundCompletedMessage(Object truffleName);
+
+  /// No description provided for @notificationReviewRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a review'**
+  String get notificationReviewRequestTitle;
+
+  /// No description provided for @notificationReviewRequestMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your experience with “{sellerName}”? Leave a review for “{truffleName}”.'**
+  String notificationReviewRequestMessage(
+    Object sellerName,
+    Object truffleName,
+  );
+
+  /// No description provided for @notificationReviewAutoCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic review'**
+  String get notificationReviewAutoCreatedTitle;
+
+  /// No description provided for @notificationReviewAutoCreatedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We automatically completed the review for “{truffleName}”.'**
+  String notificationReviewAutoCreatedMessage(Object truffleName);
+
+  /// No description provided for @notificationFavoriteTruffleUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffle no longer available'**
+  String get notificationFavoriteTruffleUnavailableTitle;
+
+  /// No description provided for @notificationFavoriteTruffleUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'“{truffleName}” is no longer available.'**
+  String notificationFavoriteTruffleUnavailableMessage(Object truffleName);
+
+  /// No description provided for @notificationFavoriteTruffleExpiringTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing expiring soon'**
+  String get notificationFavoriteTruffleExpiringTitle;
+
+  /// No description provided for @notificationFavoriteTruffleExpiringMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'“{truffleName}” is still available, but the listing is about to expire.'**
+  String notificationFavoriteTruffleExpiringMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerApplicationSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request submitted'**
+  String get notificationSellerApplicationSubmittedTitle;
+
+  /// No description provided for @notificationSellerApplicationSubmittedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to sell on Truffly has been submitted. We’ll notify you once it has been reviewed.'**
+  String get notificationSellerApplicationSubmittedMessage;
+
+  /// No description provided for @notificationSellerApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller approved'**
+  String get notificationSellerApprovedTitle;
+
+  /// No description provided for @notificationSellerApprovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been approved as a seller. Complete Stripe to start publishing truffles.'**
+  String get notificationSellerApprovedMessage;
+
+  /// No description provided for @notificationSellerRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request not approved'**
+  String get notificationSellerRejectedTitle;
+
+  /// No description provided for @notificationSellerRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your seller request was not approved. Check the details or contact support.'**
+  String get notificationSellerRejectedMessage;
+
+  /// No description provided for @notificationStripeOnboardingRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up payments'**
+  String get notificationStripeOnboardingRequiredTitle;
+
+  /// No description provided for @notificationStripeOnboardingRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your payment setup to start selling on Truffly.'**
+  String get notificationStripeOnboardingRequiredMessage;
+
+  /// No description provided for @notificationStripeOnboardingCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments set up'**
+  String get notificationStripeOnboardingCompletedTitle;
+
+  /// No description provided for @notificationStripeOnboardingCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments are set up. You can now publish your truffles.'**
+  String get notificationStripeOnboardingCompletedMessage;
+
+  /// No description provided for @notificationTrufflePublishedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffle published'**
+  String get notificationTrufflePublishedTitle;
+
+  /// No description provided for @notificationTrufflePublishedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'“{truffleName}” has been published and is now visible to users.'**
+  String notificationTrufflePublishedMessage(Object truffleName);
+
+  /// No description provided for @notificationTruffleDeletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truffle deleted'**
+  String get notificationTruffleDeletedTitle;
+
+  /// No description provided for @notificationTruffleDeletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'“{truffleName}” has been deleted.'**
+  String notificationTruffleDeletedMessage(Object truffleName);
+
+  /// No description provided for @notificationTruffleExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing expired'**
+  String get notificationTruffleExpiredTitle;
+
+  /// No description provided for @notificationTruffleExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The listing “{truffleName}” has expired and is no longer visible.'**
+  String notificationTruffleExpiredMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerNewOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New order received'**
+  String get notificationSellerNewOrderTitle;
+
+  /// No description provided for @notificationSellerNewOrderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You received a new order for “{truffleName}”. Ship it within 48 hours.'**
+  String notificationSellerNewOrderMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerShipping24hReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping reminder'**
+  String get notificationSellerShipping24hReminderTitle;
+
+  /// No description provided for @notificationSellerShipping24hReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember to ship “{truffleName}”. You still have 24 hours to add tracking.'**
+  String notificationSellerShipping24hReminderMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerShippingFinalReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Final shipping reminder'**
+  String get notificationSellerShippingFinalReminderTitle;
+
+  /// No description provided for @notificationSellerShippingFinalReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Last hours to ship “{truffleName}”. If you do not add tracking, the order will be cancelled.'**
+  String notificationSellerShippingFinalReminderMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerOrderCancelledUnshippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get notificationSellerOrderCancelledUnshippedTitle;
+
+  /// No description provided for @notificationSellerOrderCancelledUnshippedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The order “{truffleName}” was cancelled because it was not shipped within 48 hours.'**
+  String notificationSellerOrderCancelledUnshippedMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerOrderMarkedShippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order shipped'**
+  String get notificationSellerOrderMarkedShippedTitle;
+
+  /// No description provided for @notificationSellerOrderMarkedShippedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You marked “{truffleName}” as shipped. We’ll notify the buyer.'**
+  String notificationSellerOrderMarkedShippedMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerDeliveryConfirmedByBuyerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery confirmed'**
+  String get notificationSellerDeliveryConfirmedByBuyerTitle;
+
+  /// No description provided for @notificationSellerDeliveryConfirmedByBuyerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The buyer confirmed delivery of “{truffleName}”.'**
+  String notificationSellerDeliveryConfirmedByBuyerMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerOrderAutoCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order automatically completed'**
+  String get notificationSellerOrderAutoCompletedTitle;
+
+  /// No description provided for @notificationSellerOrderAutoCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The order “{truffleName}” was automatically completed.'**
+  String notificationSellerOrderAutoCompletedMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerPaymentReleasedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment released'**
+  String get notificationSellerPaymentReleasedTitle;
+
+  /// No description provided for @notificationSellerPaymentReleasedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment for “{truffleName}” has been released. You will receive {sellerAmount}.'**
+  String notificationSellerPaymentReleasedMessage(
+    Object truffleName,
+    Object sellerAmount,
+  );
+
+  /// No description provided for @notificationSellerPaymentProcessingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment processing'**
+  String get notificationSellerPaymentProcessingTitle;
+
+  /// No description provided for @notificationSellerPaymentProcessingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment for “{truffleName}” is being processed.'**
+  String notificationSellerPaymentProcessingMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerPaymentFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment issue'**
+  String get notificationSellerPaymentFailedTitle;
+
+  /// No description provided for @notificationSellerPaymentFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There is an issue with the payment for “{truffleName}”. We are checking it.'**
+  String notificationSellerPaymentFailedMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerNewReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New review'**
+  String get notificationSellerNewReviewTitle;
+
+  /// No description provided for @notificationSellerNewReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You received a new review for “{truffleName}”.'**
+  String notificationSellerNewReviewMessage(Object truffleName);
+
+  /// No description provided for @notificationSellerAutoReviewReceivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic review received'**
+  String get notificationSellerAutoReviewReceivedTitle;
+
+  /// No description provided for @notificationSellerAutoReviewReceivedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An automatic review was added for the order “{truffleName}”.'**
+  String notificationSellerAutoReviewReceivedMessage(Object truffleName);
+
+  /// No description provided for @notificationBuyerWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Truffly 👋'**
+  String get notificationBuyerWelcomeTitle;
+
+  /// No description provided for @notificationBuyerWelcomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore fresh truffles, discover new hunters, and bring the authentic taste of truffles home.'**
+  String get notificationBuyerWelcomeMessage;
+
+  /// No description provided for @notificationProfileUpdatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get notificationProfileUpdatedTitle;
+
+  /// No description provided for @notificationProfileUpdatedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile changes have been saved.'**
+  String get notificationProfileUpdatedMessage;
+
+  /// No description provided for @notificationSecurityNewLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New login'**
+  String get notificationSecurityNewLoginTitle;
+
+  /// No description provided for @notificationSecurityNewLoginMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A new login to your account was detected.'**
+  String get notificationSecurityNewLoginMessage;
+
+  /// No description provided for @notificationTitleGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notificationTitleGeneric;
+
+  /// No description provided for @notificationTitleOrderPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Order update'**
+  String get notificationTitleOrderPlaced;
+
+  /// No description provided for @notificationTitleOrderShipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Order shipped'**
+  String get notificationTitleOrderShipped;
+
+  /// No description provided for @notificationTitleOrderCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Order completed'**
+  String get notificationTitleOrderCompleted;
+
+  /// No description provided for @notificationTitleOrderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get notificationTitleOrderCancelled;
+
+  /// No description provided for @notificationTitleSellerApplicationSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller application'**
+  String get notificationTitleSellerApplicationSubmitted;
+
+  /// No description provided for @notificationTitleSellerApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller approved'**
+  String get notificationTitleSellerApproved;
+
+  /// No description provided for @notificationTitleSellerRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller rejected'**
+  String get notificationTitleSellerRejected;
+
+  /// No description provided for @notificationTitlePayoutReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout released'**
+  String get notificationTitlePayoutReleased;
+
+  /// No description provided for @notificationTitleFavoriteTruffleDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved truffle unavailable'**
+  String get notificationTitleFavoriteTruffleDeleted;
+
+  /// No description provided for @notificationMessageOrderPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been confirmed. The seller can now prepare it.'**
+  String get notificationMessageOrderPlaced;
+
+  /// No description provided for @notificationMessageOrderShipped.
+  ///
+  /// In en, this message translates to:
+  /// **'The seller has shipped your order.'**
+  String get notificationMessageOrderShipped;
+
+  /// No description provided for @notificationMessageOrderCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been completed.'**
+  String get notificationMessageOrderCompleted;
+
+  /// No description provided for @notificationMessageOrderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order was cancelled or refunded.'**
+  String get notificationMessageOrderCancelled;
+
+  /// No description provided for @notificationMessageOrderAutoCancelledUnshippedBuyer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order was cancelled and refunded because the seller did not ship it within 48 hours.'**
+  String get notificationMessageOrderAutoCancelledUnshippedBuyer;
+
+  /// No description provided for @notificationMessageOrderAutoCancelledUnshippedSeller.
+  ///
+  /// In en, this message translates to:
+  /// **'The order was cancelled and refunded because it was not shipped within 48 hours.'**
+  String get notificationMessageOrderAutoCancelledUnshippedSeller;
+
+  /// No description provided for @notificationTitleBuyerReviewCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'New review'**
+  String get notificationTitleBuyerReviewCreated;
+
+  /// No description provided for @notificationMessageBuyerReviewCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'A buyer left a review for one of your completed orders.'**
+  String get notificationMessageBuyerReviewCreated;
+
+  /// No description provided for @notificationTitleAutoReviewCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic review'**
+  String get notificationTitleAutoReviewCreated;
+
+  /// No description provided for @notificationMessageAutoReviewCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'An automatic review was created after the review window expired.'**
+  String get notificationMessageAutoReviewCreated;
+
+  /// No description provided for @notificationTitleOrderDeliveryConfirmationReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery reminder'**
+  String get notificationTitleOrderDeliveryConfirmationReminder;
+
+  /// No description provided for @notificationMessageOrderDeliveryConfirmationReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm delivery within 48 hours or the order will be auto-completed.'**
+  String get notificationMessageOrderDeliveryConfirmationReminder;
+
+  /// No description provided for @notificationMessageSellerApplicationSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'We have received your request. Your documents are under review.'**
+  String get notificationMessageSellerApplicationSubmitted;
+
+  /// No description provided for @notificationMessageSellerApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to become a seller has been approved.'**
+  String get notificationMessageSellerApproved;
+
+  /// No description provided for @notificationMessageSellerRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to become a seller was not approved.'**
+  String get notificationMessageSellerRejected;
+
+  /// No description provided for @notificationMessagePayoutReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'A payout has been released.'**
+  String get notificationMessagePayoutReleased;
+
+  /// No description provided for @notificationMessageFavoriteTruffleDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'A truffle you saved is no longer available.'**
+  String get notificationMessageFavoriteTruffleDeleted;
+
+  /// No description provided for @reviewSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your order'**
+  String get reviewSectionTitle;
+
+  /// No description provided for @reviewSectionCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review helps other buyers choose with more confidence and highlights the seller\'s work.'**
+  String get reviewSectionCopy;
+
+  /// No description provided for @reviewUnavailableCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing is no longer available for this order.'**
+  String get reviewUnavailableCopy;
+
+  /// No description provided for @reviewLeaveCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a review'**
+  String get reviewLeaveCta;
+
+  /// No description provided for @reviewSubmittedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Review sent'**
+  String get reviewSubmittedLabel;
+
+  /// No description provided for @reviewSubmittedSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks, your review has been published.'**
+  String get reviewSubmittedSnackBar;
+
+  /// No description provided for @reviewSubmitErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit the review right now.'**
+  String get reviewSubmitErrorMessage;
+
+  /// No description provided for @reviewSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your experience?'**
+  String get reviewSheetTitle;
+
+  /// No description provided for @reviewSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review helps other buyers choose with more confidence and highlights the seller\'s work.'**
+  String get reviewSheetSubtitle;
+
+  /// No description provided for @reviewRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get reviewRatingLabel;
+
+  /// No description provided for @reviewCommentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get reviewCommentLabel;
+
+  /// No description provided for @reviewCommentPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us how it went: freshness, shipping, truffle quality…'**
+  String get reviewCommentPlaceholder;
+
+  /// No description provided for @reviewWindowNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You have 48 hours to leave a review. After that, a 5-star automatic review will be published.'**
+  String get reviewWindowNote;
+
+  /// No description provided for @reviewSubmitCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish review'**
+  String get reviewSubmitCta;
+
+  /// No description provided for @reviewCancelCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get reviewCancelCta;
+
+  /// No description provided for @reviewRatingRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a rating.'**
+  String get reviewRatingRequiredError;
+
+  /// No description provided for @reviewAutoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically created review'**
+  String get reviewAutoLabel;
+
+  /// No description provided for @reviewAutoCommentCompletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic review: order completed successfully.'**
+  String get reviewAutoCommentCompletedSuccess;
+
+  /// No description provided for @reviewAutoCommentUnshipped48h.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic review: order was not shipped within 48 hours.'**
+  String get reviewAutoCommentUnshipped48h;
+
+  /// No description provided for @reviewWindowExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The time to leave a review has expired. If you did not submit one, the planned automatic rating will be recorded.'**
+  String get reviewWindowExpiredMessage;
+
+  /// No description provided for @reviewAlreadySubmittedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You already left a review for this order.'**
+  String get reviewAlreadySubmittedMessage;
 
   /// No description provided for @accountPrivacyPolicyTitle.
   ///
@@ -3343,6 +4780,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These texts are an MVP version and may be updated as Truffly expands its legal and operational flows.'**
   String get accountTermsSectionUpdatesBody;
+
+  /// No description provided for @accountSettingsRefundAndCancellationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund & Cancellation'**
+  String get accountSettingsRefundAndCancellationLabel;
+
+  /// No description provided for @accountSettingsLegalInformationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Information'**
+  String get accountSettingsLegalInformationLabel;
+
+  /// No description provided for @accountRefundAndCancellationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund & Cancellation'**
+  String get accountRefundAndCancellationTitle;
+
+  /// No description provided for @accountLegalInformationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Information'**
+  String get accountLegalInformationTitle;
+
+  /// No description provided for @accountPrivacyPolicyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: [Date]\n\nTruffly respects your privacy and is committed to protecting your personal data.\n\nThis Privacy Policy explains how Truffly collects, uses, stores, shares, and protects personal information when you use the Truffly mobile application and related services.\n\n1. Data Controller\n\nThe data controller is:\n\n[Legal owner / Company name]\nAddress: [Legal address]\nCountry: Italy\nEmail: [Privacy email]\nSupport email: truffly@gmail.com\n\n2. What Truffly is\n\nTruffly is a marketplace that connects buyers with verified Italian truffle hunters and sellers.\n\nTruffly provides the digital platform, account management, payment flow, order tools, seller verification tools, notifications, and support features.\n\nTruffly does not directly sell the truffles listed by sellers unless expressly stated otherwise.\n\n3. Personal data we collect\n\nWhen you use Truffly, we may collect the following data:\n\nAccount data\n• first name\n• last name\n• email address\n• password credentials managed through our authentication provider\n• country\n• region, where applicable\n• profile image, if uploaded\n• account role, such as buyer or seller\n\nBuyer data\n• shipping addresses\n• phone number for delivery\n• order history\n• favorite products\n• reviews submitted\n• support requests\n\nSeller data\n• seller profile information\n• region\n• bio\n• seller application status\n• truffle license or permit information\n• seller verification documents\n• Stripe Connect onboarding status\n• published products\n• sales history\n• reviews received\n\nOrder and payment data\n• purchased product\n• seller and buyer IDs\n• order amount\n• shipping cost\n• commission amount\n• payment status\n• refund status\n• Stripe transaction identifiers\n• tracking code\n• order status\n\nTruffly does not store full card numbers or complete payment card details. Payments are processed by Stripe.\n\nTechnical data\n• device information\n• operating system\n• IP address\n• app logs\n• security logs\n• push notification token\n• authentication session data\n\n4. Why we use your data\n\nWe process personal data to:\n• create and manage your account\n• allow you to buy and sell truffles\n• verify seller applications\n• process payments and refunds\n• manage orders and shipping information\n• send order-related notifications\n• provide customer support\n• prevent fraud and misuse\n• secure the platform\n• comply with legal obligations\n• manage account deletion and data requests\n\n5. Legal basis for processing\n\nWe process your data under the following legal bases:\n\nContract performance\nTo provide the Truffly service, manage accounts, process orders, and enable payments.\n\nLegal obligations\nTo comply with applicable laws, accounting obligations, consumer protection rules, and requests from competent authorities.\n\nLegitimate interest\nTo protect the platform, prevent fraud, verify sellers, maintain audit logs, and improve security.\n\nConsent\nFor push notifications and any optional processing where consent is required.\n\nYou can withdraw consent for notifications at any time through your device settings or Truffly settings where available.\n\n6. Seller verification documents\n\nIf you apply to become a seller, Truffly may request documents to verify your identity and your eligibility to sell truffles.\n\nThese documents are used only for verification and platform safety.\n\nWhere possible, identity documents are deleted after the verification process is completed, unless retention is required by law or necessary to protect Truffly against fraud, disputes, or legal claims.\n\nSeller license or permit information may be retained for as long as your seller account remains active and for any additional period required by law or legitimate compliance needs.\n\n7. Payments\n\nPayments are processed through Stripe.\n\nStripe may collect and process payment data, identity verification data, tax information, bank account details, and other information required to provide payment services.\n\nTruffly may receive and store payment identifiers, order status, refund status, and seller payout status, but does not store full payment card details.\n\n8. Push notifications\n\nTruffly may send push notifications related to:\n• order confirmations\n• shipment updates\n• refund updates\n• seller approval or rejection\n• payment release\n• important account or security notices\n\nYou can disable push notifications through your device settings.\n\nSome important service communications may still be shown inside the app.\n\n9. Who we share data with\n\nWe may share data with:\n• Stripe, for payments and seller onboarding\n• Supabase, for authentication, database, and storage\n• Firebase Cloud Messaging, for push notifications\n• hosting, infrastructure, security, and technical service providers\n• competent authorities, where legally required\n• buyers and sellers, only where necessary to complete an order\n\nFor example, a seller may receive shipping information needed to fulfill an order. A buyer may see seller profile information, ratings, and order-related details.\n\n10. International transfers\n\nSome service providers may process data outside the European Economic Area.\n\nWhere this happens, Truffly relies on appropriate safeguards, such as Standard Contractual Clauses or other lawful transfer mechanisms under applicable data protection laws.\n\n11. Data retention\n\nWe keep personal data only for as long as necessary.\n\nIndicatively:\n• account data: for as long as the account is active\n• order data: for the period required by law and accounting obligations\n• seller verification data: for the time necessary for verification and compliance\n• support requests: for the time necessary to manage the request and protect legal rights\n• security logs: for security, fraud prevention, and audit purposes\n• deleted accounts: data is deleted or anonymized unless retention is legally required\n\nIf an account has completed orders, reviews, payments, refunds, or seller activity, some data may need to be retained to comply with legal obligations and protect the rights of users and Truffly.\n\n12. Account deletion\n\nYou may request deletion of your account from within the app.\n\nWhen you delete your account, Truffly will delete or anonymize personal data where possible.\n\nSome data may be retained where necessary to:\n• comply with legal obligations\n• maintain accounting records\n• manage disputes\n• prevent fraud\n• protect the rights of Truffly, buyers, or sellers\n\nIf you are a seller or have completed transactions, order records may be retained in anonymized or limited form.\n\n13. Your rights\n\nUnder applicable data protection laws, you may have the right to:\n• access your personal data\n• correct inaccurate data\n• request deletion of your data\n• restrict processing\n• object to processing\n• request data portability\n• withdraw consent\n• lodge a complaint with a data protection authority\n\nTo exercise your rights, contact us at:\n\n[Privacy email]\n\n14. Security\n\nTruffly uses technical and organizational measures designed to protect personal data, including access controls, authentication systems, protected storage, server-side business logic, and security logs.\n\nNo digital system can be guaranteed to be completely secure.\n\n15. Children\n\nTruffly is not intended for users under 18 years old.\n\nIf we become aware that a minor has created an account, we may delete the account and associated data.\n\n16. Changes to this Privacy Policy\n\nWe may update this Privacy Policy from time to time.\n\nWhen changes are significant, we may notify users through the app or other appropriate channels.\n\n17. Contact\n\nFor privacy-related requests:\n[Privacy email]\n\nFor general support:\ntruffly@gmail.com'**
+  String get accountPrivacyPolicyContent;
+
+  /// No description provided for @accountTermsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: [Date]\n\nWelcome to Truffly.\n\nThese Terms & Conditions govern your access to and use of the Truffly mobile application and related services.\n\nBy creating an account or using Truffly, you agree to these Terms.\n\n1. Operator of the platform\n\nTruffly is operated by:\n\n[Legal owner / Company name]\nAddress: [Legal address]\nCountry: Italy\nSupport email: truffly@gmail.com\n\n2. What Truffly does\n\nTruffly is a digital marketplace that allows buyers to purchase fresh truffles from verified Italian sellers.\n\nTruffly provides:\n• the mobile platform\n• account registration\n• seller verification tools\n• product listing tools\n• order management\n• payment flow through Stripe\n• notifications\n• review tools\n• support tools\n\nUnless expressly stated otherwise, Truffly is not the direct seller of the products listed on the platform.\n\nThe sales contract for the product is concluded between the buyer and the seller.\n\n3. User eligibility\n\nTo use Truffly, you must:\n• be at least 18 years old\n• provide accurate information\n• keep your account credentials secure\n• use the platform lawfully\n• comply with these Terms\n\nTruffly may suspend or terminate accounts that violate these Terms or applicable law.\n\n4. Buyer accounts\n\nBuyers may:\n• browse truffles\n• view seller profiles\n• purchase available products\n• manage shipping addresses\n• track orders\n• confirm delivery\n• leave reviews\n• contact support\n\nBuyers must provide accurate shipping and contact information.\n\nTruffly is not responsible for failed deliveries caused by incorrect or incomplete information provided by the buyer.\n\n5. Seller accounts\n\nOnly approved sellers may publish truffles on Truffly.\n\nSellers must:\n• be based in Italy\n• provide accurate identity and eligibility information\n• hold any license, permit, authorization, or requirement applicable to truffle harvesting and sale\n• publish truthful product information\n• use real product images\n• ship products within the required timeframe\n• provide valid tracking information\n• comply with tax, food, consumer, and commercial laws applicable to their activity\n\nSellers are responsible for the products they publish and sell.\n\nTruffly may approve, reject, suspend, or remove seller access where necessary to protect users, comply with law, or preserve platform trust.\n\n6. Product listings\n\nEach product listing must contain accurate information, including where applicable:\n• truffle type\n• quality\n• weight\n• price\n• harvest date\n• region\n• shipping cost\n• images\n\nSellers must not publish misleading, false, illegal, unsafe, or unavailable products.\n\nTruffly may remove listings that violate these Terms or platform rules.\n\n7. Product freshness and availability\n\nTruffles are fresh and perishable products.\n\nAvailability may be limited and time-sensitive.\n\nA product may become unavailable if it is sold, expired, removed, or cancelled according to platform rules.\n\n8. Orders\n\nWhen a buyer completes payment, the order is created and the seller must ship the product according to the rules shown in the app.\n\nThe seller must insert tracking information within the required timeframe.\n\nOrder statuses may include:\n• paid\n• shipped\n• completed\n• cancelled\n\nTruffly may use automated systems to update order status according to platform rules.\n\n9. Payments\n\nPayments are processed through Stripe.\n\nWhen a buyer purchases a product, payment is collected securely and held according to the platform payment flow.\n\nSeller payouts are released according to the order completion rules.\n\nTruffly applies a fixed commission of [10%] on completed transactions, unless otherwise stated.\n\nThe commission is calculated by the platform.\n\n10. Shipping\n\nThe seller is responsible for preparing and shipping the product properly.\n\nSellers must use packaging suitable for fresh truffles and must comply with applicable shipping and food safety requirements.\n\nShipping times and costs may vary depending on destination and seller settings.\n\nTruffly is not responsible for delays caused by couriers, incorrect addresses, force majeure, or events outside Truffly’s reasonable control.\n\n11. Buyer confirmation and automatic completion\n\nAfter shipment, the buyer may confirm delivery in the app.\n\nIf the buyer does not confirm within the timeframe shown in the app, the order may be automatically completed after the applicable waiting period.\n\nWhen an order is completed, seller payout may be released according to the payment flow.\n\n12. Cancellations\n\nOrders may be cancelled in the cases described in the Refund & Cancellation Policy.\n\nIf the seller does not ship within the required timeframe, the order may be automatically cancelled and refunded.\n\nBuyers cannot freely cancel an order after payment unless allowed by law, platform policy, or support review.\n\n13. Right of withdrawal\n\nFresh truffles are perishable food products.\n\nFor this reason, the right of withdrawal may not apply to purchases of fresh truffles where the product is liable to deteriorate or expire rapidly.\n\nThis does not affect any mandatory consumer rights that cannot be excluded by law.\n\n14. Reviews\n\nBuyers may leave one review for each completed order.\n\nReviews must be honest, relevant, and based on a real purchase.\n\nUsers may not post:\n• false reviews\n• offensive content\n• discriminatory content\n• spam\n• private personal data\n• threats\n• illegal content\n\nTruffly may remove reviews that violate these Terms or applicable law.\n\nIf the app provides automatic reviews after a certain period, this will be disclosed in the app.\n\n15. User content\n\nUsers may upload or publish content such as profile information, product images, descriptions, and reviews.\n\nBy uploading content, you confirm that:\n• you have the right to use it\n• it is accurate and lawful\n• it does not infringe third-party rights\n• it does not contain illegal, harmful, or misleading material\n\nTruffly may remove content that violates these Terms.\n\n16. Prohibited use\n\nYou must not:\n• create fake accounts\n• impersonate another person\n• publish false product information\n• manipulate reviews\n• attempt to bypass payment systems\n• harass other users\n• upload illegal or harmful content\n• interfere with platform security\n• use Truffly for fraud or unlawful activity\n\n17. Platform role and limitation of responsibility\n\nTruffly acts as a marketplace platform and technology intermediary.\n\nSellers are responsible for the products they publish and sell.\n\nBuyers and sellers are responsible for complying with laws applicable to their own conduct.\n\nTo the maximum extent permitted by law, Truffly is not responsible for:\n• false information provided by users\n• product quality issues caused by sellers\n• misuse of products\n• courier delays\n• incorrect shipping information\n• tax obligations of sellers\n• disputes not caused by Truffly’s own breach\n\nNothing in these Terms limits rights that cannot be excluded under applicable consumer law.\n\n18. Taxes\n\nSellers are responsible for determining and fulfilling their own tax, invoicing, accounting, and reporting obligations.\n\nTruffly does not provide tax advice.\n\nBuyers and sellers should consult a qualified professional where needed.\n\n19. Account suspension or termination\n\nTruffly may suspend or terminate an account if:\n• the user violates these Terms\n• the user provides false information\n• fraud or abuse is suspected\n• required by law\n• necessary to protect users or the platform\n\nUsers may delete their account from within the app, subject to legal retention obligations.\n\n20. Changes to the service\n\nTruffly may update, modify, suspend, or discontinue parts of the platform.\n\nWhere changes materially affect users, Truffly may provide notice through the app or other appropriate channels.\n\n21. Governing law\n\nThese Terms are governed by the laws of Italy, without prejudice to mandatory consumer protection rights that may apply in the buyer’s country of residence.\n\n22. Contact\n\nFor support:\ntruffly@gmail.com\n\nFor legal inquiries:\n[Legal email]'**
+  String get accountTermsContent;
+
+  /// No description provided for @accountRefundAndCancellationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: [Date]\n\nThis Refund & Cancellation Policy explains how cancellations, refunds, shipment deadlines, and payment releases work on Truffly.\n\n1. General principle\n\nTruffly is a marketplace for fresh truffles sold by verified Italian sellers.\n\nFresh truffles are perishable products. For this reason, refunds and cancellations are managed according to product freshness, shipment status, seller obligations, and applicable consumer protection laws.\n\n2. Payment protection\n\nWhen a buyer pays for an order, the payment is processed securely through Stripe.\n\nThe payment may be held according to the Truffly payment flow until the order is shipped, confirmed, completed, cancelled, or refunded.\n\n3. Seller shipping deadline\n\nSellers must ship the product and provide tracking information within the timeframe shown in the app.\n\nFor Truffly’s standard flow, sellers are expected to ship within 48 hours from order confirmation, unless otherwise stated.\n\n4. Automatic cancellation if the seller does not ship\n\nIf the seller does not provide tracking information within the required timeframe, Truffly may automatically cancel the order.\n\nIn this case:\n• the buyer receives a refund\n• the seller does not receive the payout\n• the product may become available again where applicable\n\n5. Buyer cancellation\n\nBecause fresh truffles are perishable and time-sensitive products, buyers generally cannot cancel an order after payment once the seller has started preparing or shipping the product.\n\nA buyer may contact support if:\n• the order was placed by mistake\n• the shipping address is incorrect\n• the seller has not shipped yet\n• there is another serious issue\n\nTruffly will evaluate the request but cannot guarantee cancellation in every case.\n\n6. Seller cancellation\n\nA seller may cancel an order before shipment only where allowed by the app flow or by Truffly support.\n\nReasons may include:\n• product no longer suitable for sale\n• product quality issue\n• inability to ship\n• incorrect listing information\n\nIf the seller cancels before shipment, the buyer will receive a refund.\n\nRepeated seller cancellations may lead to account review or suspension.\n\n7. Refund after shipment\n\nAfter an order has been shipped, refunds are not automatic.\n\nA buyer may contact support if:\n• the product was not delivered\n• the product arrived damaged\n• the product is materially different from the listing\n• there is a serious issue with freshness or quality\n• tracking information shows a delivery problem\n\nTruffly may ask the buyer to provide evidence, such as photos, tracking information, or order details.\n\n8. Delivery confirmation\n\nWhen the buyer receives the product, they may confirm delivery in the app.\n\nOnce delivery is confirmed, the order may be completed and the seller payout may be released.\n\n9. Automatic completion\n\nIf the buyer does not confirm delivery or report an issue within the timeframe shown in the app, the order may be automatically completed.\n\nAfter automatic completion, the seller payout may be released.\n\nThis does not remove mandatory legal rights that cannot be excluded.\n\n10. Right of withdrawal\n\nFresh truffles are perishable food products and may deteriorate or expire rapidly.\n\nFor this reason, the legal right of withdrawal may not apply to purchases of fresh truffles.\n\nThis does not affect any mandatory rights that consumers may have under applicable law, including rights related to defective, damaged, or non-conforming products.\n\n11. Refund method and timing\n\nRefunds are processed through the original payment method where possible.\n\nRefund timing may depend on:\n• Stripe processing times\n• the buyer’s bank or card issuer\n• payment method used\n• fraud or compliance checks\n\nTruffly cannot control delays caused by banks or payment providers.\n\n12. Shipping costs\n\nWhere an order is cancelled before shipment due to seller failure, shipping costs paid by the buyer may be refunded.\n\nWhere a refund is requested after shipment, shipping costs may be refunded or excluded depending on the reason for the refund, applicable law, and support review.\n\n13. Disputes\n\nIf there is a problem with an order, the buyer should contact support as soon as possible.\n\nSupport email:\ntruffly@gmail.com\n\nThe buyer should include:\n• order number\n• description of the issue\n• photos, if relevant\n• tracking details, if available\n\n14. Abuse\n\nTruffly may refuse refunds, suspend accounts, or restrict access where fraud, abuse, false claims, or repeated misuse of the refund process is suspected.\n\n15. Contact\n\nFor refund and cancellation requests:\ntruffly@gmail.com'**
+  String get accountRefundAndCancellationContent;
+
+  /// No description provided for @accountLegalInformationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: [Date]\n\nThis page provides legal information about Truffly and the operator of the platform.\n\nPlatform operator\n\nTruffly is operated by:\n\n[Legal owner / Company name]\nAddress: [Legal address]\nCountry: Italy\nEmail: [Legal email]\nSupport email: truffly@gmail.com\n\nVAT / tax information:\n[VAT number / Tax code / Not applicable / To be added]\n\nNature of the service\n\nTruffly is a digital marketplace that connects buyers with verified Italian sellers of fresh truffles.\n\nUnless expressly stated otherwise, Truffly does not directly sell the products listed in the app.\n\nThe sales contract for each product is concluded between the buyer and the seller.\n\nSeller responsibility\n\nSellers are responsible for:\n• the accuracy of their listings\n• the quality and condition of the products they sell\n• compliance with applicable harvesting, food, tax, commercial, and consumer laws\n• packaging and shipping the product correctly\n• providing valid tracking information\n\nBuyer responsibility\n\nBuyers are responsible for:\n• providing accurate account information\n• providing a correct shipping address\n• checking order details before payment\n• reporting delivery or product issues promptly\n• using the platform lawfully\n\nPayments\n\nPayments are processed securely through Stripe.\n\nTruffly may apply a platform commission to completed transactions.\n\nSeller payouts, refunds, and payment releases are managed according to the applicable payment flow and platform policies.\n\nConsumer information\n\nBefore completing a purchase, buyers are shown key order information, including product details, price, shipping cost, seller information where available, and total amount.\n\nFresh truffles are perishable food products. The right of withdrawal may not apply where products are liable to deteriorate or expire rapidly.\n\nAccount deletion and data requests\n\nUsers can request account deletion from within the app.\n\nSome data may be retained where required by law or necessary for security, accounting, fraud prevention, disputes, or legal claims.\n\nPrivacy-related requests can be sent to:\n[Privacy email]\n\nSupport\n\nFor general support:\ntruffly@gmail.com\n\nLegal notices\n\nAll trademarks, logos, app designs, text, images, and platform materials are owned by Truffly or used with permission, unless otherwise stated.\n\nUsers may not copy, reproduce, distribute, or misuse Truffly content without authorization.\n\nGoverning law\n\nThe platform is operated from Italy.\n\nThese legal notices are governed by Italian law, without prejudice to mandatory consumer protection rights that may apply in the user’s country of residence.'**
+  String get accountLegalInformationContent;
 }
 
 class _AppLocalizationsDelegate

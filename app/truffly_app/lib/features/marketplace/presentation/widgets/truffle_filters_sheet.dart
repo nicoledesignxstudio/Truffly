@@ -11,10 +11,7 @@ import 'package:truffly_app/features/truffle/domain/truffle_quality.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class TruffleFiltersSheet extends StatefulWidget {
-  const TruffleFiltersSheet({
-    super.key,
-    required this.initialFilters,
-  });
+  const TruffleFiltersSheet({super.key, required this.initialFilters});
 
   final TruffleListingFilters initialFilters;
 
@@ -38,21 +35,25 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.auth)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadii.auth),
+        ),
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.spacingM,
-            right: AppSpacing.spacingM,
-            top: AppSpacing.spacingM,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.spacingM,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.spacingM,
+              right: AppSpacing.spacingM,
+              top: AppSpacing.spacingS,
+              bottom:
+                  MediaQuery.of(context).viewInsets.bottom + AppSpacing.spacingM,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               Row(
                 children: [
                   IconButton(
@@ -63,8 +64,11 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                         );
                       });
                     },
-                    icon: const Icon(Icons.refresh_rounded),
-                    color: AppColors.black80,
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: AppColors.black,
+                      size: 24,
+                    ),
                   ),
                   Expanded(
                     child: Text(
@@ -80,15 +84,17 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: AppSpacing.spacingS),
               _SectionTitle(title: l10n.truffleFilterQuality),
-              _HorizontalChipList(
+              _HorizontalChipRow(
                 children: [
                   _StyledSheetChip(
                     label: l10n.truffleFilterAll,
                     selected: _draft.qualities.isEmpty,
                     onTap: () => setState(() {
-                      _draft = _draft.copyWith(qualities: <TruffleQuality>{});
+                      _draft = _draft.copyWith(
+                        qualities: <TruffleQuality>{},
+                      );
                     }),
                   ),
                   for (final quality in TruffleQuality.values)
@@ -99,69 +105,44 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                     ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _SectionTitle(title: l10n.truffleFilterPriceRange),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: AppColors.black,
-                  inactiveTrackColor: AppColors.softGrey,
-                  thumbColor: AppColors.black,
-                  overlayColor: AppColors.black10,
-                  activeTickMarkColor: AppColors.black,
-                  inactiveTickMarkColor: AppColors.softGrey,
-                ),
-                child: RangeSlider(
-                  values: RangeValues(_draft.minPrice, _draft.maxPrice),
-                  min: TruffleListingFilterBounds.minPriceEuro,
-                  max: TruffleListingFilterBounds.maxPriceEuro,
-                  divisions: TruffleListingFilterBounds.priceDivisions,
-                  labels: RangeLabels(
-                    _draft.minPrice.round().toString(),
-                    _draft.maxPrice.round().toString(),
-                  ),
-                  onChanged: (values) {
-                    setState(() {
-                      _draft = _draft.copyWith(
-                        minPrice: values.start,
-                        maxPrice: values.end,
-                      );
-                    });
-                  },
-                ),
+              _CompactRangeSlider(
+                values: RangeValues(_draft.minPrice, _draft.maxPrice),
+                min: TruffleListingFilterBounds.minPriceEuro,
+                max: TruffleListingFilterBounds.maxPriceEuro,
+                divisions: TruffleListingFilterBounds.priceDivisions,
+                onChanged: (values) {
+                  setState(() {
+                    _draft = _draft.copyWith(
+                      minPrice: values.start,
+                      maxPrice: values.end,
+                    );
+                  });
+                },
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _SectionTitle(title: l10n.truffleFilterWeight),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: AppColors.black,
-                  inactiveTrackColor: AppColors.softGrey,
-                  thumbColor: AppColors.black,
-                  overlayColor: AppColors.black10,
-                  activeTickMarkColor: AppColors.black,
-                  inactiveTickMarkColor: AppColors.softGrey,
+              _CompactRangeSlider(
+                values: RangeValues(
+                  _draft.minWeight,
+                  _draft.maxWeight,
                 ),
-                child: RangeSlider(
-                  values: RangeValues(_draft.minWeight, _draft.maxWeight),
-                  min: TruffleListingFilterBounds.minWeightGrams,
-                  max: TruffleListingFilterBounds.maxWeightGrams,
-                  divisions: TruffleListingFilterBounds.weightDivisions,
-                  labels: RangeLabels(
-                    _draft.minWeight.round().toString(),
-                    _draft.maxWeight.round().toString(),
-                  ),
-                  onChanged: (values) {
-                    setState(() {
-                      _draft = _draft.copyWith(
-                        minWeight: values.start,
-                        maxWeight: values.end,
-                      );
-                    });
-                  },
-                ),
+                min: TruffleListingFilterBounds.minWeightGrams,
+                max: TruffleListingFilterBounds.maxWeightGrams,
+                divisions: TruffleListingFilterBounds.weightDivisions,
+                onChanged: (values) {
+                  setState(() {
+                    _draft = _draft.copyWith(
+                      minWeight: values.start,
+                      maxWeight: values.end,
+                    );
+                  });
+                },
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _SectionTitle(title: l10n.truffleFilterHarvestDate),
-              _HorizontalChipList(
+              _HorizontalChipRow(
                 children: [
                   for (final preset in HarvestDatePreset.values)
                     _StyledSheetChip(
@@ -169,15 +150,17 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                       selected: _draft.harvestDatePreset == preset,
                       onTap: () {
                         setState(() {
-                          _draft = _draft.copyWith(harvestDatePreset: preset);
+                          _draft = _draft.copyWith(
+                            harvestDatePreset: preset,
+                          );
                         });
                       },
                     ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _SectionTitle(title: l10n.truffleFilterRegion),
-              _HorizontalChipList(
+              _HorizontalChipRow(
                 children: [
                   _StyledSheetChip(
                     label: l10n.truffleFilterAll,
@@ -188,18 +171,22 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
                   ),
                   for (final region in ItalianRegions.values)
                     _StyledSheetChip(
-                      label: ItalianRegions.localizedLabel(l10n, region),
+                      label: ItalianRegions.localizedLabel(
+                        l10n,
+                        region,
+                      ),
                       selected: _draft.regions.contains(region),
                       onTap: () => _toggleRegion(region),
                     ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: AppSpacing.spacingM),
               AuthPrimaryButton(
                 label: l10n.truffleFiltersApply,
                 onPressed: () => Navigator.of(context).pop(_draft),
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -239,6 +226,50 @@ class _TruffleFiltersSheetState extends State<TruffleFiltersSheet> {
   }
 }
 
+class _CompactRangeSlider extends StatelessWidget {
+  const _CompactRangeSlider({
+    required this.values,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.onChanged,
+  });
+
+  final RangeValues values;
+  final double min;
+  final double max;
+  final int divisions;
+  final ValueChanged<RangeValues> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        activeTrackColor: AppColors.black,
+        inactiveTrackColor: AppColors.softGrey,
+        thumbColor: AppColors.black,
+        overlayColor: AppColors.black10,
+        activeTickMarkColor: AppColors.black,
+        inactiveTickMarkColor: AppColors.softGrey,
+        trackHeight: 3,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+      ),
+      child: RangeSlider(
+        values: values,
+        min: min,
+        max: max,
+        divisions: divisions,
+        labels: RangeLabels(
+          values.start.round().toString(),
+          values.end.round().toString(),
+        ),
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
 
@@ -259,8 +290,8 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _HorizontalChipList extends StatelessWidget {
-  const _HorizontalChipList({required this.children});
+class _HorizontalChipRow extends StatelessWidget {
+  const _HorizontalChipRow({required this.children});
 
   final List<Widget> children;
 
@@ -295,10 +326,10 @@ class _StyledSheetChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: selected ? AppColors.accent : AppColors.white,
+        color: selected ? AppColors.black : AppColors.white,
         borderRadius: AppRadii.authBorderRadius,
         border: Border.all(
-          color: selected ? AppColors.accent : AppColors.black10,
+          color: selected ? AppColors.black : AppColors.black10,
         ),
         boxShadow: AppShadows.authField,
       ),
@@ -309,11 +340,13 @@ class _StyledSheetChip extends StatelessWidget {
           borderRadius: AppRadii.authBorderRadius,
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.spacingM + 2,
-              vertical: AppSpacing.spacingS,
+              horizontal: AppSpacing.spacingS,
+              vertical: AppSpacing.spacingXS,
             ),
             child: Text(
               label,
+              maxLines: 1,
+              softWrap: false,
               style: AppTextStyles.bodySmall.copyWith(
                 color: selected ? AppColors.white : AppColors.black80,
               ),

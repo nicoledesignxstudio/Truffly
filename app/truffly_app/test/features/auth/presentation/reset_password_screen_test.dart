@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:truffly_app/core/config/auth_callback_context.dart';
 import 'package:truffly_app/core/providers/app_providers.dart';
 import 'package:truffly_app/features/auth/presentation/reset_password_screen.dart';
@@ -13,9 +13,10 @@ void main() {
       ProviderScope(
         overrides: [
           supabaseClientProvider.overrideWithValue(
-            SupabaseClient(
+            sb.SupabaseClient(
               'https://example.supabase.co',
               'public-anon-key',
+              authOptions: const sb.AuthClientOptions(autoRefreshToken: false),
             ),
           ),
         ],

@@ -136,148 +136,153 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
           child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.spacingM,
-            AppSpacing.spacingS,
-            AppSpacing.spacingM,
-            AppSpacing.spacingL,
-          ),
-          children: [
-            PublishTruffleImageSection(
-              title: l10n.publishTrufflePhotosTitle,
-              subtitle: l10n.publishTrufflePhotosSubtitle,
-              addPhotoLabel: l10n.publishTruffleAddPhoto,
-              removePhotoLabel: l10n.publishTruffleRemovePhoto,
-              images: state.images,
-              errorText: _imageErrorText(l10n, state),
-              onAddPressed: _handleAddImage,
-              onRemovePressed: notifier.removeImageAt,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.spacingM,
+              AppSpacing.spacingS,
+              AppSpacing.spacingM,
+              AppSpacing.spacingL,
             ),
-            const SizedBox(height: AppSpacing.spacingL),
-            _SectionTitle(title: l10n.publishTruffleQualityLabel),
-            const SizedBox(height: AppSpacing.spacingS),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (var index = 0; index < TruffleQuality.values.length; index++) ...[
-                    if (index > 0) const SizedBox(width: AppSpacing.spacingXS),
-                    _PublishChoiceChip(
-                      label: TruffleQuality.values[index].choiceLabel(l10n),
-                      selected: state.quality == TruffleQuality.values[index],
-                      onTap: () => notifier.updateQuality(TruffleQuality.values[index]),
-                    ),
+            children: [
+              PublishTruffleImageSection(
+                title: l10n.publishTrufflePhotosTitle,
+                subtitle: l10n.publishTrufflePhotosSubtitle,
+                addPhotoLabel: l10n.publishTruffleAddPhoto,
+                removePhotoLabel: l10n.publishTruffleRemovePhoto,
+                images: state.images,
+                errorText: _imageErrorText(l10n, state),
+                onAddPressed: _handleAddImage,
+                onRemovePressed: notifier.removeImageAt,
+                onReorderPressed: notifier.reorderImages,
+              ),
+              const SizedBox(height: AppSpacing.spacingL),
+              _SectionTitle(title: l10n.publishTruffleQualityLabel),
+              const SizedBox(height: AppSpacing.spacingS),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (var index = 0; index < TruffleQuality.values.length; index++) ...[
+                      if (index > 0) const SizedBox(width: AppSpacing.spacingXS),
+                      _PublishChoiceChip(
+                        label: TruffleQuality.values[index].badgeLabel,
+                        selected: state.quality == TruffleQuality.values[index],
+                        onTap: () => notifier.updateQuality(TruffleQuality.values[index]),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            if (_qualityErrorText(l10n, state) != null) ...[
-              const SizedBox(height: AppSpacing.spacingXS),
-              Text(
-                _qualityErrorText(l10n, state)!,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.error,
                 ),
               ),
-            ],
-            const SizedBox(height: AppSpacing.spacingL),
-            _SectionTitle(title: l10n.publishTruffleTypeLabel),
-            const SizedBox(height: AppSpacing.spacingS),
-            OnboardingDropdownField<TruffleType>(
-              initialValue: state.truffleType,
-              hintText: l10n.publishTruffleTypePlaceholder,
-              errorText: _typeErrorText(l10n, state),
-              items: [
-                DropdownMenuItem<TruffleType>(
-                  value: null,
-                  child: Text(l10n.publishTruffleTypePlaceholder),
+              if (_qualityErrorText(l10n, state) != null) ...[
+                const SizedBox(height: AppSpacing.spacingXS),
+                Text(
+                  _qualityErrorText(l10n, state)!,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.error,
+                  ),
                 ),
-                for (final type in TruffleType.valuesInUiOrder)
+              ],
+              const SizedBox(height: AppSpacing.spacingL),
+              _SectionTitle(title: l10n.publishTruffleTypeLabel),
+              const SizedBox(height: AppSpacing.spacingS),
+              OnboardingDropdownField<TruffleType>(
+                initialValue: state.truffleType,
+                hintText: l10n.publishTruffleTypePlaceholder,
+                errorText: _typeErrorText(l10n, state),
+                items: [
                   DropdownMenuItem<TruffleType>(
-                    value: type,
-                    child: Text(type.localizedName(l10n)),
+                    value: null,
+                    child: Text(l10n.publishTruffleTypePlaceholder),
                   ),
-              ],
-              onChanged: notifier.updateTruffleType,
-            ),
-            const SizedBox(height: AppSpacing.spacingM),
-            AuthTextField(
-              controller: _latinNameController,
-              labelText: l10n.publishTruffleLatinNameLabel,
-              readOnly: true,
-            ),
-            const SizedBox(height: AppSpacing.spacingL),
-            _SectionTitle(title: l10n.publishTrufflePricingTitle),
-            const SizedBox(height: AppSpacing.spacingS),
-            PublishTrufflePricingSection(
-              weightController: _weightController,
-              totalPriceController: _priceController,
-              shippingItalyController: _shippingItalyController,
-              shippingAbroadController: _shippingAbroadController,
-              weightLabel: l10n.publishTruffleWeightLabel,
-              totalPriceLabel: l10n.publishTruffleTotalPriceLabel,
-              shippingItalyLabel: l10n.publishTruffleShippingItalyLabel,
-              shippingAbroadLabel: l10n.publishTruffleShippingAbroadLabel,
-              shippingTitle: 'Shipping',
-              previewLabel: l10n.publishTrufflePricePerKgPreviewLabel,
-              previewValue: state.pricePerKgPreview == null
-                  ? l10n.publishTrufflePricePerKgPreviewPlaceholder
-                  : formatEuro(state.pricePerKgPreview!),
-              onWeightChanged: notifier.updateWeightInput,
-              onTotalPriceChanged: notifier.updatePriceInput,
-              onShippingItalyChanged: notifier.updateShippingItalyInput,
-              onShippingAbroadChanged: notifier.updateShippingAbroadInput,
-              weightErrorText: _weightErrorText(l10n, state),
-              totalPriceErrorText: _totalPriceErrorText(l10n, state),
-              shippingItalyErrorText: _shippingItalyErrorText(l10n, state),
-              shippingAbroadErrorText: _shippingAbroadErrorText(l10n, state),
-            ),
-            const SizedBox(height: AppSpacing.spacingL),
-            _SectionTitle(title: l10n.publishTruffleRegionLabel),
-            const SizedBox(height: AppSpacing.spacingS),
-            OnboardingDropdownField<String>(
-              initialValue: state.region,
-              hintText: l10n.publishTruffleRegionPlaceholder,
-              errorText: _regionErrorText(l10n, state),
-              items: [
-                DropdownMenuItem<String>(
-                  value: null,
-                  child: Text(l10n.publishTruffleRegionPlaceholder),
-                ),
-                for (final region in ItalianRegions.values)
+                  for (final type in TruffleType.valuesInUiOrder)
+                    DropdownMenuItem<TruffleType>(
+                      value: type,
+                      child: Text(type.localizedName(l10n)),
+                    ),
+                ],
+                onChanged: notifier.updateTruffleType,
+              ),
+              const SizedBox(height: AppSpacing.spacingXS),
+              AuthTextField(
+                controller: _latinNameController,
+                labelText: l10n.publishTruffleLatinNameLabel,
+                readOnly: true,
+              ),
+              const SizedBox(height: AppSpacing.spacingL),
+              _SectionTitle(title: l10n.publishTrufflePricingTitle),
+              const SizedBox(height: AppSpacing.spacingS),
+              PublishTrufflePricingSection(
+                weightController: _weightController,
+                totalPriceController: _priceController,
+                shippingItalyController: _shippingItalyController,
+                shippingAbroadController: _shippingAbroadController,
+                weightLabel: l10n.publishTruffleWeightLabel,
+                totalPriceLabel: l10n.publishTruffleTotalPriceLabel,
+                shippingItalyLabel: l10n.publishTruffleShippingItalyLabel,
+                shippingAbroadLabel: l10n.publishTruffleShippingAbroadLabel,
+                shippingTitle: 'Shipping',
+                previewLabel: l10n.publishTrufflePricePerKgPreviewLabel,
+                previewValue: state.pricePerKgPreview == null
+                    ? l10n.publishTrufflePricePerKgPreviewPlaceholder
+                    : formatEuro(state.pricePerKgPreview!),
+                onWeightChanged: notifier.updateWeightInput,
+                onTotalPriceChanged: notifier.updatePriceInput,
+                onShippingItalyChanged: notifier.updateShippingItalyInput,
+                onShippingAbroadChanged: notifier.updateShippingAbroadInput,
+                weightErrorText: _weightErrorText(l10n, state),
+                totalPriceErrorText: _totalPriceErrorText(l10n, state),
+                shippingItalyErrorText: _shippingItalyErrorText(l10n, state),
+                shippingAbroadErrorText: _shippingAbroadErrorText(l10n, state),
+              ),
+              const SizedBox(height: AppSpacing.spacingL),
+              _SectionTitle(title: l10n.publishTruffleRegionLabel),
+              const SizedBox(height: AppSpacing.spacingS),
+              OnboardingDropdownField<String>(
+                initialValue: state.region,
+                hintText: l10n.publishTruffleRegionPlaceholder,
+                errorText: _regionErrorText(l10n, state),
+                items: [
                   DropdownMenuItem<String>(
-                    value: region,
-                    child: Text(ItalianRegions.localizedLabel(l10n, region)),
+                    value: null,
+                    child: Text(l10n.publishTruffleRegionPlaceholder),
                   ),
-              ],
-              onChanged: notifier.updateRegion,
-            ),
-            const SizedBox(height: AppSpacing.spacingM),
-            AuthTextField(
-              controller: _harvestDateController,
-              labelText: l10n.publishTruffleHarvestDateLabel,
-              readOnly: true,
-              onTap: () => _handlePickHarvestDate(),
-              suffixIcon: const Icon(Icons.calendar_today_outlined),
-              errorText: _harvestDateErrorText(l10n, state),
-            ),
-            if (state.submitFailure != null) ...[
-              const SizedBox(height: AppSpacing.spacingM),
-              Text(
-                _submitFailureText(l10n, state.submitFailure!),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.error,
+                  for (final region in ItalianRegions.values)
+                    DropdownMenuItem<String>(
+                      value: region,
+                      child: Text(ItalianRegions.localizedLabel(l10n, region)),
+                    ),
+                ],
+                onChanged: notifier.updateRegion,
+              ),
+              const SizedBox(height: AppSpacing.spacingXS),
+              AuthTextField(
+                controller: _harvestDateController,
+                labelText: l10n.publishTruffleHarvestDateLabel,
+                readOnly: true,
+                onTap: () => _handlePickHarvestDate(),
+                suffixIcon: const Icon(Icons.calendar_today_outlined),
+                errorText: _harvestDateErrorText(l10n, state),
+              ),
+              if (state.submitFailure != null) ...[
+                const SizedBox(height: AppSpacing.spacingM),
+                Text(
+                  _submitFailureText(
+                    context,
+                    l10n,
+                    state.submitFailure!,
+                  ),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.error,
+                  ),
                 ),
+              ],
+              const SizedBox(height: AppSpacing.spacingXL),
+              AuthPrimaryButton(
+                label: l10n.publishTruffleCta,
+                isLoading: state.isSubmitting,
+                onPressed: () => _handlePublishPressed(),
               ),
             ],
-            const SizedBox(height: AppSpacing.spacingXL),
-            AuthPrimaryButton(
-              label: l10n.publishTruffleCta,
-              isLoading: state.isSubmitting,
-              onPressed: () => _handlePublishPressed(),
-            ),
-          ],
-        ),
+          ),
         ),
       ),
     );
@@ -402,14 +407,14 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
             l10n.publishTruffleConfirmTitle,
             textAlign: TextAlign.center,
             style: AppTextStyles.cardTitle.copyWith(
-              fontSize: 28,
+              fontSize: 22,
               fontWeight: FontWeight.w600,
             ),
           ),
           content: Text(
             l10n.publishTruffleConfirmMessage,
             textAlign: TextAlign.center,
-            style: AppTextStyles.bodyLarge.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.black80,
             ),
           ),
@@ -420,7 +425,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
               children: [
                 AuthPrimaryButton(
                   label: l10n.publishTruffleConfirmAction,
-                  backgroundColor: AppColors.accent,
+                  backgroundColor: AppColors.black,
                   foregroundColor: AppColors.white,
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
@@ -660,6 +665,7 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
   }
 
   String _submitFailureText(
+    BuildContext context,
     AppLocalizations l10n,
     PublishTruffleSubmissionFailure failure,
   ) {
@@ -667,7 +673,23 @@ class _PublishTrufflePageState extends ConsumerState<PublishTrufflePage> {
       PublishTruffleSubmissionFailure.unauthenticated =>
         l10n.publishTruffleSubmitUnauthenticated,
       PublishTruffleSubmissionFailure.notAllowed =>
-        l10n.publishTruffleSubmitNotAllowed,
+        _text(
+          context,
+          it: 'Non puoi pubblicare questo tartufo in questo momento.',
+          en: 'You cannot publish this truffle right now.',
+        ),
+      PublishTruffleSubmissionFailure.stripeVerificationPending =>
+        _text(
+          context,
+          it: 'Stripe sta ancora verificando il tuo account. Puoi gestire la verifica da Stripe.',
+          en: 'Stripe is still verifying your account. You can manage verification directly in Stripe.',
+        ),
+      PublishTruffleSubmissionFailure.stripeOnboardingRequired =>
+        _text(
+          context,
+          it: 'Completa la registrazione Stripe per pubblicare questo tartufo.',
+          en: 'Complete Stripe registration to publish this truffle.',
+        ),
       PublishTruffleSubmissionFailure.inProgress =>
         l10n.publishTruffleSubmitInProgress,
       PublishTruffleSubmissionFailure.validation =>
@@ -806,4 +828,8 @@ class _ImageSourceActionTile extends StatelessWidget {
       ),
     );
   }
+}
+
+String _text(BuildContext context, {required String it, required String en}) {
+  return Localizations.localeOf(context).languageCode == 'it' ? it : en;
 }

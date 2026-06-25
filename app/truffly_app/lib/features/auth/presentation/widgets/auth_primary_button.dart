@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_radii.dart';
+import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 
 class AuthPrimaryButton extends StatelessWidget {
@@ -30,7 +31,7 @@ class AuthPrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isEnabled ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(55),
+          minimumSize: const Size.fromHeight(AppSpacing.authControlHeight),
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
           disabledBackgroundColor: backgroundColor,

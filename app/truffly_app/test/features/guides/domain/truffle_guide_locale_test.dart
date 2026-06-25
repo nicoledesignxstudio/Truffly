@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:truffly_app/features/guides/domain/truffle_guide.dart';
+import 'package:truffly_app/l10n/app_localizations_en.dart';
+import 'package:truffly_app/l10n/app_localizations_it.dart';
 
 void main() {
   test('TruffleGuide locale getters select IT/EN content consistently', () {
@@ -35,8 +37,8 @@ void main() {
       'sort_order': 1,
     });
 
-    expect(guide.titleForLocale('it'), 'Titolo IT');
-    expect(guide.titleForLocale('en'), 'Title EN');
+    expect(guide.titleForLocale(AppLocalizationsIt()), 'Bianco pregiato');
+    expect(guide.titleForLocale(AppLocalizationsEn()), 'White');
     expect(guide.shortDescriptionForLocale('it'), 'Short IT');
     expect(guide.shortDescriptionForLocale('en'), 'Short EN');
     expect(guide.descriptionForLocale('it'), 'Description IT');

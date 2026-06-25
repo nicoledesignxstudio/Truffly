@@ -4,7 +4,7 @@ String formatEuro(double value) {
   final normalized = value % 1 == 0
       ? value.toStringAsFixed(0)
       : value.toStringAsFixed(2);
-  return 'EUR $normalized';
+  return '€$normalized';
 }
 
 String formatWeightGrams(int grams) {

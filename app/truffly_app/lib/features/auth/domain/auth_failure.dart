@@ -35,6 +35,14 @@ final class NetworkErrorFailure extends AuthFailure {
   const NetworkErrorFailure();
 }
 
+final class EmailResendRateLimitedFailure extends AuthFailure {
+  const EmailResendRateLimitedFailure();
+}
+
+final class EmailDeliveryRestrictedFailure extends AuthFailure {
+  const EmailDeliveryRestrictedFailure();
+}
+
 final class TimeoutFailure extends AuthFailure {
   const TimeoutFailure();
 }

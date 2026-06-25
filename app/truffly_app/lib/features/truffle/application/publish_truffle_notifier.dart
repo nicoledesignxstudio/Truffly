@@ -1,7 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:truffly_app/core/providers/app_providers.dart';
+import 'package:truffly_app/features/home/application/home_content_provider.dart';
 import 'package:truffly_app/features/truffle/application/publish_truffle_providers.dart';
+import 'package:truffly_app/features/truffle/application/seller_managed_truffle_providers.dart';
+import 'package:truffly_app/features/marketplace/application/marketplace_providers.dart';
 import 'package:truffly_app/features/truffle/data/publish_truffle_service.dart';
 import 'package:truffly_app/features/truffle/domain/publish_truffle_image_draft.dart';
 import 'package:truffly_app/features/truffle/domain/publish_truffle_state.dart';
@@ -10,6 +14,7 @@ import 'package:truffly_app/features/truffle/domain/publish_truffle_submission_i
 import 'package:truffly_app/features/truffle/domain/publish_truffle_validation_failure.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_quality.dart';
 import 'package:truffly_app/features/truffle/domain/truffle_type.dart';
+import 'package:truffly_app/features/profile/application/seller_profile_providers.dart';
 
 final publishTruffleNotifierProvider =
     AutoDisposeNotifierProvider<PublishTruffleNotifier, PublishTruffleState>(
@@ -58,6 +63,19 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
     if (index < 0 || index >= state.images.length) return;
     final nextImages = [...state.images]..removeAt(index);
     _setState(state.copyWith(images: nextImages));
+  }
+
+  void reorderImages(int oldIndex, int newIndex) {
+    final images = [...state.images];
+    if (oldIndex < 0 || oldIndex >= images.length) return;
+    if (newIndex < 0 || newIndex >= images.length) return;
+    if (oldIndex == newIndex) return;
+
+    final image = images.removeAt(oldIndex);
+    final adjustedIndex = newIndex.clamp(0, images.length);
+    images.insert(adjustedIndex, image);
+
+    _setState(state.copyWith(images: images));
   }
 
   void updateQuality(TruffleQuality? quality) {
@@ -126,6 +144,37 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
       return false;
     }
 
+    state = state.copyWith(
+      isSubmitting: true,
+      submitFailure: null,
+      publishRequestId: null,
+    );
+
+    try {
+      // Refresh Stripe once at submit time so we do not rely on stale cached rows.
+      final access = await ref
+          .read(publishTruffleServiceProvider)
+          .getCurrentSellerPublishAccess(refreshStripeStatus: true);
+      if (!access.canPublish) {
+        final failure = !access.hasStripeAccount
+            ? PublishTruffleSubmissionFailure.stripeOnboardingRequired
+            : PublishTruffleSubmissionFailure.stripeVerificationPending;
+        state = state.copyWith(
+          isSubmitting: false,
+          submitFailure: failure,
+          publishRequestId: null,
+        );
+        return false;
+      }
+    } on PublishTruffleServiceException catch (error) {
+      state = state.copyWith(
+        isSubmitting: false,
+        submitFailure: error.failure,
+        publishRequestId: null,
+      );
+      return false;
+    }
+
     final publishRequestId = state.publishRequestId ?? _generatePublishRequestId();
     state = state.copyWith(
       isSubmitting: true,
@@ -140,6 +189,11 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
             input,
             publishRequestId: publishRequestId,
           );
+      try {
+        await _refreshPublishedTruffleCaches();
+      } catch (_) {
+        // Publish already succeeded; cache refresh is best effort.
+      }
       state = state.copyWith(
         isSubmitting: false,
         showValidationErrors: false,
@@ -177,6 +231,28 @@ final class PublishTruffleNotifier extends AutoDisposeNotifier<PublishTruffleSta
   ) {
     return failure == PublishTruffleSubmissionFailure.network ||
         failure == PublishTruffleSubmissionFailure.inProgress;
+  }
+
+  Future<void> _refreshPublishedTruffleCaches() async {
+    final sellerId = ref.read(supabaseClientProvider).auth.currentUser?.id;
+
+    if (sellerId != null) {
+      ref.invalidate(sellerProfileProvider(sellerId));
+      ref.invalidate(sellerReviewsProvider(sellerId));
+    }
+
+    ref.invalidate(homeLatestTrufflesProvider);
+    ref.invalidate(homeTopSellersProvider);
+    ref.invalidate(sellerHomeStatsProvider);
+    ref.invalidate(sellerManagedTrufflesProvider);
+
+    await Future.wait([
+      ref.read(homeLatestTrufflesProvider.future),
+      ref.read(homeTopSellersProvider.future),
+      ref.read(sellerHomeStatsProvider.future),
+      ref.read(sellerManagedTrufflesProvider.future),
+      ref.read(truffleListingNotifierProvider.notifier).refresh(),
+    ]);
   }
 
   String _generatePublishRequestId() {

@@ -19,6 +19,8 @@ class AccountMenuRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onTap != null;
+
     return Material(
       color: AppColors.white,
       child: InkWell(
@@ -26,7 +28,7 @@ class AccountMenuRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.spacingM,
-            vertical: AppSpacing.spacingS,
+            vertical: AppSpacing.spacingXS,
           ),
           child: Row(
             children: [
@@ -36,12 +38,12 @@ class AccountMenuRow extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: SizedBox(
-                  width: 30,
-                  height: 30,
+                  width: 28,
+                  height: 28,
                   child: Icon(
                     icon,
                     color: AppColors.white,
-                    size: 18,
+                    size: 16,
                   ),
                 ),
               ),
@@ -49,19 +51,25 @@ class AccountMenuRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
+                  softWrap: true,
                   style: AppTextStyles.sectionTitle.copyWith(
-                    color: isDestructive ? AppColors.error : AppColors.black80,
-                    fontSize: 18,
+                    color: isDestructive
+                        ? AppColors.error
+                        : isEnabled
+                        ? AppColors.black80
+                        : AppColors.black50,
+                    fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
               const SizedBox(width: AppSpacing.spacingXS),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: isDestructive ? AppColors.error : AppColors.black50,
-                size: 22,
-              ),
+              if (isEnabled)
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDestructive ? AppColors.error : AppColors.black50,
+                  size: 22,
+                ),
             ],
           ),
         ),

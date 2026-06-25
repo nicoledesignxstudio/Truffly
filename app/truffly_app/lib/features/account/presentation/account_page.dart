@@ -10,11 +10,14 @@ import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/account/application/account_providers.dart';
 import 'package:truffly_app/features/account/presentation/widgets/account_menu_row.dart';
 import 'package:truffly_app/features/account/presentation/widgets/account_section_card.dart';
+import 'package:truffly_app/features/account/presentation/widgets/destructive_confirmation_dialog.dart';
 import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/home/presentation/widgets/home_nav_bar.dart';
 import 'package:truffly_app/features/profile/presentation/widgets/seller_avatar.dart';
+import 'package:truffly_app/features/push/application/notification_preferences_provider.dart';
+import 'package:truffly_app/features/truffle/presentation/publish_truffle_page.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class AccountPage extends ConsumerStatefulWidget {
@@ -65,7 +68,15 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             onLogoutPressed: _handleLogoutPressed,
             onRefresh: () async {
               ref.invalidate(currentUserAccountProfileProvider);
-              await ref.read(currentUserAccountProfileProvider.future);
+              ref.invalidate(currentSellerStripeStatusProvider);
+              try {
+                await Future.wait([
+                  ref.read(currentUserAccountProfileProvider.future),
+                  ref.read(currentSellerStripeStatusProvider.future),
+                ]);
+              } catch (_) {
+                // Best effort refresh.
+              }
             },
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -84,26 +95,28 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) =>
-          _LogoutConfirmationDialog(isItalian: _isItalian(context)),
+      builder: (context) => DestructiveConfirmationDialog(
+        title: _text(context, it: 'Vuoi uscire?', en: 'Log out?'),
+        message: _text(
+          context,
+          it: 'Verrai reindirizzato al flusso di accesso.',
+          en: 'You will be redirected to the sign-in flow.',
+        ),
+        confirmLabel: _text(context, it: 'Esci', en: 'Log out'),
+        cancelLabel: _text(context, it: 'Annulla', en: 'Cancel'),
+      ),
     );
 
     if (!mounted || shouldLogout != true) return;
 
-    setState(() {
-      _isSigningOut = true;
-    });
-
+    setState(() => _isSigningOut = true);
     await ref.read(authNotifierProvider.notifier).signOut();
     if (!mounted) return;
-
-    setState(() {
-      _isSigningOut = false;
-    });
+    setState(() => _isSigningOut = false);
   }
 }
 
-class _AccountContent extends StatelessWidget {
+class _AccountContent extends ConsumerWidget {
   const _AccountContent({
     required this.profile,
     required this.isSigningOut,
@@ -117,8 +130,34 @@ class _AccountContent extends StatelessWidget {
   final Future<void> Function() onRefresh;
 
   @override
-  Widget build(BuildContext context) {
-    final businessItems = profile.isSeller
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sellerStripeStatusAsync = ref.watch(
+      currentSellerStripeStatusProvider,
+    );
+    final sellerStripeStatus = sellerStripeStatusAsync.valueOrNull;
+
+    final showSellerProgress =
+        profile.isSellerRequestPending || profile.isSellerRequestApproved;
+    final sellerStripeReady = sellerStripeStatus?.isReady == true;
+
+    final businessItems = profile.isSellerRequestPending
+        ? [
+            _AccountDestination(
+              label: _text(context, it: 'I miei ordini', en: 'My orders'),
+              icon: Icons.receipt_long_outlined,
+              onTap: () => context.push(AppRoutes.accountOrders),
+            ),
+            _AccountDestination(
+              label: _text(
+                context,
+                it: 'Articoli preferiti',
+                en: 'Favorite items',
+              ),
+              icon: Icons.favorite_border_rounded,
+              onTap: () => context.push(AppRoutes.accountFavorites),
+            ),
+          ]
+        : profile.isSellerRequestApproved
         ? [
             _AccountDestination(
               label: _text(
@@ -131,11 +170,7 @@ class _AccountContent extends StatelessWidget {
                   context.push(AppRoutes.sellerProfilePath(profile.userId)),
             ),
             _AccountDestination(
-              label: _text(
-                context,
-                it: 'Stripe onboarding',
-                en: 'Stripe onboarding',
-              ),
+              label: _text(context, it: 'Account Stripe', en: 'Account Stripe'),
               icon: Icons.account_balance_wallet_outlined,
               onTap: () => context.push(AppRoutes.accountBecomeSeller),
             ),
@@ -165,28 +200,20 @@ class _AccountContent extends StatelessWidget {
               icon: Icons.favorite_border_rounded,
               onTap: () => context.push(AppRoutes.accountFavorites),
             ),
-            _AccountDestination(
-              label: _text(
-                context,
-                it: 'Diventa venditore',
-                en: 'Become a seller',
+            if ((profile.countryCode ?? '').trim().toUpperCase() == 'IT')
+              _AccountDestination(
+                label: _text(
+                  context,
+                  it: 'Diventa venditore',
+                  en: 'Become a seller',
+                ),
+                icon: Icons.workspace_premium_outlined,
+                onTap: () => context.push(AppRoutes.accountSellerOnboarding),
               ),
-              icon: Icons.workspace_premium_outlined,
-              onTap: () => context.push(AppRoutes.accountBecomeSeller),
-            ),
           ];
 
     final personalItems = profile.isSeller
         ? [
-            _AccountDestination(
-              label: _text(
-                context,
-                it: 'Articoli preferiti',
-                en: 'Favorite items',
-              ),
-              icon: Icons.favorite_border_rounded,
-              onTap: () => context.push(AppRoutes.accountFavorites),
-            ),
             _AccountDestination(
               label: _text(
                 context,
@@ -200,11 +227,6 @@ class _AccountContent extends StatelessWidget {
               label: _text(context, it: 'Spedizione', en: 'Shipping'),
               icon: Icons.local_shipping_outlined,
               onTap: () => context.push(AppRoutes.accountShipping),
-            ),
-            _AccountDestination(
-              label: _text(context, it: 'Pagamenti', en: 'Payments'),
-              icon: Icons.credit_card_outlined,
-              onTap: () => context.push(AppRoutes.accountPayments),
             ),
           ]
         : [
@@ -223,15 +245,15 @@ class _AccountContent extends StatelessWidget {
               onTap: () => context.push(AppRoutes.accountShipping),
             ),
             _AccountDestination(
-              label: _text(context, it: 'Pagamenti', en: 'Payments'),
-              icon: Icons.credit_card_outlined,
-              onTap: () => context.push(AppRoutes.accountPayments),
+              label: _text(context, it: 'Notifiche', en: 'Notifications'),
+              icon: Icons.notifications_none_rounded,
+              onTap: () => context.push(AppRoutes.notifications),
             ),
           ];
 
     final supportItems = [
       _AccountDestination(
-        label: _text(context, it: 'Guida a Truffly', en: 'Guide to Truffly'),
+        label: _text(context, it: 'Guide ai tartufi', en: 'Truffle guides'),
         icon: Icons.menu_book_outlined,
         onTap: () => context.push(AppRoutes.guides),
       ),
@@ -247,6 +269,9 @@ class _AccountContent extends StatelessWidget {
       ),
     ];
 
+    final notificationsEnabledAsync = ref.watch(notificationsEnabledProvider);
+    final notificationsEnabled = notificationsEnabledAsync.valueOrNull;
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
@@ -258,7 +283,15 @@ class _AccountContent extends StatelessWidget {
         ),
         children: [
           _AccountHeaderCard(profile: profile),
-          const SizedBox(height: AppSpacing.spacingL),
+          const SizedBox(height: AppSpacing.spacingM),
+          if (showSellerProgress) ...[
+            _SellerProgressCard(
+              sellerStatus: profile.sellerStatus,
+              sellerStripeReady: sellerStripeReady,
+              region: profile.region,
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
+          ],
           AccountSectionCard(
             title: _text(context, it: 'Business', en: 'Business'),
             children: [
@@ -315,6 +348,23 @@ class _AccountContent extends StatelessWidget {
               ),
             ),
           ],
+          if (notificationsEnabled != null) ...[
+            const SizedBox(height: AppSpacing.spacingM),
+            Text(
+              _text(
+                context,
+                it: notificationsEnabled
+                    ? 'Le notifiche sono abilitate su questo dispositivo.'
+                    : 'Le notifiche sono disattivate su questo dispositivo.',
+                en: notificationsEnabled
+                    ? 'Notifications are enabled on this device.'
+                    : 'Notifications are disabled on this device.',
+              ),
+              textAlign: TextAlign.center,
+              style: AppTextStyles.micro,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.spacingM),
         ],
       ),
     );
@@ -328,24 +378,21 @@ class _AccountHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roleLabel = profile.isSeller
-        ? _text(context, it: 'Venditore', en: 'Seller')
-        : _text(context, it: 'Acquirente', en: 'Buyer');
-
     final locationLabel = [
-      if ((profile.region ?? '').trim().isNotEmpty) profile.region!.trim(),
+      if ((profile.region ?? '').trim().isNotEmpty)
+        _formatLocation(profile.region!.trim()),
       if ((profile.countryCode ?? '').trim().isNotEmpty)
         localizedEuropeanCountryName(
           AppLocalizations.of(context)!,
           profile.countryCode!,
         ),
-    ].join(' - ');
+    ].join(', ');
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.black10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.black20, width: 1),
         boxShadow: AppShadows.authField,
       ),
       child: Padding(
@@ -367,25 +414,32 @@ class _AccountHeaderCard extends StatelessWidget {
                     profile.displayName,
                     style: AppTextStyles.sectionTitle.copyWith(
                       fontWeight: FontWeight.w600,
+                      fontSize: 17,
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    profile.email,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall,
-                  ),
-                  const SizedBox(height: AppSpacing.spacingS),
-                  Wrap(
-                    spacing: AppSpacing.spacingXS,
-                    runSpacing: AppSpacing.spacingXS,
-                    children: [
-                      _HeaderPill(label: roleLabel, isAccent: profile.isSeller),
-                      if (locationLabel.isNotEmpty)
-                        _HeaderPill(label: locationLabel),
-                    ],
-                  ),
+                  Text(profile.email, style: AppTextStyles.bodySmall),
+                  if (locationLabel.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: AppColors.black50,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            locationLabel,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.black80,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -396,60 +450,217 @@ class _AccountHeaderCard extends StatelessWidget {
   }
 }
 
-class _HeaderPill extends StatelessWidget {
-  const _HeaderPill({required this.label, this.isAccent = false});
+class _SellerProgressCard extends StatelessWidget {
+  const _SellerProgressCard({
+    required this.sellerStatus,
+    required this.sellerStripeReady,
+    required this.region,
+  });
 
-  final String label;
-  final bool isAccent;
+  final String sellerStatus;
+  final bool sellerStripeReady;
+  final String? region;
 
   @override
   Widget build(BuildContext context) {
+    final isItalian = Localizations.localeOf(context).languageCode == 'it';
+    final isPending = sellerStatus == 'pending';
+    final isApproved = sellerStatus == 'approved';
+    if (isApproved && sellerStripeReady) {
+      return _PublishTruffleCard(
+        label: isItalian ? 'Pubblica un tartufo' : 'Publish a truffle',
+        subtitle: isItalian
+            ? 'Condividi i tuoi tartufi freschi'
+            : 'Share your fresh truffles',
+        onTap: () => Navigator.of(
+          context,
+        ).push(buildPublishTruffleRoute(initialRegion: region)),
+      );
+    }
+
+    final title = switch ((isPending, sellerStripeReady)) {
+      (true, _) =>
+        isItalian ? 'Richiesta in revisione' : 'Request under review',
+      (false, false) when isApproved =>
+        isItalian
+            ? 'Completa il tuo Account Stripe'
+            : 'Complete your Stripe account',
+      _ => isItalian ? 'Richiesta venditore' : 'Seller request',
+    };
+    final body = switch ((isPending, sellerStripeReady)) {
+      (true, _) =>
+        isItalian
+            ? 'Grazie per la tua richiesta. L\'abbiamo ricevuta e verra analizzata il prima possibile.'
+            : 'Thanks for your request. We received it and it will be reviewed as soon as possible.',
+      (false, false) when isApproved =>
+        isItalian
+            ? 'Stripe gestisce i pagamenti e i bonifici in sicurezza. Completa la registrazione per iniziare a vendere.'
+            : 'Stripe handles payments and payouts securely. Complete registration to start selling.',
+      (false, true) when isApproved =>
+        isItalian
+            ? 'Il tuo account e pronto. Ora puoi pubblicare nuovi tartufi su Truffly.'
+            : 'Your account is ready. You can publish new truffles on Truffly.',
+      _ =>
+        isItalian
+            ? 'Stato venditore non disponibile.'
+            : 'Seller status unavailable.',
+    };
+    final icon = switch ((isPending, sellerStripeReady)) {
+      (true, _) => Icons.hourglass_bottom_rounded,
+      (false, false) when isApproved => Icons.account_balance_wallet_outlined,
+      (false, true) when isApproved => Icons.add_circle_outline_rounded,
+      _ => Icons.storefront_outlined,
+    };
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isAccent ? const Color(0xFFFFEEE8) : AppColors.softGrey,
-        borderRadius: BorderRadius.circular(999),
+        color: AppColors.black,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: AppShadows.authField,
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.spacingS,
-          vertical: AppSpacing.spacingXS,
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.micro.copyWith(
-            color: isAccent ? AppColors.accent : AppColors.black80,
-            fontWeight: FontWeight.w600,
-          ),
+        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.black, size: 21),
+            ),
+            const SizedBox(width: AppSpacing.spacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    softWrap: true,
+                    style: AppTextStyles.cardTitle.copyWith(
+                      color: AppColors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXXS),
+                  Text(
+                    body,
+                    softWrap: true,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.8),
+                      fontSize: 13,
+                    ),
+                  ),
+                  if (isApproved && !sellerStripeReady) ...[
+                    const SizedBox(height: AppSpacing.spacingM),
+                    FilledButton(
+                      onPressed: () =>
+                          context.push(AppRoutes.accountBecomeSeller),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.white,
+                        foregroundColor: AppColors.black,
+                        minimumSize: const Size(0, 0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.spacingM,
+                          vertical: 14,
+                        ),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      child: Text(
+                        isItalian ? 'Registrati' : 'Register',
+                        style: AppTextStyles.buttonText.copyWith(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _LogoutConfirmationDialog extends StatelessWidget {
-  const _LogoutConfirmationDialog({required this.isItalian});
+class _PublishTruffleCard extends StatelessWidget {
+  const _PublishTruffleCard({
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
 
-  final bool isItalian;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(isItalian ? 'Vuoi uscire?' : 'Log out?'),
-      content: Text(
-        isItalian
-            ? 'Verrai reindirizzato al flusso di accesso.'
-            : 'You will be redirected to the sign-in flow.',
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: onTap,
+      child: Ink(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.black,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: AppShadows.authField,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.spacingM,
+          vertical: AppSpacing.spacingS,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: AppColors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: AppColors.black,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      color: AppColors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXXS),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.78),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(isItalian ? 'Annulla' : 'Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(isItalian ? 'Esci' : 'Log out'),
-        ),
-      ],
     );
   }
 }
@@ -506,4 +717,11 @@ bool _isItalian(BuildContext context) {
 
 String _text(BuildContext context, {required String it, required String en}) {
   return _isItalian(context) ? it : en;
+}
+
+String _formatLocation(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return trimmed;
+  final normalized = trimmed.toLowerCase();
+  return normalized[0].toUpperCase() + normalized.substring(1);
 }

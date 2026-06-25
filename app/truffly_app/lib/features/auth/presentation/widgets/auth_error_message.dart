@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AuthErrorMessage extends StatelessWidget {
-  const AuthErrorMessage({
-    super.key,
-    this.message,
-  });
+  const AuthErrorMessage({super.key, this.message});
 
   final String? message;
 
@@ -17,9 +14,7 @@ class AuthErrorMessage extends StatelessWidget {
 
     return Text(
       value,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.error,
-      ),
+      style: TextStyle(color: Theme.of(context).colorScheme.error),
     );
   }
 }

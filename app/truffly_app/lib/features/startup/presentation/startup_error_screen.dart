@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:truffly_app/core/bootstrap/domain/bootstrap_failure.dart';
 
@@ -22,10 +23,15 @@ class StartupErrorScreen extends StatelessWidget {
             children: [
               const Icon(Icons.wifi_off, size: 36),
               const SizedBox(height: 12),
-              Text(
-                _messageForFailure(failure),
-                textAlign: TextAlign.center,
-              ),
+              Text(_messageForFailure(failure), textAlign: TextAlign.center),
+              if (kDebugMode && _devHintForFailure(failure) != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _devHintForFailure(failure)!,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: onRetry,
@@ -52,6 +58,16 @@ class StartupErrorScreen extends StatelessWidget {
         'Session is invalid. Please sign in again.',
       UnknownBootstrapFailure() =>
         'An unexpected startup error occurred. Please retry.',
+    };
+  }
+
+  String? _devHintForFailure(BootstrapFailure failure) {
+    return switch (failure) {
+      BackendUnavailableFailure() ||
+      NetworkTimeoutFailure() ||
+      NetworkFailure() =>
+        'Dev hint: with local Supabase on a real Android device, run adb reverse tcp:54321 tcp:54321 or set ANDROID_DEVICE_HOST to your computer LAN IP.',
+      _ => null,
     };
   }
 }

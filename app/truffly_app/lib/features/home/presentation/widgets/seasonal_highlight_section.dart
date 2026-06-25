@@ -13,10 +13,12 @@ class SeasonalHighlightSection extends ConsumerStatefulWidget {
   const SeasonalHighlightSection({super.key});
 
   @override
-  ConsumerState<SeasonalHighlightSection> createState() => _SeasonalHighlightSectionState();
+  ConsumerState<SeasonalHighlightSection> createState() =>
+      _SeasonalHighlightSectionState();
 }
 
-class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSection> {
+class _SeasonalHighlightSectionState
+    extends ConsumerState<SeasonalHighlightSection> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -34,7 +36,7 @@ class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSect
     return state.when(
       data: (data) => _buildData(context, data),
       loading: () => _LoadingCard(label: l10n.homeSeasonalLoadingLabel),
-      error: (_, __) => _ErrorCard(
+      error: (_, _) => _ErrorCard(
         message: l10n.homeSeasonalErrorText,
         retryLabel: l10n.homeSeasonalRetryLabel,
         onRetry: () => ref.read(seasonalHighlightProvider.notifier).retry(),
@@ -45,7 +47,8 @@ class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSect
   Widget _buildData(BuildContext context, SeasonalHighlightResponse response) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (response.mode == SeasonalHighlightMode.active && response.cards.isNotEmpty) {
+    if (response.mode == SeasonalHighlightMode.active &&
+        response.cards.isNotEmpty) {
       final cards = response.cards;
       final safePage = _currentPage.clamp(0, cards.length - 1);
       if (safePage != _currentPage) {
@@ -75,6 +78,7 @@ class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSect
                   title: item.title,
                   subtitle: item.subtitle,
                   badgeLabel: l10n.homeSeasonalInSeasonLabel,
+                  imageAssetPath: item.truffleType.guideAssetImagePath,
                 );
               },
             ),
@@ -94,6 +98,7 @@ class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSect
         title: countdown.title,
         subtitle: countdown.subtitle,
         badgeLabel: l10n.homeSeasonalComingSoonLabel,
+        imageAssetPath: countdown.truffleType.guideAssetImagePath,
         footnote: l10n.homeSeasonalCountdownLine(
           countdown.daysRemaining,
           countdown.truffleType.seasonalDisplayName(l10n),
@@ -110,16 +115,28 @@ class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSect
   ) {
     final mediaWidth = MediaQuery.of(context).size.width;
     final cardWidth = mediaWidth - (AppSpacing.screenHorizontal * 2);
-    final textWidth = (cardWidth * 0.64) - (AppSpacing.spacingM * 2);
+    final textWidth =
+        (cardWidth * 0.68) - AppSpacing.spacingS - AppSpacing.spacingXS;
 
     var maxTextHeight = 0.0;
     for (final card in cards) {
-      maxTextHeight = _max(maxTextHeight, _textHeight(card.title, textWidth, 18, FontWeight.w500));
-      maxTextHeight = _max(maxTextHeight, _textHeight(card.subtitle, textWidth, 14, FontWeight.w400));
+      maxTextHeight = _max(
+        maxTextHeight,
+        _textHeight(card.title, textWidth, 15, FontWeight.w600),
+      );
+      maxTextHeight = _max(
+        maxTextHeight,
+        _textHeight(card.subtitle, textWidth, 13, FontWeight.w400),
+      );
     }
 
-    final estimated = (AppSpacing.spacingM * 2) + 24 + 20 + 4 + maxTextHeight + 8;
-    return estimated.clamp(168.0, 240.0);
+    final estimated =
+        (AppSpacing.spacingS * 2) +
+        22 +
+        AppSpacing.spacingS +
+        maxTextHeight +
+        8;
+    return estimated.clamp(150.0, 250.0);
   }
 
   double _textHeight(
@@ -134,7 +151,7 @@ class _SeasonalHighlightSectionState extends ConsumerState<SeasonalHighlightSect
         style: AppTextStyles.bodySmall.copyWith(
           fontSize: fontSize,
           fontWeight: fontWeight,
-          height: 1.3,
+          height: 1.18,
         ),
       ),
       maxLines: 4,
@@ -211,10 +228,7 @@ class _ErrorCard extends StatelessWidget {
                 style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
               ),
             ),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(retryLabel),
-            ),
+            TextButton(onPressed: onRetry, child: Text(retryLabel)),
           ],
         ),
       ),

@@ -13,34 +13,32 @@ class TestBootstrapNotifier extends BootstrapNotifier {
 }
 
 void main() {
-  testWidgets(
-    'VerifyEmailScreen hides back icon and shows resend plus login fallback actions',
-    (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          bootstrapNotifierProvider.overrideWith(TestBootstrapNotifier.new),
-        ],
-      );
-      addTearDown(container.dispose);
+  testWidgets('VerifyEmailScreen shows navigation and verification actions', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapNotifierProvider.overrideWith(TestBootstrapNotifier.new),
+      ],
+    );
+    addTearDown(container.dispose);
 
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const VerifyEmailScreen(
-              prefilledEmail: 'user@example.com',
-            ),
-          ),
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const VerifyEmailScreen(prefilledEmail: 'user@example.com'),
         ),
-      );
+      ),
+    );
 
-      expect(find.byType(AuthBackButton), findsNothing);
-      expect(find.text('I verified my email'), findsOneWidget);
-      expect(find.text('Resend email'), findsOneWidget);
-      expect(find.text('Sign out'), findsNothing);
-      expect(find.textContaining('user@example.com'), findsOneWidget);
-    },
-  );
+    expect(find.byType(AuthBackButton), findsOneWidget);
+      expect(find.text('Back to login'), findsOneWidget);
+    expect(find.text('Resend email'), findsOneWidget);
+    expect(find.text('Sign out'), findsNothing);
+    expect(find.textContaining('user@example.com'), findsOneWidget);
+  });
 }

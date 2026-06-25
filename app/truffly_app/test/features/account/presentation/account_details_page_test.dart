@@ -11,6 +11,7 @@ import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/auth/data/auth_result.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/auth/domain/auth_state.dart';
+import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class _FakeAccountDetailsService implements AccountDetailsService {
@@ -125,8 +126,10 @@ Finder get _emailField => find.byKey(const Key('account_email_field'));
 Finder get _countryField => find.byKey(const Key('account_country_field'));
 Finder get _regionField => find.byKey(const Key('account_region_field'));
 Finder get _bioField => find.byKey(const Key('account_bio_field'));
-Finder get _profileImageUrlField =>
-    find.byKey(const Key('account_profile_image_url_field'));
+Finder get _changeEmailButton => find.text('Change email');
+Finder get _saveEmailButton => find.text('Save new email');
+Finder get _changePhotoButton => find.text('Change photo');
+Finder get _removePhotoButton => find.text('Remove photo');
 Finder get _saveButton => find.byKey(const Key('account_save_button'));
 
 void main() {
@@ -140,18 +143,18 @@ void main() {
 
     expect(_firstNameField, findsOneWidget);
     expect(_lastNameField, findsOneWidget);
-    expect(_emailField, findsOneWidget);
+    expect(_changeEmailButton, findsOneWidget);
     expect(_countryField, findsOneWidget);
 
     expect(_bioField, findsNothing);
-    expect(_profileImageUrlField, findsNothing);
+    expect(_changePhotoButton, findsNothing);
+    expect(_removePhotoButton, findsNothing);
 
     expect(find.text('Mario'), findsOneWidget);
     expect(find.text('Rossi'), findsOneWidget);
     expect(find.text('user@test.com'), findsOneWidget);
     expect(find.text('France'), findsOneWidget);
     expect(find.text('Bio'), findsNothing);
-    expect(find.text('Profile image'), findsNothing);
   });
 
   testWidgets('seller form shows bio and profile image sections', (
@@ -164,16 +167,14 @@ void main() {
 
     expect(_firstNameField, findsOneWidget);
     expect(_lastNameField, findsOneWidget);
-    expect(_emailField, findsOneWidget);
-    expect(_countryField, findsOneWidget);
-    expect(_regionField, findsOneWidget);
+    expect(_changeEmailButton, findsOneWidget);
     expect(_bioField, findsOneWidget);
-    expect(_profileImageUrlField, findsOneWidget);
-
-    expect(find.text('Profile image'), findsOneWidget);
-    expect(find.text('Bio'), findsOneWidget);
     expect(find.text('Italy'), findsOneWidget);
     expect(find.text('Toscana'), findsOneWidget);
+    expect(_changePhotoButton, findsOneWidget);
+    expect(_removePhotoButton, findsOneWidget);
+
+    expect(find.text('Bio'), findsOneWidget);
   });
 
   testWidgets('region is visible and required when country is Italy', (
@@ -190,6 +191,8 @@ void main() {
     expect(_regionField, findsOneWidget);
 
     await tester.enterText(_firstNameField, 'Luigi');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(_saveButton);
     await tester.tap(_saveButton);
     await tester.pumpAndSettle();
 
@@ -223,11 +226,13 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(_firstNameField, 'Luigi');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(_saveButton);
     await tester.tap(_saveButton);
     await tester.pump();
 
-    final button = tester.widget<ElevatedButton>(_saveButton);
-    expect(button.onPressed, isNull);
+    final button = tester.widget<AuthPrimaryButton>(_saveButton);
+    expect(button.isLoading, isTrue);
 
     service.profileCompleter.complete(const AuthSuccess<AuthUnit>(AuthUnit.value));
     await tester.pumpAndSettle();
@@ -240,6 +245,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(_firstNameField, 'Luigi');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(_saveButton);
     await tester.tap(_saveButton);
     await tester.pumpAndSettle();
 
@@ -262,11 +269,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(_changeEmailButton);
+    await tester.tap(_changeEmailButton);
+    await tester.pumpAndSettle();
     await tester.enterText(_emailField, 'new@test.com');
-    await tester.tap(_saveButton);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(_saveEmailButton);
+    await tester.tap(_saveEmailButton);
     await tester.pumpAndSettle();
 
-    expect(service.updateProfileCalls, 1);
+    expect(service.updateProfileCalls, 0);
     expect(service.updateEmailCalls, 1);
     expect(
       find.text(

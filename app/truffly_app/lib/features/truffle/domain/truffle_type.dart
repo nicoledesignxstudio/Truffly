@@ -12,52 +12,63 @@ enum TruffleType {
   tuberMesentericum;
 
   String get dbValue => switch (this) {
-        TruffleType.tuberMagnatum => 'TUBER_MAGNATUM',
-        TruffleType.tuberMelanosporum => 'TUBER_MELANOSPORUM',
-        TruffleType.tuberAestivum => 'TUBER_AESTIVUM',
-        TruffleType.tuberUncinatum => 'TUBER_UNCINATUM',
-        TruffleType.tuberBorchii => 'TUBER_BORCHII',
-        TruffleType.tuberBrumale => 'TUBER_BRUMALE',
-        TruffleType.tuberMacrosporum => 'TUBER_MACROSPORUM',
-        TruffleType.tuberBrumaleMoschatum => 'TUBER_BRUMALE_MOSCHATUM',
-        TruffleType.tuberMesentericum => 'TUBER_MESENTERICUM',
-      };
+    TruffleType.tuberMagnatum => 'TUBER_MAGNATUM',
+    TruffleType.tuberMelanosporum => 'TUBER_MELANOSPORUM',
+    TruffleType.tuberAestivum => 'TUBER_AESTIVUM',
+    TruffleType.tuberUncinatum => 'TUBER_UNCINATUM',
+    TruffleType.tuberBorchii => 'TUBER_BORCHII',
+    TruffleType.tuberBrumale => 'TUBER_BRUMALE',
+    TruffleType.tuberMacrosporum => 'TUBER_MACROSPORUM',
+    TruffleType.tuberBrumaleMoschatum => 'TUBER_BRUMALE_MOSCHATUM',
+    TruffleType.tuberMesentericum => 'TUBER_MESENTERICUM',
+  };
 
   String get latinName => switch (this) {
-        TruffleType.tuberMagnatum => 'Tuber Magnatum',
-        TruffleType.tuberMelanosporum => 'Tuber Melanosporum',
-        TruffleType.tuberAestivum => 'Tuber Aestivum',
-        TruffleType.tuberUncinatum => 'Tuber Uncinatum',
-        TruffleType.tuberBorchii => 'Tuber Borchii',
-        TruffleType.tuberBrumale => 'Tuber Brumale',
-        TruffleType.tuberMacrosporum => 'Tuber macrosporum',
-        TruffleType.tuberBrumaleMoschatum => 'Tuber brumale var. moschatum',
-        TruffleType.tuberMesentericum => 'Tuber mesentericum',
-      };
+    TruffleType.tuberMagnatum => 'Tuber Magnatum',
+    TruffleType.tuberMelanosporum => 'Tuber Melanosporum',
+    TruffleType.tuberAestivum => 'Tuber Aestivum',
+    TruffleType.tuberUncinatum => 'Tuber Uncinatum',
+    TruffleType.tuberBorchii => 'Tuber Borchii',
+    TruffleType.tuberBrumale => 'Tuber Brumale',
+    TruffleType.tuberMacrosporum => 'Tuber macrosporum',
+    TruffleType.tuberBrumaleMoschatum => 'Tuber brumale var. moschatum',
+    TruffleType.tuberMesentericum => 'Tuber mesentericum',
+  };
 
   String localizedName(AppLocalizations l10n) => switch (this) {
-        TruffleType.tuberMagnatum => l10n.truffleTypeMagnatum,
-        TruffleType.tuberMelanosporum => l10n.truffleTypeMelanosporum,
-        TruffleType.tuberAestivum => l10n.truffleTypeAestivum,
-        TruffleType.tuberUncinatum => l10n.truffleTypeUncinatum,
-        TruffleType.tuberBorchii => l10n.truffleTypeBorchii,
-        TruffleType.tuberBrumale => l10n.truffleTypeBrumale,
-        TruffleType.tuberMacrosporum => l10n.truffleTypeMacrosporum,
-        TruffleType.tuberBrumaleMoschatum => l10n.truffleTypeBrumaleMoschatum,
-        TruffleType.tuberMesentericum => l10n.truffleTypeMesentericum,
-      };
+    TruffleType.tuberMagnatum => l10n.truffleTypeMagnatum,
+    TruffleType.tuberMelanosporum => l10n.truffleTypeMelanosporum,
+    TruffleType.tuberAestivum => l10n.truffleTypeAestivum,
+    TruffleType.tuberUncinatum => l10n.truffleTypeUncinatum,
+    TruffleType.tuberBorchii => l10n.truffleTypeBorchii,
+    TruffleType.tuberBrumale => l10n.truffleTypeBrumale,
+    TruffleType.tuberMacrosporum => l10n.truffleTypeMacrosporum,
+    TruffleType.tuberBrumaleMoschatum => l10n.truffleTypeBrumaleMoschatum,
+    TruffleType.tuberMesentericum => l10n.truffleTypeMesentericum,
+  };
+
+  String chipLabel(AppLocalizations l10n) {
+    final value = localizedName(l10n).trim();
+    final italianPrefix = RegExp('^tartufo\\s+', caseSensitive: false);
+    final englishSuffix = RegExp('\\s+truffle\$', caseSensitive: false);
+    return value
+        .replaceFirst(italianPrefix, '')
+        .replaceFirst(englishSuffix, '')
+        .trim();
+  }
 
   String seasonalDisplayName(AppLocalizations l10n) => switch (this) {
-        TruffleType.tuberMagnatum => l10n.seasonalTruffleNameMagnatum,
-        TruffleType.tuberMelanosporum => l10n.seasonalTruffleNameMelanosporum,
-        TruffleType.tuberAestivum => l10n.seasonalTruffleNameAestivum,
-        TruffleType.tuberUncinatum => l10n.seasonalTruffleNameUncinatum,
-        TruffleType.tuberBorchii => l10n.seasonalTruffleNameBorchii,
-        TruffleType.tuberBrumale => l10n.seasonalTruffleNameBrumale,
-        TruffleType.tuberMacrosporum => l10n.seasonalTruffleNameMacrosporum,
-        TruffleType.tuberBrumaleMoschatum => l10n.seasonalTruffleNameBrumaleMoschatum,
-        TruffleType.tuberMesentericum => l10n.seasonalTruffleNameMesentericum,
-      };
+    TruffleType.tuberMagnatum => l10n.seasonalTruffleNameMagnatum,
+    TruffleType.tuberMelanosporum => l10n.seasonalTruffleNameMelanosporum,
+    TruffleType.tuberAestivum => l10n.seasonalTruffleNameAestivum,
+    TruffleType.tuberUncinatum => l10n.seasonalTruffleNameUncinatum,
+    TruffleType.tuberBorchii => l10n.seasonalTruffleNameBorchii,
+    TruffleType.tuberBrumale => l10n.seasonalTruffleNameBrumale,
+    TruffleType.tuberMacrosporum => l10n.seasonalTruffleNameMacrosporum,
+    TruffleType.tuberBrumaleMoschatum =>
+      l10n.seasonalTruffleNameBrumaleMoschatum,
+    TruffleType.tuberMesentericum => l10n.seasonalTruffleNameMesentericum,
+  };
 
   String get guideAssetImagePath => 'assets/images/guides/$dbValue.jpeg';
 

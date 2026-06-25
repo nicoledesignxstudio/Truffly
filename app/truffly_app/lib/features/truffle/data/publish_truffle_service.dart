@@ -19,12 +19,15 @@ final class PublishTruffleService {
 
   static const _requestTimeout = Duration(seconds: 12);
   static const _publishTruffleFunction = 'publish_truffle';
+  static const _refreshStripeStatusFunction = 'refresh_seller_stripe_status';
   static const _truffleImagesStagingBucket = 'truffle_images_staging';
   static const _stagingPrefix = 'staging';
 
   final SupabaseClient _supabaseClient;
 
-  Future<SellerPublishAccess> getCurrentSellerPublishAccess() async {
+  Future<SellerPublishAccess> getCurrentSellerPublishAccess({
+    bool refreshStripeStatus = false,
+  }) async {
     final authUser = _supabaseClient.auth.currentUser;
     if (authUser == null) {
       throw const PublishTruffleServiceException(
@@ -33,6 +36,12 @@ final class PublishTruffleService {
     }
 
     try {
+      if (refreshStripeStatus) {
+        await _supabaseClient.functions
+            .invoke(_refreshStripeStatusFunction)
+            .timeout(_requestTimeout);
+      }
+
       final row = await _supabaseClient
           .from('users')
           .select(
@@ -50,7 +59,7 @@ final class PublishTruffleService {
         );
       }
 
-      return SellerPublishAccess(
+      final access = SellerPublishAccess(
         role: (row['role'] as String? ?? '').trim().toLowerCase(),
         sellerStatus: (row['seller_status'] as String? ?? '').trim().toLowerCase(),
         stripeAccountId: row['stripe_account_id'] as String?,
@@ -61,6 +70,7 @@ final class PublishTruffleService {
         stripeReadyAt: _parseIsoDate(row['stripe_ready_at']),
         region: row['region'] as String?,
       );
+      return access;
     } on PublishTruffleServiceException {
       rethrow;
     } on TimeoutException {
@@ -346,6 +356,14 @@ final class PublishTruffleService {
       return PublishTruffleSubmissionFailure.validation;
     }
 
+    if (errorCode == 'seller_stripe_onboarding_required') {
+      return PublishTruffleSubmissionFailure.stripeOnboardingRequired;
+    }
+
+    if (errorCode == 'seller_stripe_verification_pending') {
+      return PublishTruffleSubmissionFailure.stripeVerificationPending;
+    }
+
     if (_isNotAllowedErrorCode(errorCode)) {
       return PublishTruffleSubmissionFailure.notAllowed;
     }
@@ -443,7 +461,9 @@ final class PublishTruffleService {
       'unauthorized' ||
       'user_not_found' ||
       'inactive_account' ||
-      'seller_not_allowed' => true,
+      'seller_not_allowed' ||
+      'seller_stripe_onboarding_required' ||
+      'seller_stripe_verification_pending' => true,
       _ => false,
     };
   }
@@ -462,6 +482,7 @@ final class PublishTruffleService {
     if (trimmed.isEmpty) return null;
     return DateTime.tryParse(trimmed);
   }
+
 }
 
 final class _StagedPublishImage {

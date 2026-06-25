@@ -78,18 +78,23 @@ class HomeRepository {
 
   Future<List<SellerListItem>> fetchTopSellers({int limit = 6}) async {
     try {
-      final rows = await _supabaseClient
-          .from('active_seller_cards')
-          .select(
-            'id, first_name, last_name, profile_image_url, region, '
-            'seller_rating_avg, seller_review_count, completed_orders_count',
-          )
-          .order('seller_review_count', ascending: false)
-          .order('seller_rating_avg', ascending: false)
-          .order('completed_orders_count', ascending: false)
-          .limit(limit) as List<dynamic>;
+      final rows =
+          await _supabaseClient
+                  .from('active_seller_cards')
+                  .select(
+                    'id, first_name, last_name, profile_image_url, region, '
+                    'seller_rating_avg, seller_review_count, completed_orders_count',
+                  )
+                  .order('seller_review_count', ascending: false)
+                  .order('seller_rating_avg', ascending: false)
+                  .order('completed_orders_count', ascending: false)
+                  .limit(limit)
+              as List<dynamic>;
 
-      return rows.cast<Map<String, dynamic>>().map(_mapSeller).toList(growable: false);
+      return rows
+          .cast<Map<String, dynamic>>()
+          .map(_mapSeller)
+          .toList(growable: false);
     } on SocketException {
       throw const SeasonalHighlightException(SeasonalHighlightFailure.network);
     } on PostgrestException {
@@ -99,19 +104,26 @@ class HomeRepository {
     }
   }
 
-  Future<SellerHomeStats> fetchSellerHomeStats({required String sellerId}) async {
+  Future<SellerHomeStats> fetchSellerHomeStats({
+    required String sellerId,
+  }) async {
     try {
-      final orders = await _supabaseClient
-          .from('orders')
-          .select('id')
-          .eq('seller_id', sellerId)
-          .inFilter('status', ['paid', 'shipped']) as List<dynamic>;
+      final orders =
+          await _supabaseClient
+                  .from('orders')
+                  .select('id')
+                  .eq('seller_id', sellerId)
+                  .inFilter('status', ['paid', 'shipped'])
+              as List<dynamic>;
 
-      final activeTruffles = await _supabaseClient
-          .from('truffles')
-          .select('id')
-          .eq('seller_id', sellerId)
-          .eq('status', 'active') as List<dynamic>;
+      final activeTruffles =
+          await _supabaseClient
+                  .from('truffles')
+                  .select('id')
+                  .eq('seller_id', sellerId)
+                  .eq('status', 'active')
+                  .gt('expires_at', DateTime.now().toUtc().toIso8601String())
+              as List<dynamic>;
 
       return SellerHomeStats(
         inProgressOrdersCount: orders.length,
@@ -135,7 +147,8 @@ class HomeRepository {
       region: row['region'] as String?,
       ratingAverage: _toDouble(row['seller_rating_avg']),
       reviewCount: (row['seller_review_count'] as num?)?.toInt() ?? 0,
-      completedOrdersCount: (row['completed_orders_count'] as num?)?.toInt() ?? 0,
+      completedOrdersCount:
+          (row['completed_orders_count'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -152,8 +165,8 @@ final class SellerHomeStats {
   });
 
   const SellerHomeStats.empty()
-      : inProgressOrdersCount = 0,
-        activeTrufflesCount = 0;
+    : inProgressOrdersCount = 0,
+      activeTrufflesCount = 0;
 
   final int inProgressOrdersCount;
   final int activeTrufflesCount;

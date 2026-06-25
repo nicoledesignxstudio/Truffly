@@ -24,9 +24,7 @@ class SellerRegionPage extends ConsumerWidget {
       builder: (context, constraints) {
         return SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 30,
-          ),
+          padding: const EdgeInsets.only(bottom: AppSpacing.spacingL),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Align(
@@ -61,8 +59,10 @@ class SellerRegionPage extends ConsumerWidget {
                     OnboardingDropdownField<String>(
                       initialValue: selectedRegion,
                       hintText: l10n.onboardingRegionLabel,
-                      errorText: onboardingState.validationFailures.contains(
-                              OnboardingValidationFailure.regionRequired)
+                      errorText:
+                          onboardingState.validationFailures.contains(
+                            OnboardingValidationFailure.regionRequired,
+                          )
                           ? l10n.onboardingRegionRequiredError
                           : null,
                       items: [

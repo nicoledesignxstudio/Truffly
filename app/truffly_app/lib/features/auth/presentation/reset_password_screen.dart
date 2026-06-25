@@ -10,6 +10,7 @@ import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/auth/presentation/create_password_screen.dart';
+import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_error_message.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_scaffold.dart';
@@ -17,22 +18,16 @@ import 'package:truffly_app/features/auth/presentation/widgets/auth_text_block.d
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
-  const ResetPasswordScreen({
-    required this.callbackContext,
-    super.key,
-  });
+  const ResetPasswordScreen({required this.callbackContext, super.key});
 
   final AuthCallbackContext callbackContext;
 
   @override
-  ConsumerState<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  ConsumerState<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
 }
 
-enum _RecoverySessionStatus {
-  checking,
-  ready,
-  invalid,
-}
+enum _RecoverySessionStatus { checking, ready, invalid }
 
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   static const _sessionResolutionTimeout = Duration(seconds: 4);
@@ -65,13 +60,15 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       return;
     }
 
-    _authStateSub = ref.read(supabaseClientProvider).auth.onAuthStateChange.listen((
-      _,
-    ) {
-      if (_hasUsableRecoverySession()) {
-        _setStatus(_RecoverySessionStatus.ready);
-      }
-    });
+    _authStateSub = ref
+        .read(supabaseClientProvider)
+        .auth
+        .onAuthStateChange
+        .listen((_) {
+          if (_hasUsableRecoverySession()) {
+            _setStatus(_RecoverySessionStatus.ready);
+          }
+        });
 
     _resolutionTimeout = Timer(_sessionResolutionTimeout, () {
       if (!_hasUsableRecoverySession()) {
@@ -132,7 +129,7 @@ class _RecoverySessionCheckingView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        const SizedBox(height: AppSpacing.authFieldGap),
+        const SizedBox(height: AppSpacing.authTitleSubtitleGap),
         AuthTextBlock(
           child: Text(
             l10n.authResetPasswordSubtitle,
@@ -154,6 +151,8 @@ class _RecoverySessionInvalidView extends StatelessWidget {
 
     return AuthScaffold(
       children: [
+        AuthBackButton(onPressed: () => context.go(AppRoutes.login)),
+        const SizedBox(height: AppSpacing.authGroupGap),
         AuthTextBlock(
           child: Text(
             l10n.authResetPasswordTitle,
@@ -161,10 +160,8 @@ class _RecoverySessionInvalidView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.authFieldGap),
-        AuthErrorMessage(
-          message: l10n.authResetPasswordInvalidRecoverySession,
-        ),
-        const SizedBox(height: AppSpacing.authGroupGap),
+        AuthErrorMessage(message: l10n.authResetPasswordInvalidRecoverySession),
+        const SizedBox(height: AppSpacing.authSubmitGap),
         AuthPrimaryButton(
           label: l10n.authForgotPasswordButton,
           onPressed: () => context.go(AppRoutes.forgotPassword),

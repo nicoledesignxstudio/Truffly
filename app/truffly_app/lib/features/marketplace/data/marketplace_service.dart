@@ -17,14 +17,16 @@ final class MarketplaceServiceException implements Exception {
 
 final class MarketplaceService {
   MarketplaceService(this._supabaseClient)
-      : _imageUrlResolver = TruffleImageUrlResolver(_supabaseClient);
+    : _imageUrlResolver = TruffleImageUrlResolver(_supabaseClient);
 
   static const pageSize = 20;
 
   final SupabaseClient _supabaseClient;
   final TruffleImageUrlResolver _imageUrlResolver;
 
-  Future<List<TruffleListItem>> fetchTrufflesByIds(List<String> truffleIds) async {
+  Future<List<TruffleListItem>> fetchTrufflesByIds(
+    List<String> truffleIds,
+  ) async {
     final normalizedIds = truffleIds
         .map((id) => id.trim())
         .where((id) => id.isNotEmpty)
@@ -35,11 +37,13 @@ final class MarketplaceService {
     }
 
     try {
-      final rows = await _supabaseClient
-          .from('active_truffle_cards')
-          .select()
-          .inFilter('id', normalizedIds)
-          .order('created_at', ascending: false) as List<dynamic>;
+      final rows =
+          await _supabaseClient
+                  .from('active_truffle_cards')
+                  .select()
+                  .inFilter('id', normalizedIds)
+                  .order('created_at', ascending: false)
+              as List<dynamic>;
 
       return _mapRowsToItems(rows.cast<Map<String, dynamic>>());
     } on SocketException {
@@ -126,9 +130,9 @@ final class MarketplaceService {
 
       final from = page * pageSize;
       final to = from + pageSize - 1;
-      final rows = await query
-          .order('created_at', ascending: false)
-          .range(from, to) as List<dynamic>;
+      final rows =
+          await query.order('created_at', ascending: false).range(from, to)
+              as List<dynamic>;
 
       return _mapRowsToItems(rows.cast<Map<String, dynamic>>());
     } on SocketException {

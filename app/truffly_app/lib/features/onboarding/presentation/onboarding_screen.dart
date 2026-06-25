@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/auth/domain/auth_state.dart';
 import 'package:truffly_app/features/onboarding/application/onboarding_notifier.dart';
 import 'package:truffly_app/features/onboarding/application/onboarding_providers.dart';
 import 'package:truffly_app/features/onboarding/domain/onboarding_state.dart';
+import 'package:truffly_app/features/onboarding/domain/onboarding_step_id.dart';
 import 'package:truffly_app/features/onboarding/presentation/onboarding_flow_screen.dart';
 import 'package:truffly_app/features/onboarding/presentation/onboarding_role_selection_screen.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
@@ -41,14 +43,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           l10n: l10n,
         );
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: onboardingState.hasSelectedPath
-              ? OnboardingFlowScreen(
-                  key: ValueKey(onboardingState.path),
-                )
-              : const OnboardingRoleSelectionScreen(),
+      child: const AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
         ),
+        child: _OnboardingScreenBody(),
       ),
     );
   }
@@ -117,5 +118,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     ref.read(onboardingNotifierProvider.notifier).resetFlow();
+  }
+}
+
+class _OnboardingScreenBody extends ConsumerWidget {
+  const _OnboardingScreenBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final onboardingState = ref.watch(onboardingNotifierProvider);
+    final isWelcomeStep =
+        onboardingState.currentStepId == OnboardingStepId.welcome;
+
+    return Scaffold(
+      body: isWelcomeStep
+          ? const OnboardingFlowScreen()
+          : SafeArea(
+              child: onboardingState.hasSelectedPath
+                  ? OnboardingFlowScreen(key: ValueKey(onboardingState.path))
+                  : const OnboardingRoleSelectionScreen(),
+            ),
+    );
   }
 }

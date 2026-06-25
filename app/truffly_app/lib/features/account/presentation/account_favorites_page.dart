@@ -131,7 +131,7 @@ class AccountFavoritesPage extends ConsumerWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: AppSpacing.spacingXS,
                 crossAxisSpacing: AppSpacing.spacingXS,
-                childAspectRatio: 0.58,
+                childAspectRatio: 0.66,
               ),
               itemBuilder: (context, index) {
                 final item = items[index];
@@ -149,7 +149,7 @@ class AccountFavoritesPage extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => ListView(
+          error: (_, _) => ListView(
             padding: const EdgeInsets.all(AppSpacing.spacingL),
             children: [
               const SizedBox(height: AppSpacing.spacingXXL),

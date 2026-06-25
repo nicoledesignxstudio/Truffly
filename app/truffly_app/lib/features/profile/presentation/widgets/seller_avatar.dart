@@ -17,9 +17,7 @@ class SellerAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final normalizedImageUrl = imageUrl?.trim();
-    final canUseImage = normalizedImageUrl != null &&
-        normalizedImageUrl.isNotEmpty &&
-        Uri.tryParse(normalizedImageUrl)?.hasScheme == true;
+    final url = normalizedImageUrl;
 
     return Container(
       width: size,
@@ -29,15 +27,17 @@ class SellerAvatar extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       clipBehavior: Clip.antiAlias,
-      child: canUseImage
-          ? Image.network(
-              normalizedImageUrl!,
+      child: url == null ||
+              url.isEmpty ||
+              Uri.tryParse(url)?.hasScheme != true
+          ? _SellerInitials(initials: initials)
+          : Image.network(
+              url,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return _SellerInitials(initials: initials);
               },
-            )
-          : _SellerInitials(initials: initials),
+            ),
     );
   }
 }

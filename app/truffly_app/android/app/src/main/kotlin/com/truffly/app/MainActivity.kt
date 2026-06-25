@@ -1,4 +1,4 @@
-package com.example.truffly_app
+package com.truffly.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

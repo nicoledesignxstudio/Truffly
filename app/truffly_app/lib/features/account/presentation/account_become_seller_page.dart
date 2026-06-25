@@ -3,14 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
+import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/account/application/account_providers.dart';
+import 'package:truffly_app/features/account/data/seller_dashboard_service.dart';
 import 'package:truffly_app/features/account/data/seller_stripe_onboarding_service.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
+import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/truffle/application/publish_truffle_providers.dart';
+import 'package:truffly_app/features/truffle/presentation/widgets/truffle_ui_formatters.dart';
 
 class AccountBecomeSellerPage extends ConsumerStatefulWidget {
   const AccountBecomeSellerPage({
@@ -32,6 +36,7 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
   bool _isOpeningOnboarding = false;
   bool _isRefreshing = false;
   bool _awaitingExternalReturn = false;
+  bool _hasResolvedStripeStatus = false;
   String? _errorMessage;
 
   @override
@@ -61,7 +66,6 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(currentUserAccountProfileProvider);
     final isItalian = Localizations.localeOf(context).languageCode == 'it';
-    final title = isItalian ? 'Diventa venditore' : 'Become a seller';
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -84,7 +88,7 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
           ),
         ),
         title: Text(
-          title,
+          'Stripe',
           style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
         ),
       ),
@@ -112,7 +116,7 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
     required CurrentUserProfile profile,
     required bool isItalian,
   }) {
-    if (!profile.isSeller) {
+    if (!profile.isSeller && profile.sellerStatus != 'approved') {
         return _CenteredMessageCard(
         title: isItalian ? 'Richiesta seller' : 'Seller request',
         description: isItalian
@@ -124,7 +128,7 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
     if (profile.sellerStatus != 'approved') {
       final description = switch (profile.sellerStatus) {
         'pending' => isItalian
-            ? "La tua richiesta seller e' ancora in revisione. Lo step Stripe si sblocca solo dopo approvazione."
+            ? "La tua richiesta seller e' ancora in revisione. Lo step Stripe si sblocca dopo l'approvazione."
             : 'Your seller request is still under review. The Stripe step unlocks only after approval.',
         'rejected' => isItalian
             ? "La tua richiesta seller e' stata rifiutata. Stripe onboarding non e' disponibile finche' non ottieni una nuova approvazione."
@@ -140,136 +144,135 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
       );
     }
 
+    if (!_hasResolvedStripeStatus && _stripeStatus == null) {
+      return _CenteredMessageCard(
+        title: isItalian ? 'Carico Stripe...' : 'Loading Stripe...',
+        description: isItalian
+            ? 'Stiamo recuperando lo stato del tuo account per mostrarti la schermata corretta.'
+            : 'We are loading your account status so we can show the correct screen.',
+      );
+    }
+
+    final dashboardAsync = ref.watch(currentSellerDashboardSummaryProvider);
+    final stripeHasAccount = _stripeStatus?.accountId?.trim().isNotEmpty == true;
+    final stripeActive =
+        _stripeStatus?.chargesEnabled == true && _stripeStatus?.payoutsEnabled == true;
+    final stripeVerificationPending = stripeHasAccount && !stripeActive;
+    final stripeRequirementsPending = _stripeStatus?.requirementsPending == true;
+    final stripeNotConnected = !stripeHasAccount;
+    final isVerifying = _isLoadingStatus && _stripeStatus == null;
+    final showDashboard = stripeActive;
+
     return RefreshIndicator(
       onRefresh: _refreshStripeStatus,
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.spacingM,
+          AppSpacing.spacingM,
+          AppSpacing.spacingM,
+          AppSpacing.spacingL,
+        ),
         children: [
-          _CenteredMessageCard(
-            title: isItalian ? 'Stripe Express onboarding' : 'Stripe Express onboarding',
-            description: isItalian
-                ? 'Apri il flusso Stripe nel browser di sistema, completa i dati richiesti e torna in app. Truffly verifica sempre lo stato lato backend prima di sbloccare la pubblicazione.'
-                : 'Open the Stripe flow in the system browser, complete the required data, and return to the app. Truffly always verifies the status server-side before unlocking publishing.',
+          _StripeStatusHeaderCard(
+            title: isItalian ? 'Stato account' : 'Account status',
+            statusTitle: isVerifying
+                ? (isItalian ? 'Verifica in corso...' : 'Checking...')
+                : stripeActive
+                ? (isItalian ? 'Stripe attivo' : 'Stripe active')
+                : stripeNotConnected
+                ? (isItalian ? 'Non collegato' : 'Not connected')
+                : stripeVerificationPending
+                ? (isItalian ? 'In verifica' : 'Under review')
+                : (isItalian ? 'Da completare' : 'Incomplete'),
+            description: isVerifying
+                ? (isItalian
+                    ? 'Stiamo aggiornando lo stato del tuo account Stripe...'
+                    : 'We are updating your Stripe account status...')
+                : stripeActive
+                ? (isItalian
+                    ? 'Il tuo account Stripe è attivo e pronto a ricevere pagamenti.'
+                    : 'Your Stripe account is active and ready to receive payments.')
+                : stripeVerificationPending
+                ? (isItalian
+                    ? 'Stripe sta ancora verificando il tuo account. Puoi gestire la verifica da Stripe.'
+                    : 'Stripe is still verifying your account. You can manage verification directly in Stripe.')
+                : (isItalian
+                    ? 'Completa la registrazione Stripe per ricevere i pagamenti in sicurezza.'
+                    : 'Complete Stripe registration to receive payments securely.'),
+            statusTone: stripeActive
+                ? _StripeTone.success
+                : _StripeTone.warning,
+            accountId: _stripeStatus?.accountId,
+            isItalian: isItalian,
           ),
-          const SizedBox(height: AppSpacing.spacingM),
-          _buildStatusCard(isItalian: isItalian),
           if (_errorMessage != null) ...[
             const SizedBox(height: AppSpacing.spacingM),
             _InlineErrorBanner(message: _errorMessage!),
           ],
-          const SizedBox(height: AppSpacing.spacingM),
-          FilledButton(
-            key: const Key('seller_stripe_open_button'),
-            onPressed: _isOpeningOnboarding || _isLoadingStatus
-                ? null
-                : _openStripeOnboarding,
-            child: Text(
-              _isOpeningOnboarding
+          if (stripeRequirementsPending)
+            _RequirementsNoticeCard(isItalian: isItalian),
+          if (!showDashboard) ...[
+            const SizedBox(height: AppSpacing.spacingM),
+            _StripeActionButton(
+              key: const Key('seller_stripe_open_button'),
+              isPrimary: true,
+              onPressed: _isOpeningOnboarding || _isLoadingStatus
+                  ? null
+                  : _openStripeOnboarding,
+              label: _isOpeningOnboarding
                   ? (isItalian ? 'Apertura in corso...' : 'Opening...')
-                  : (isItalian ? 'Apri Stripe' : 'Open Stripe'),
+                  : stripeHasAccount
+                  ? (isItalian ? 'Gestisci verifica Stripe' : 'Manage Stripe verification')
+                  : (isItalian ? 'Completa registrazione' : 'Complete registration'),
             ),
-          ),
-          const SizedBox(height: AppSpacing.spacingS),
-          OutlinedButton(
-            key: const Key('seller_stripe_refresh_button'),
-            onPressed: _isRefreshing || _isLoadingStatus
-                ? null
-                : _refreshStripeStatus,
-            child: Text(
-              _isRefreshing
+            const SizedBox(height: AppSpacing.spacingS),
+            _StripeActionButton(
+              key: const Key('seller_stripe_refresh_button'),
+              isPrimary: false,
+              onPressed: _isRefreshing || _isLoadingStatus
+                  ? null
+                  : _refreshStripeStatus,
+              label: _isRefreshing
                   ? (isItalian ? 'Verifica in corso...' : 'Checking...')
-                  : (isItalian ? 'Verifica stato' : 'Refresh status'),
+                  : (isItalian ? 'Aggiorna stato' : 'Refresh status'),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusCard({required bool isItalian}) {
-    final status = _stripeStatus;
-    final title = switch (status?.readiness) {
-      SellerStripeReadinessStatus.notConnected => isItalian
-          ? 'Non collegato'
-          : 'Not connected',
-      SellerStripeReadinessStatus.onboardingInProgress => isItalian
-          ? 'Onboarding in corso'
-          : 'Onboarding in progress',
-      SellerStripeReadinessStatus.verificationPending => isItalian
-          ? 'Verifica in attesa'
-          : 'Verification pending',
-      SellerStripeReadinessStatus.ready => isItalian ? 'Pronto' : 'Ready',
-      null => isItalian ? 'Stato Stripe' : 'Stripe status',
-    };
-
-    final description = switch (status?.readiness) {
-      SellerStripeReadinessStatus.notConnected => isItalian
-          ? 'Non esiste ancora un account Stripe collegato per il tuo profilo seller.'
-          : 'No connected Stripe account exists yet for your seller profile.',
-      SellerStripeReadinessStatus.onboardingInProgress => isItalian
-          ? "L'account esiste, ma Stripe non ha ancora ricevuto tutti i dati richiesti."
-          : 'The account exists, but Stripe has not received all the required data yet.',
-      SellerStripeReadinessStatus.verificationPending => isItalian
-          ? 'I dettagli sono stati inviati, ma Stripe non considera ancora il profilo pronto alla pubblicazione.'
-          : 'Details were submitted, but Stripe does not consider the profile ready for publishing yet.',
-      SellerStripeReadinessStatus.ready => isItalian
-          ? 'Il seller risulta Stripe-ready. Il gate publish server-side puo ora confermare la pubblicazione.'
-          : 'The seller is Stripe-ready. The server-side publish gate can now confirm publishing.',
-      null when _isLoadingStatus || _isRefreshing => isItalian
-          ? 'Stiamo caricando lo stato Stripe del seller.'
-          : 'Loading the seller Stripe status.',
-      null when _errorMessage != null => isItalian
-          ? 'Non siamo riusciti a verificare lo stato Stripe del seller.'
-          : 'We could not verify the seller Stripe status.',
-      null => isItalian
-          ? 'Lo stato Stripe del seller sara disponibile qui.'
-          : 'The seller Stripe status will appear here.',
-    };
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.black10),
-        boxShadow: AppShadows.authField,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.spacingL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: AppTextStyles.sectionTitle.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          ] else ...[
+            const SizedBox(height: AppSpacing.spacingM),
+            _SellerDashboardSummaryCard(
+              summaryAsync: dashboardAsync,
+              isItalian: isItalian,
             ),
-            const SizedBox(height: AppSpacing.spacingXS),
-            Text(
-              description,
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.black80,
-              ),
-            ),
-            if (_isLoadingStatus || _isRefreshing) ...[
-              const SizedBox(height: AppSpacing.spacingM),
-              const LinearProgressIndicator(),
-            ],
-            if (_stripeStatus?.accountId case final accountId?) ...[
-              const SizedBox(height: AppSpacing.spacingM),
-              Text(
-                'Stripe ID: $accountId',
-                style: AppTextStyles.bodySmall,
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
 
   Future<void> _loadInitialStatus() async {
     final callbackHint = widget.stripeCallbackHint?.trim().toLowerCase();
+    try {
+      final cachedStatus = await ref
+          .read(currentSellerStripeStatusProvider.future);
+      if (!mounted) return;
+      setState(() {
+        if (cachedStatus.isReady) {
+          _stripeStatus = cachedStatus;
+          _hasResolvedStripeStatus = true;
+        } else {
+          _stripeStatus = null;
+          _hasResolvedStripeStatus = false;
+        }
+        _errorMessage = null;
+      });
+    } catch (_) {
+      // Best effort: the explicit refresh path below will surface a user-facing error if needed.
+      if (mounted) {
+        setState(() {
+          _hasResolvedStripeStatus = true;
+        });
+      }
+    }
+
     if (callbackHint == 'return') {
       await _refreshStripeStatus(showVerifyingMessage: true);
       return;
@@ -308,7 +311,7 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
         setState(() {
           _errorMessage = _text(
             context,
-            it: 'Non siamo riusciti ad aprire il browser di sistema.',
+            it: 'Non siamo riusciti ad aprire il browser di sistema. Riprova.',
             en: 'We could not open the system browser.',
           );
         });
@@ -333,10 +336,14 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
   }
 
   Future<void> _refreshStripeStatus({bool showVerifyingMessage = false}) async {
-    setState(() {
-      _isLoadingStatus = _stripeStatus == null;
-      _isRefreshing = _stripeStatus != null;
-      _errorMessage = showVerifyingMessage
+    String? snackMessage;
+    Color? snackIconColor;
+    IconData? snackIcon;
+
+      setState(() {
+        _isLoadingStatus = _stripeStatus == null;
+        _isRefreshing = _stripeStatus != null;
+        _errorMessage = showVerifyingMessage
           ? _text(
               context,
               it: 'Stiamo verificando il tuo account Stripe...',
@@ -353,21 +360,75 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
 
       setState(() {
         _stripeStatus = status;
+        _hasResolvedStripeStatus = true;
         _errorMessage = null;
       });
 
+      snackMessage = _text(
+        context,
+        it: 'Stato aggiornato',
+        en: 'Status updated',
+      );
+      snackIcon = Icons.check_circle_rounded;
+      snackIconColor = const Color(0xFF24A148);
+
       ref.invalidate(currentSellerPublishAccessProvider);
+      ref.invalidate(currentSellerStripeStatusProvider);
     } on SellerStripeOnboardingServiceException catch (error) {
       if (!mounted) return;
       setState(() {
         _errorMessage = _messageForFailure(error);
+        _hasResolvedStripeStatus = true;
       });
+      snackMessage = _text(
+        context,
+        it: 'Impossibile aggiornare',
+        en: 'Unable to update',
+      );
+      snackIcon = Icons.close_rounded;
+      snackIconColor = AppColors.error;
     } finally {
       if (mounted) {
         setState(() {
           _isLoadingStatus = false;
           _isRefreshing = false;
         });
+
+        if (snackMessage != null && snackIcon != null && snackIconColor != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: AppColors.black,
+                duration: const Duration(seconds: 2),
+                margin: const EdgeInsets.fromLTRB(
+                  AppSpacing.spacingM,
+                  0,
+                  AppSpacing.spacingM,
+                  AppSpacing.spacingL,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                content: Row(
+                  children: [
+                    Icon(snackIcon, color: snackIconColor, size: 18),
+                    const SizedBox(width: AppSpacing.spacingS),
+                    Expanded(
+                      child: Text(
+                        snackMessage,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.white,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+        }
       }
     }
   }
@@ -381,15 +442,15 @@ class _AccountBecomeSellerPageState extends ConsumerState<AccountBecomeSellerPag
         ),
       SellerStripeOnboardingFailure.notAllowed => _text(
           context,
-          it: 'Questo profilo seller non puo ancora usare Stripe onboarding.',
-          en: 'This seller profile cannot use Stripe onboarding yet.',
+          it: 'La richiesta venditore deve essere approvata prima di configurare Stripe.',
+          en: 'The seller request must be approved before configuring Stripe.',
         ),
       SellerStripeOnboardingFailure.network => _text(
           context,
           it: error.backendMessage ??
-              "La verifica Stripe non e' disponibile in questo momento. Riprova tra poco.",
+              "Non riusciamo a verificare lo stato ora. Riprova.",
           en: error.backendMessage ??
-              'Stripe verification is unavailable right now. Please try again soon.',
+              'We cannot verify the status right now. Please try again.',
         ),
       SellerStripeOnboardingFailure.unknown => error.backendMessage ??
           _text(
@@ -480,6 +541,407 @@ class _InlineErrorBanner extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RequirementsNoticeCard extends StatelessWidget {
+  const _RequirementsNoticeCard({required this.isItalian});
+
+  final bool isItalian;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.black10),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.info_outline_rounded, color: AppColors.black50),
+            const SizedBox(width: AppSpacing.spacingS),
+            Expanded(
+              child: Text(
+                isItalian
+                    ? 'Stripe potrebbe richiedere altre informazioni.'
+                    : 'Stripe may require a few more details.',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.black80),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _StripeTone { neutral, warning, success }
+
+class _StripeStatusHeaderCard extends StatelessWidget {
+  const _StripeStatusHeaderCard({
+    required this.title,
+    required this.statusTitle,
+    required this.description,
+    required this.statusTone,
+    required this.isItalian,
+    this.accountId,
+  });
+
+  final String title;
+  final String statusTitle;
+  final String description;
+  final _StripeTone statusTone;
+  final bool isItalian;
+  final String? accountId;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = switch (statusTone) {
+      _StripeTone.warning => AppColors.accent,
+      _StripeTone.neutral => const Color(0xFF24A148),
+      _StripeTone.success => const Color(0xFF24A148),
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.spacingL),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.black10),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.micro.copyWith(
+              color: AppColors.black50,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spacingXS),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  statusTone == _StripeTone.warning
+                      ? Icons.error_outline_rounded
+                      : Icons.check_circle_rounded,
+                  color: statusColor,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.spacingS),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      statusTitle,
+                      style: AppTextStyles.sectionTitle.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.black80,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.spacingS),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.spacingS,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        statusTone == _StripeTone.warning
+                            ? (isItalian ? 'Da completare' : 'Incomplete')
+                            : (isItalian ? 'Attivo' : 'Active'),
+                        style: AppTextStyles.micro.copyWith(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (accountId case final value?) ...[
+            const SizedBox(height: AppSpacing.spacingM),
+            const Divider(height: 1, color: Color.fromARGB(43, 21, 22, 24)),
+            const SizedBox(height: AppSpacing.spacingM),
+            Row(
+              children: [
+                Text(
+                  'Account ID',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.black50,
+                    fontSize: 13,
+                  ),
+                ),
+                const Spacer(),
+                Expanded(
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.right,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.black80,
+                      fontSize: 13,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.spacingXS),
+                const Icon(Icons.copy_rounded, size: 18, color: AppColors.black50),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SellerDashboardSummaryCard extends StatelessWidget {
+  const _SellerDashboardSummaryCard({
+    required this.summaryAsync,
+    required this.isItalian,
+  });
+
+  final AsyncValue<SellerDashboardSummary> summaryAsync;
+  final bool isItalian;
+
+  @override
+  Widget build(BuildContext context) {
+    return summaryAsync.when(
+      loading: () => const SizedBox(
+        height: 180,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, _) => _CenteredMessageCard(
+        title: isItalian ? 'Dashboard non disponibile' : 'Dashboard unavailable',
+        description: isItalian
+            ? 'Non siamo riusciti a caricare il riepilogo del seller.'
+            : 'We could not load the seller summary.',
+      ),
+      data: (summary) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _MiniMetricCard(
+              title: isItalian ? 'Guadagno completato' : 'Completed earnings',
+              value: formatEuro(summary.completedEarnings),
+            ),
+            const SizedBox(height: AppSpacing.spacingS),
+            _MiniMetricGrid(
+              primaryTitle: isItalian ? 'In attesa' : 'Pending',
+              primaryValue: formatEuro(summary.pendingEarnings),
+              secondaryTitle: isItalian ? 'Ordini in corso' : 'Orders in progress',
+              secondaryValue: summary.inProgressOrdersCount.toString(),
+              tertiaryTitle: isItalian ? 'Ordini completati' : 'Completed orders',
+              tertiaryValue: summary.completedOrdersCount.toString(),
+              quaternaryTitle: isItalian ? 'Rating medio' : 'Average rating',
+              quaternaryValue: summary.reviewCount == 0
+                  ? '--'
+                  : summary.averageRating.toStringAsFixed(1),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MiniMetricCard extends StatelessWidget {
+  const _MiniMetricCard({
+    required this.title,
+    required this.value,
+  });
+
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.black,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: AppTextStyles.micro.copyWith(
+                color: AppColors.white.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacingXS),
+            Text(
+              value,
+              style: AppTextStyles.authScreenTitle.copyWith(
+                color: AppColors.white,
+                fontSize: 32,
+                height: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniMetricGrid extends StatelessWidget {
+  const _MiniMetricGrid({
+    required this.primaryTitle,
+    required this.primaryValue,
+    required this.secondaryTitle,
+    required this.secondaryValue,
+    required this.tertiaryTitle,
+    required this.tertiaryValue,
+    required this.quaternaryTitle,
+    required this.quaternaryValue,
+  });
+
+  final String primaryTitle;
+  final String primaryValue;
+  final String secondaryTitle;
+  final String secondaryValue;
+  final String tertiaryTitle;
+  final String tertiaryValue;
+  final String quaternaryTitle;
+  final String quaternaryValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: AppSpacing.spacingS,
+      crossAxisSpacing: AppSpacing.spacingS,
+      childAspectRatio: 1.9,
+      children: [
+        _TinyMetricTile(title: primaryTitle, value: primaryValue),
+        _TinyMetricTile(title: secondaryTitle, value: secondaryValue),
+        _TinyMetricTile(title: tertiaryTitle, value: tertiaryValue),
+        _TinyMetricTile(title: quaternaryTitle, value: quaternaryValue),
+      ],
+    );
+  }
+}
+
+class _TinyMetricTile extends StatelessWidget {
+  const _TinyMetricTile({
+    required this.title,
+    required this.value,
+  });
+
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.black10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              style: AppTextStyles.micro.copyWith(color: AppColors.black50),
+            ),
+            const SizedBox(height: AppSpacing.spacingXS),
+            Text(
+              value,
+              style: AppTextStyles.sectionTitle.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StripeActionButton extends StatelessWidget {
+  const _StripeActionButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    required this.isPrimary,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: isPrimary
+          ? AuthPrimaryButton(
+              label: label,
+              onPressed: onPressed,
+              backgroundColor: AppColors.black,
+              foregroundColor: AppColors.white,
+            )
+          : OutlinedButton(
+              onPressed: onPressed,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: AppColors.white,
+                foregroundColor: AppColors.black,
+                side: const BorderSide(color: AppColors.black10),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadii.authBorderRadius,
+                ),
+                textStyle: AppTextStyles.buttonText,
+              ),
+              child: Text(label),
+            ),
     );
   }
 }

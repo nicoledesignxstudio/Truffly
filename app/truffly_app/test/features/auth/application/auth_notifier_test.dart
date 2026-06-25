@@ -31,6 +31,8 @@ class TestBootstrapNotifier extends BootstrapNotifier {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   ProviderContainer createContainer({
     TestBootstrapNotifier? bootstrapNotifier,
   }) {

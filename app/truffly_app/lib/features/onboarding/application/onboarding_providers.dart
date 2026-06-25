@@ -9,6 +9,9 @@ final onboardingServiceProvider = Provider<OnboardingService>((ref) {
   return AppOnboardingService(
     supabaseClient: ref.read(supabaseClientProvider),
     profileService: ref.read(profileServiceProvider),
+    notificationPermissionService: ref.read(
+      notificationPermissionServiceProvider,
+    ),
     refreshAuthState: () {
       return ref.read(authNotifierProvider.notifier).refreshAuthState();
     },
@@ -17,5 +20,9 @@ final onboardingServiceProvider = Provider<OnboardingService>((ref) {
 
 final onboardingNotifierProvider =
     NotifierProvider<OnboardingNotifier, OnboardingState>(
-  OnboardingNotifier.new,
-);
+      OnboardingNotifier.new,
+    );
+
+final onboardingSellerApplicationEntryProvider = StateProvider<bool>((ref) {
+  return false;
+});

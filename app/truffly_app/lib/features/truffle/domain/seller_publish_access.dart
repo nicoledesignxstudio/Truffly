@@ -21,15 +21,10 @@ final class SellerPublishAccess {
   final DateTime? stripeReadyAt;
   final String? region;
 
-  bool get isSeller => role == 'seller';
+  bool get isSeller => sellerStatus == 'approved';
   bool get isApproved => sellerStatus == 'approved';
   bool get hasStripeAccount =>
       stripeAccountId != null && stripeAccountId!.trim().isNotEmpty;
-  bool get isStripeReady =>
-      hasStripeAccount &&
-      stripeDetailsSubmitted &&
-      stripePayoutsEnabled &&
-      !stripeRequirementsPending &&
-      stripeReadyAt != null;
+  bool get isStripeReady => hasStripeAccount && stripeChargesEnabled && stripePayoutsEnabled;
   bool get canPublish => isSeller && isApproved && isStripeReady;
 }

@@ -66,9 +66,7 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
       builder: (context, constraints) {
         return SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 30,
-          ),
+          padding: const EdgeInsets.only(bottom: AppSpacing.spacingL),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Align(
@@ -105,9 +103,10 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
                       focusNode: _tesserinoNumberFocusNode,
                       textInputAction: TextInputAction.done,
                       hintText: l10n.onboardingTesserinoNumberLabel,
-                      errorText: onboardingState.validationFailures.contains(
-                        OnboardingValidationFailure.tesserinoNumberRequired,
-                      )
+                      errorText:
+                          onboardingState.validationFailures.contains(
+                            OnboardingValidationFailure.tesserinoNumberRequired,
+                          )
                           ? l10n.onboardingTesserinoNumberRequiredError
                           : null,
                       onChanged: notifier.updateTesserinoNumber,
@@ -121,13 +120,16 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
                           ? l10n.onboardingDocumentPickButton
                           : l10n.onboardingDocumentReplaceButton,
                       removeLabel: l10n.onboardingDocumentRemoveButton,
-                      errorText: _identityDocumentError ??
+                      errorText:
+                          _identityDocumentError ??
                           (onboardingState.validationFailures.contains(
-                            OnboardingValidationFailure.identityDocumentRequired,
-                          )
+                                OnboardingValidationFailure
+                                    .identityDocumentRequired,
+                              )
                               ? l10n.onboardingIdentityDocumentRequiredError
                               : null),
-                      onPickPressed: () => _pickDocument(_DocumentSlot.identity),
+                      onPickPressed: () =>
+                          _pickDocument(_DocumentSlot.identity),
                       onRemovePressed:
                           onboardingState.draft.identityDocument == null
                           ? null
@@ -144,13 +146,16 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
                           ? l10n.onboardingDocumentPickButton
                           : l10n.onboardingDocumentReplaceButton,
                       removeLabel: l10n.onboardingDocumentRemoveButton,
-                      errorText: _tesserinoDocumentError ??
+                      errorText:
+                          _tesserinoDocumentError ??
                           (onboardingState.validationFailures.contains(
-                            OnboardingValidationFailure.tesserinoDocumentRequired,
-                          )
+                                OnboardingValidationFailure
+                                    .tesserinoDocumentRequired,
+                              )
                               ? l10n.onboardingTesserinoDocumentRequiredError
                               : null),
-                      onPickPressed: () => _pickDocument(_DocumentSlot.tesserino),
+                      onPickPressed: () =>
+                          _pickDocument(_DocumentSlot.tesserino),
                       onRemovePressed:
                           onboardingState.draft.tesserinoDocument == null
                           ? null
@@ -171,11 +176,12 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
 
   void _syncController(String value) {
     if (_tesserinoNumberController.text == value) return;
-    _tesserinoNumberController.value = _tesserinoNumberController.value.copyWith(
-      text: value,
-      selection: TextSelection.collapsed(offset: value.length),
-      composing: TextRange.empty,
-    );
+    _tesserinoNumberController.value = _tesserinoNumberController.value
+        .copyWith(
+          text: value,
+          selection: TextSelection.collapsed(offset: value.length),
+          composing: TextRange.empty,
+        );
   }
 
   Future<void> _pickDocument(_DocumentSlot slot) async {
@@ -240,7 +246,9 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
       context: context,
       backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.auth)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadii.auth),
+        ),
       ),
       builder: (context) {
         return SafeArea(
@@ -336,10 +344,7 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
   }
 }
 
-enum _DocumentSlot {
-  identity,
-  tesserino,
-}
+enum _DocumentSlot { identity, tesserino }
 
 class _DocumentSelectorCard extends StatelessWidget {
   const _DocumentSelectorCard({
@@ -367,9 +372,7 @@ class _DocumentSelectorCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: AppRadii.authBorderRadius,
         boxShadow: AppShadows.authField,
-        border: Border.fromBorderSide(
-          BorderSide(color: AppColors.black10),
-        ),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.black10)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.spacingM),
@@ -402,8 +405,7 @@ class _DocumentSelectorCard extends StatelessWidget {
                           ),
                           const SizedBox(height: AppSpacing.spacingS),
                           Text(
-                            selectedDocument?.fileName ??
-                                title,
+                            selectedDocument?.fileName ?? title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -428,9 +430,7 @@ class _DocumentSelectorCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.spacingS),
               Text(
                 errorText!,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.error,
-                ),
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
               ),
             ],
             if (selectedDocument != null && onRemovePressed != null) ...[
@@ -508,12 +508,7 @@ class _SheetActionTile extends StatelessWidget {
               children: [
                 Icon(icon, color: AppColors.black),
                 const SizedBox(width: AppSpacing.spacingS),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.bodyLarge,
-                  ),
-                ),
+                Expanded(child: Text(label, style: AppTextStyles.bodyLarge)),
               ],
             ),
           ),
@@ -541,10 +536,7 @@ class _DashedBorderPainter extends CustomPainter {
       var distance = 0.0;
       while (distance < metric.length) {
         final next = distance + dashWidth;
-        canvas.drawPath(
-          metric.extractPath(distance, next),
-          borderPaint,
-        );
+        canvas.drawPath(metric.extractPath(distance, next), borderPaint);
         distance = next + dashSpace;
       }
     }

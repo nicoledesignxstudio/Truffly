@@ -92,10 +92,7 @@ class AuthSuccessDialog extends StatelessWidget {
               style: AppTextStyles.bodyLarge.copyWith(color: AppColors.black80),
             ),
             const SizedBox(height: AppSpacing.spacingL),
-            AuthPrimaryButton(
-              label: buttonLabel,
-              onPressed: onPressed,
-            ),
+            AuthPrimaryButton(label: buttonLabel, onPressed: onPressed),
           ],
         ),
       ),

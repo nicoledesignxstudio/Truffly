@@ -10,5 +10,5 @@ final marketplaceServiceProvider = Provider<MarketplaceService>((ref) {
 
 final truffleListingNotifierProvider =
     NotifierProvider<TruffleListingNotifier, TruffleListingState>(
-  TruffleListingNotifier.new,
-);
+      TruffleListingNotifier.new,
+    );

@@ -17,11 +17,7 @@ class TruffleListingEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 48,
-              color: AppColors.black50,
-            ),
+            Icon(Icons.search_off_rounded, size: 48, color: AppColors.black50),
             const SizedBox(height: AppSpacing.spacingM),
             Text(
               l10n.truffleEmptyTitle,

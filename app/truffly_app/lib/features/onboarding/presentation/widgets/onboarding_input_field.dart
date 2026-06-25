@@ -59,9 +59,7 @@ class OnboardingTextField extends StatelessWidget {
           const SizedBox(height: AppSpacing.spacingXS),
           Text(
             errorText!,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.error,
-            ),
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
           ),
         ],
       ],
@@ -90,7 +88,8 @@ class OnboardingDropdownField<T> extends StatefulWidget {
       _OnboardingDropdownFieldState<T>();
 }
 
-class _OnboardingDropdownFieldState<T> extends State<OnboardingDropdownField<T>> {
+class _OnboardingDropdownFieldState<T>
+    extends State<OnboardingDropdownField<T>> {
   final MenuController _menuController = MenuController();
   final ScrollController _scrollController = ScrollController();
   bool _isOpen = false;
@@ -149,7 +148,11 @@ class _OnboardingDropdownFieldState<T> extends State<OnboardingDropdownField<T>>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          for (var index = 0; index < widget.items.length; index++)
+                          for (
+                            var index = 0;
+                            index < widget.items.length;
+                            index++
+                          )
                             _DropdownMenuTile<T>(
                               item: widget.items[index],
                               isLast: index == widget.items.length - 1,
@@ -221,9 +224,7 @@ class _OnboardingDropdownFieldState<T> extends State<OnboardingDropdownField<T>>
             const SizedBox(height: AppSpacing.spacingXS),
             Text(
               widget.errorText!,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.error,
-              ),
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
             ),
           ],
         ],
@@ -265,7 +266,7 @@ class _DropdownMenuTile<T> extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.spacingM,
-            vertical: AppSpacing.spacingM,
+            vertical: AppSpacing.authControlVerticalPadding,
           ),
           decoration: BoxDecoration(
             border: Border(
@@ -298,7 +299,7 @@ InputDecoration _baseDecoration({
     fillColor: AppColors.white,
     contentPadding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.spacingM,
-      vertical: AppSpacing.spacingM,
+      vertical: AppSpacing.authControlVerticalPadding,
     ),
     enabledBorder: const OutlineInputBorder(
       borderRadius: AppRadii.authBorderRadius,
@@ -306,10 +307,7 @@ InputDecoration _baseDecoration({
     ),
     focusedBorder: const OutlineInputBorder(
       borderRadius: AppRadii.authBorderRadius,
-      borderSide: BorderSide(
-        color: AppColors.accent,
-        width: 1.5,
-      ),
+      borderSide: BorderSide(color: AppColors.accent, width: 1.5),
     ),
     errorBorder: const OutlineInputBorder(
       borderRadius: AppRadii.authBorderRadius,
@@ -326,16 +324,13 @@ InputDecoration _baseDecoration({
             borderSide: BorderSide(color: AppColors.error),
           )
         : isFocused
-            ? const OutlineInputBorder(
-                borderRadius: AppRadii.authBorderRadius,
-                borderSide: BorderSide(
-                  color: AppColors.accent,
-                  width: 1.5,
-                ),
-              )
-            : const OutlineInputBorder(
-                borderRadius: AppRadii.authBorderRadius,
-                borderSide: BorderSide(color: AppColors.black20),
-              ),
+        ? const OutlineInputBorder(
+            borderRadius: AppRadii.authBorderRadius,
+            borderSide: BorderSide(color: AppColors.accent, width: 1.5),
+          )
+        : const OutlineInputBorder(
+            borderRadius: AppRadii.authBorderRadius,
+            borderSide: BorderSide(color: AppColors.black20),
+          ),
   );
 }

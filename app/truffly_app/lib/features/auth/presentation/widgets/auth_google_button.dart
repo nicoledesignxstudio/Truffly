@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_radii.dart';
+import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 
 class AuthGoogleButton extends StatelessWidget {
@@ -23,7 +24,7 @@ class AuthGoogleButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: enabled ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(55),
+          minimumSize: const Size.fromHeight(AppSpacing.authControlHeight),
           backgroundColor: AppColors.black,
           foregroundColor: AppColors.white,
           disabledBackgroundColor: AppColors.black,

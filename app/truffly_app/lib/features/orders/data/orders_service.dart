@@ -19,13 +19,20 @@ enum OrdersFailure {
 }
 
 final class OrdersServiceException implements Exception {
-  const OrdersServiceException(this.failure, {this.code});
+  const OrdersServiceException(
+    this.failure, {
+    this.code,
+    this.requestId,
+    this.debugMessage,
+  });
 
   final OrdersFailure failure;
   final String? code;
+  final String? requestId;
+  final String? debugMessage;
 }
 
-final class OrdersService {
+class OrdersService {
   OrdersService(this._supabaseClient)
     : _imageUrlResolver = TruffleImageUrlResolver(_supabaseClient);
 
@@ -126,9 +133,17 @@ final class OrdersService {
         final code = data is Map<String, dynamic>
             ? data['error'] as String?
             : null;
+        final requestId = data is Map<String, dynamic>
+            ? data['request_id'] as String?
+            : null;
+        final debugMessage = data is Map<String, dynamic>
+            ? data['debug_message'] as String?
+            : null;
         throw OrdersServiceException(
           _mapFunctionFailure(response.status),
           code: code,
+          requestId: requestId,
+          debugMessage: debugMessage,
         );
       }
     } on OrdersServiceException {
@@ -136,11 +151,20 @@ final class OrdersService {
     } on FunctionException catch (error) {
       final details = error.details;
       String? code;
+      String? requestId;
+      String? debugMessage;
       final status = error.status;
       if (details is Map<String, dynamic>) {
         code = details['error'] as String?;
+        requestId = details['request_id'] as String?;
+        debugMessage = details['debug_message'] as String?;
       }
-      throw OrdersServiceException(_mapFunctionFailure(status), code: code);
+      throw OrdersServiceException(
+        _mapFunctionFailure(status),
+        code: code,
+        requestId: requestId,
+        debugMessage: debugMessage,
+      );
     } on SocketException {
       throw const OrdersServiceException(OrdersFailure.network);
     } catch (error) {
@@ -166,6 +190,7 @@ final class OrdersService {
   OrdersFailure _mapFunctionFailure(int status) {
     return switch (status) {
       400 => OrdersFailure.validation,
+      409 => OrdersFailure.validation,
       401 => OrdersFailure.unauthenticated,
       403 => OrdersFailure.forbidden,
       404 => OrdersFailure.notFound,

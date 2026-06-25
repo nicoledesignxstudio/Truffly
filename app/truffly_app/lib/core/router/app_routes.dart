@@ -9,6 +9,7 @@ class AppRoutes {
   static const onboarding = '/onboarding';
   static const home = '/home';
   static const account = '/account';
+  static const notifications = '/notifications';
   static const accountOrders = '/account/orders';
   static const accountOrderDetail = '/account/orders/:orderId';
   static const accountFavorites = '/account/favorites';
@@ -16,14 +17,17 @@ class AppRoutes {
   static const accountShipping = '/account/shipping';
   static const accountShippingAdd = '/account/shipping/add';
   static const accountShippingEdit = '/account/shipping/:addressId/edit';
-  static const accountPayments = '/account/payments';
   static const accountBecomeSeller = '/account/become-seller';
+  static const accountSellerOnboarding = '/account/become-seller/onboarding';
   static const accountMyTruffles = '/account/my-truffles';
   static const accountGuide = '/account/guide';
   static const accountSupport = '/account/support';
   static const accountSettings = '/account/settings';
   static const accountPrivacyPolicy = '/account/settings/privacy-policy';
   static const accountTerms = '/account/settings/terms';
+  static const accountRefundAndCancellation =
+      '/account/settings/refund-and-cancellation';
+  static const accountLegalInformation = '/account/settings/legal-information';
   static const truffles = '/truffles';
   static const checkout = '/checkout/:truffleId';
   static const sellers = '/sellers';
@@ -32,9 +36,26 @@ class AppRoutes {
   static const sellerProfile = '/sellers/:sellerId';
   static const truffleGuide = '/guides/truffles/:truffleType';
 
-  static String verifyEmailWithPrefill(String email) {
+  static String signupWithPrefill(String email) {
     final normalizedEmail = email.trim();
-    final query = Uri(queryParameters: {'email': normalizedEmail}).query;
+    final query = Uri(
+      queryParameters: {
+        if (normalizedEmail.isNotEmpty) 'email': normalizedEmail,
+      },
+    ).query;
+    return query.isEmpty ? signup : '$signup?$query';
+  }
+
+  static String verifyEmailWithPrefill(
+    String email, {
+    bool manualFlow = false,
+  }) {
+    final normalizedEmail = email.trim();
+    final queryParameters = <String, String>{
+      'email': normalizedEmail,
+      if (manualFlow) 'source': 'email_change',
+    };
+    final query = Uri(queryParameters: queryParameters).query;
     return '$verifyEmail?$query';
   }
 

@@ -48,12 +48,14 @@ class _CreatePasswordScreenState extends ConsumerState<CreatePasswordScreen> {
 
     setState(() => _isSubmitting = true);
     final l10n = AppLocalizations.of(context)!;
-    final result = await ref.read(authNotifierProvider.notifier).updatePassword(
-          newPassword: _newPasswordController.text.trim(),
-        );
+    final result = await ref
+        .read(authNotifierProvider.notifier)
+        .updatePassword(newPassword: _newPasswordController.text.trim());
     if (!mounted) return;
 
     if (result.isSuccess) {
+      await ref.read(authNotifierProvider.notifier).signOut();
+      if (!mounted) return;
       setState(() => _isSubmitting = false);
       await AuthSuccessDialog.show(
         context: context,
@@ -87,9 +89,7 @@ class _CreatePasswordScreenState extends ConsumerState<CreatePasswordScreen> {
 
     return AuthScaffold(
       children: [
-        AuthBackButton(
-          onPressed: () => context.go(AppRoutes.login),
-        ),
+        AuthBackButton(onPressed: () => context.go(AppRoutes.login)),
         const SizedBox(height: AppSpacing.authGroupGap),
         AuthTextBlock(
           child: Text(
@@ -97,7 +97,7 @@ class _CreatePasswordScreenState extends ConsumerState<CreatePasswordScreen> {
             style: AppTextStyles.authScreenTitle,
           ),
         ),
-        const SizedBox(height: AppSpacing.authFieldGap),
+        const SizedBox(height: AppSpacing.authTitleSubtitleGap),
         AuthTextBlock(
           child: Text(
             l10n.authResetPasswordSubtitle,
@@ -115,7 +115,8 @@ class _CreatePasswordScreenState extends ConsumerState<CreatePasswordScreen> {
                 labelText: l10n.authResetPasswordNewPasswordLabel,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.newPassword],
-                validator: (value) => AuthValidators.validatePassword(value, l10n),
+                validator: (value) =>
+                    AuthValidators.validatePassword(value, l10n),
               ),
               const SizedBox(height: AppSpacing.authFieldGap),
               AuthPasswordField(
@@ -132,7 +133,7 @@ class _CreatePasswordScreenState extends ConsumerState<CreatePasswordScreen> {
               ),
               const SizedBox(height: AppSpacing.authFieldGap),
               AuthErrorMessage(message: _errorMessage),
-              const SizedBox(height: AppSpacing.authGroupGap),
+              const SizedBox(height: AppSpacing.authSubmitGap),
               AuthPrimaryButton(
                 label: l10n.authResetPasswordButton,
                 isLoading: _isSubmitting,

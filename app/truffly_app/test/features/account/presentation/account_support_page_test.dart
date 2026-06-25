@@ -21,9 +21,7 @@ class _FakeAccountSupportLauncher extends AccountSupportLauncher {
 
 Widget _buildApp(AccountSupportLauncher launcher) {
   return ProviderScope(
-    overrides: [
-      accountSupportLauncherProvider.overrideWithValue(launcher),
-    ],
+    overrides: [accountSupportLauncherProvider.overrideWithValue(launcher)],
     child: MaterialApp(
       locale: const Locale('en'),
       localizationsDelegates: const [
@@ -45,7 +43,15 @@ void main() {
 
     expect(find.text('Support'), findsOneWidget);
     expect(find.text('FAQ'), findsOneWidget);
-    expect(find.byKey(const Key('support_faq_orderFlow')), findsOneWidget);
+    expect(find.byKey(const Key('support_faq_buy_truffle')), findsOneWidget);
+
+    await tester.dragUntilVisible(
+      find.byKey(const Key('support_email_button')),
+      find.byType(Scrollable).first,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('support_email_button')), findsOneWidget);
     expect(find.text('support@truffly.com'), findsOneWidget);
   });
@@ -56,17 +62,17 @@ void main() {
 
     expect(
       find.text(
-        'Choose your truffle, confirm the order, and we will keep you updated until delivery.',
+        'Browse available truffles, open a listing, review the product details, select a shipping address, and complete payment securely through Truffly.',
       ),
       findsNothing,
     );
 
-    await tester.tap(find.byKey(const Key('support_faq_orderFlow')));
+    await tester.tap(find.byKey(const Key('support_faq_buy_truffle')));
     await tester.pumpAndSettle();
 
     expect(
       find.text(
-        'Choose your truffle, confirm the order, and we will keep you updated until delivery.',
+        'Browse available truffles, open a listing, review the product details, select a shipping address, and complete payment securely through Truffly.',
       ),
       findsOneWidget,
     );
@@ -78,6 +84,12 @@ void main() {
     await tester.pumpWidget(_buildApp(launcher));
     await tester.pumpAndSettle();
 
+    await tester.dragUntilVisible(
+      find.byKey(const Key('support_email_button')),
+      find.byType(Scrollable).first,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('support_email_button')));
     await tester.pumpAndSettle();
 
@@ -88,8 +100,14 @@ void main() {
     await tester.pumpWidget(_buildApp(_FakeAccountSupportLauncher(false)));
     await tester.pumpAndSettle();
 
+    await tester.dragUntilVisible(
+      find.byKey(const Key('support_email_button')),
+      find.byType(Scrollable).first,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('support_email_button')));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(
       find.text('Unable to open your email app right now.'),

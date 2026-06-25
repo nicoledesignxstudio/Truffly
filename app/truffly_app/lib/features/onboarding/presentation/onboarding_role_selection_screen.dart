@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
+import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_text_block.dart';
 import 'package:truffly_app/features/onboarding/application/onboarding_providers.dart';
@@ -31,7 +34,7 @@ class _OnboardingRoleSelectionScreenState
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenHorizontal,
-        AppSpacing.screenHorizontal,
+        10,
         AppSpacing.screenHorizontal,
         30,
       ),
@@ -42,7 +45,13 @@ class _OnboardingRoleSelectionScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: AuthBackButton(
+                  onPressed: () => context.go(AppRoutes.welcome),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.spacingL),
               AuthTextBlock(
                 alignment: Alignment.centerLeft,
                 maxWidth: 440,
@@ -146,10 +155,7 @@ class _RoleSelectionCard extends StatelessWidget {
                     ),
                   ),
                   if (isSelected)
-                    const Icon(
-                      Icons.check_circle,
-                      color: AppColors.accent,
-                    ),
+                    const Icon(Icons.check_circle, color: AppColors.accent),
                 ],
               ),
             ),

@@ -1,56 +1,60 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart';
-
 class Env {
   Env._();
 
-  static String get supabaseUrl => _normalizeSupabaseUrl(_require('SUPABASE_URL'));
-  static String get supabaseAnonKey => _require('SUPABASE_ANON_KEY');
-  static String get stripePublishableKey =>
-      _optional('STRIPE_PUBLISHABLE_KEY') ??
-      _require('STRIPE_PUBLISHABLE_KEY_TEST');
-  static String? get stripeMerchantIdentifier =>
-      _optional('STRIPE_MERCHANT_IDENTIFIER');
-  static String get stripeMerchantCountryCode =>
-      (_optional('STRIPE_MERCHANT_COUNTRY_CODE') ?? 'IT').toUpperCase();
+  static const String appEnvironment =
+      String.fromEnvironment('APP_ENV', defaultValue: 'local');
+
+  static const String _supabaseUrlRaw = String.fromEnvironment('SUPABASE_URL');
+  static const String _supabaseAnonKeyRaw =
+      String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  static String get supabaseUrl => validateSupabaseUrl(_supabaseUrlRaw);
+
+  static String get supabaseAnonKey =>
+      validateSupabaseAnonKey(_supabaseAnonKeyRaw);
 
   static void validate() {
-    _normalizeSupabaseUrl(_require('SUPABASE_URL'));
-    _require('SUPABASE_ANON_KEY');
-    stripePublishableKey;
+    validateSupabaseUrl(_supabaseUrlRaw);
+    validateSupabaseAnonKey(_supabaseAnonKeyRaw);
   }
 
-  static String _require(String key) {
-    final value = dotenv.env[key];
-    if (value == null || value.trim().isEmpty) {
-      throw StateError('Missing required environment variable: $key');
+  static String validateSupabaseUrl(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      throw StateError(
+        'Missing required dart-define: SUPABASE_URL. '
+        'Pass an origin such as https://project-ref.supabase.co.',
+      );
     }
-    return value;
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || !uri.hasScheme || uri.host.trim().isEmpty) {
+      throw StateError(
+        'Invalid SUPABASE_URL: $trimmed. '
+        'Use a valid Supabase project origin such as '
+        'https://project-ref.supabase.co.',
+      );
+    }
+
+    if (uri.query.isNotEmpty || uri.fragment.isNotEmpty) {
+      throw StateError(
+        'SUPABASE_URL must be the Supabase project origin, without a path. '
+        'Example: https://project-ref.supabase.co',
+      );
+    }
+
+    return uri.origin;
   }
 
-  static String? _optional(String key) {
-    final value = dotenv.env[key];
-    if (value == null || value.trim().isEmpty) {
-      return null;
-    }
-    return value;
-  }
-
-  static String _normalizeSupabaseUrl(String rawUrl) {
-    final uri = Uri.tryParse(rawUrl.trim());
-    if (uri == null) {
-      throw StateError('Invalid SUPABASE_URL: $rawUrl');
+  static String validateSupabaseAnonKey(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      throw StateError(
+        'Missing required dart-define: SUPABASE_ANON_KEY. '
+        'Use the public anon key for the client app.',
+      );
     }
 
-    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    final host = uri.host.trim().toLowerCase();
-    final shouldUseEmulatorLoopback =
-        isAndroid && (host == '127.0.0.1' || host == 'localhost');
-
-    if (!shouldUseEmulatorLoopback) {
-      return uri.toString();
-    }
-
-    return uri.replace(host: '10.0.2.2').toString();
+    return trimmed;
   }
 }

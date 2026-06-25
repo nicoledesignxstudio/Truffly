@@ -30,121 +30,127 @@ class SellerManagedTruffleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final contentPadding = AppSpacing.spacingXS;
+    final titleSize = 13.25;
+    final metaSize = 11.75;
+    final priceSize = 13.25;
+    final imageAspectRatio = 1.18;
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 300, maxHeight: 330),
-      child: Material(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.black10),
-              boxShadow: AppShadows.authField,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 55,
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: _CardImage(imageUrl: item.primaryImageUrl),
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.black10),
+            boxShadow: AppShadows.authField,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AspectRatio(
+                aspectRatio: imageAspectRatio,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: _CardImage(
+                        imageUrl: item.primaryImageUrl,
+                        fallbackAssetPath: item.type.guideAssetImagePath,
                       ),
-                      Positioned(
-                        top: AppSpacing.spacingS,
-                        left: AppSpacing.spacingS,
-                        child: TruffleQualityBadge(quality: item.quality),
-                      ),
-                      Positioned(
-                        right: AppSpacing.spacingS,
-                        bottom: AppSpacing.spacingS,
-                        child: _isActive
-                            ? DecoratedBox(
-                                decoration: const BoxDecoration(
-                                  color: AppColors.white,
-                                  borderRadius: AppRadii.circularBorderRadius,
-                                  boxShadow: AppShadows.authField,
-                                ),
-                                child: SizedBox(
-                                  height: 43,
-                                  width: 43,
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    onPressed: isDeletePending ? null : onDeleteTap,
-                                    icon: isDeletePending
-                                        ? const SizedBox(
-                                            width: 18,
-                                            height: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : const Icon(
-                                            Icons.delete_outline_rounded,
-                                            color: AppColors.error,
+                    ),
+                    Positioned(
+                      top: AppSpacing.spacingS,
+                      left: AppSpacing.spacingS,
+                      child: TruffleQualityBadge(quality: item.quality),
+                    ),
+                    Positioned(
+                      right: AppSpacing.spacingS,
+                      bottom: AppSpacing.spacingS,
+                      child: _isActive
+                          ? DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: AppRadii.circularBorderRadius,
+                                boxShadow: AppShadows.authField,
+                              ),
+                              child: SizedBox(
+                                height: 34,
+                                width: 34,
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: isDeletePending ? null : onDeleteTap,
+                                  icon: isDeletePending
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
                                           ),
-                                  ),
+                                        )
+                                      : const Icon(
+                                          Icons.delete_outline_rounded,
+                                          color: AppColors.error,
+                                        ),
                                 ),
-                              )
-                            : _StatusPill(status: item.status),
+                              ),
+                            )
+                          : _StatusPill(status: item.status),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(contentPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.type.localizedName(l10n),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.cardTitle.copyWith(
+                          fontSize: titleSize,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        item.type.latinName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.black80,
+                          fontSize: metaSize,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${formatEuro(item.priceTotal)} - ${formatWeightGrams(item.weightGrams)}',
+                        style: AppTextStyles.cardPrice.copyWith(
+                          fontSize: priceSize,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        '${formatShortDate(context, item.harvestDate)} - ${ItalianRegions.localizedLabel(l10n, item.region)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.black80,
+                          fontSize: metaSize,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 45,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.spacingM),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.type.localizedName(l10n),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.cardTitle.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.type.latinName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.black80,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '${formatEuro(item.priceTotal)} - ${formatWeightGrams(item.weightGrams)}',
-                          style: AppTextStyles.cardPrice.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${formatShortDate(context, item.harvestDate)} - ${ItalianRegions.localizedLabel(l10n, item.region)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.black80,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -212,44 +218,56 @@ class _StatusPill extends StatelessWidget {
 }
 
 class _CardImage extends StatelessWidget {
-  const _CardImage({required this.imageUrl});
+  const _CardImage({
+    required this.imageUrl,
+    required this.fallbackAssetPath,
+  });
 
   final String? imageUrl;
+  final String fallbackAssetPath;
 
   @override
   Widget build(BuildContext context) {
     if (imageUrl == null) {
-      return Container(
-        decoration: const BoxDecoration(
-          color: AppColors.softGrey,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-        ),
-        child: const Center(
-          child: Icon(
-            Icons.image_outlined,
-            color: AppColors.black50,
-            size: 30,
-          ),
-        ),
-      );
+      return _FallbackAssetImage(fallbackAssetPath: fallbackAssetPath);
     }
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-      child: Image.network(
-        imageUrl!,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: AppColors.softGrey,
-            child: const Center(
-              child: Icon(
-                Icons.broken_image_outlined,
-                color: AppColors.black50,
-              ),
-            ),
-          );
-        },
+      child: ColoredBox(
+        color: AppColors.softGrey,
+        child: Image.network(
+          imageUrl!,
+          fit: BoxFit.contain,
+          alignment: Alignment.center,
+          errorBuilder: (context, error, stackTrace) {
+            return _FallbackAssetImage(fallbackAssetPath: fallbackAssetPath);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _FallbackAssetImage extends StatelessWidget {
+  const _FallbackAssetImage({required this.fallbackAssetPath});
+
+  final String fallbackAssetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+      child: ColoredBox(
+        color: AppColors.softGrey,
+        child: Image.asset(
+          fallbackAssetPath,
+          fit: BoxFit.contain,
+          alignment: Alignment.center,
+          errorBuilder: (_, _, _) => const Center(
+            child: Icon(Icons.image_outlined, color: AppColors.black50),
+          ),
+        ),
       ),
     );
   }

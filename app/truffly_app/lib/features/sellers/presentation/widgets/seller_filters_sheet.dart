@@ -9,10 +9,7 @@ import 'package:truffly_app/features/sellers/domain/seller_listing_filters.dart'
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class SellerFiltersSheet extends StatefulWidget {
-  const SellerFiltersSheet({
-    super.key,
-    required this.initialFilters,
-  });
+  const SellerFiltersSheet({super.key, required this.initialFilters});
 
   final SellerListingFilters initialFilters;
 
@@ -36,33 +33,41 @@ class _SellerFiltersSheetState extends State<SellerFiltersSheet> {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.auth)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadii.auth),
+        ),
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.spacingM,
-            right: AppSpacing.spacingM,
-            top: AppSpacing.spacingM,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.spacingM,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.spacingM,
+              right: AppSpacing.spacingM,
+              top: AppSpacing.spacingS,
+              bottom:
+                  MediaQuery.of(context).viewInsets.bottom + AppSpacing.spacingM,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               Row(
                 children: [
                   IconButton(
                     onPressed: () {
                       setState(() {
                         _draft = SellerListingFilters.defaults().copyWith(
-                          selectedRegion: widget.initialFilters.selectedRegion,
+                          selectedRegion:
+                              widget.initialFilters.selectedRegion,
                         );
                       });
                     },
-                    icon: const Icon(Icons.refresh_rounded),
-                    color: AppColors.black80,
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: AppColors.black,
+                      size: 24,
+                    ),
                   ),
                   Expanded(
                     child: Text(
@@ -78,9 +83,9 @@ class _SellerFiltersSheetState extends State<SellerFiltersSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: AppSpacing.spacingS),
               _SectionTitle(title: l10n.sellerFilterRatingTitle),
-              _HorizontalChipList(
+              _HorizontalChipRow(
                 children: [
                   for (final option in SellerRatingFilter.values)
                     _StyledSheetChip(
@@ -94,9 +99,9 @@ class _SellerFiltersSheetState extends State<SellerFiltersSheet> {
                     ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingL),
+              const SizedBox(height: AppSpacing.spacingM),
               _SectionTitle(title: l10n.sellerFilterCompletedOrdersTitle),
-              _HorizontalChipList(
+              _HorizontalChipRow(
                 children: [
                   for (final option in SellerCompletedOrdersFilter.values)
                     _StyledSheetChip(
@@ -104,18 +109,21 @@ class _SellerFiltersSheetState extends State<SellerFiltersSheet> {
                       selected: _draft.completedOrders == option,
                       onTap: () {
                         setState(() {
-                          _draft = _draft.copyWith(completedOrders: option);
+                          _draft = _draft.copyWith(
+                            completedOrders: option,
+                          );
                         });
                       },
                     ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: AppSpacing.spacingM),
               AuthPrimaryButton(
                 label: l10n.truffleFiltersApply,
                 onPressed: () => Navigator.of(context).pop(_draft),
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -137,7 +145,8 @@ class _SellerFiltersSheetState extends State<SellerFiltersSheet> {
   ) {
     return switch (filter) {
       SellerCompletedOrdersFilter.any => l10n.truffleFilterAll,
-      SellerCompletedOrdersFilter.fivePlus => l10n.sellerFilterCompletedOrdersFivePlus,
+      SellerCompletedOrdersFilter.fivePlus =>
+        l10n.sellerFilterCompletedOrdersFivePlus,
       SellerCompletedOrdersFilter.twentyPlus =>
         l10n.sellerFilterCompletedOrdersTwentyPlus,
       SellerCompletedOrdersFilter.fiftyPlus =>
@@ -166,8 +175,8 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _HorizontalChipList extends StatelessWidget {
-  const _HorizontalChipList({required this.children});
+class _HorizontalChipRow extends StatelessWidget {
+  const _HorizontalChipRow({required this.children});
 
   final List<Widget> children;
 
@@ -202,10 +211,10 @@ class _StyledSheetChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: selected ? AppColors.accent : AppColors.white,
+        color: selected ? AppColors.black : AppColors.white,
         borderRadius: AppRadii.authBorderRadius,
         border: Border.all(
-          color: selected ? AppColors.accent : AppColors.black10,
+          color: selected ? AppColors.black : AppColors.black10,
         ),
         boxShadow: AppShadows.authField,
       ),
@@ -216,11 +225,13 @@ class _StyledSheetChip extends StatelessWidget {
           borderRadius: AppRadii.authBorderRadius,
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.spacingM + 2,
-              vertical: AppSpacing.spacingS,
+              horizontal: AppSpacing.spacingS,
+              vertical: AppSpacing.spacingXS,
             ),
             child: Text(
               label,
+              maxLines: 1,
+              softWrap: false,
               style: AppTextStyles.bodySmall.copyWith(
                 color: selected ? AppColors.white : AppColors.black80,
               ),

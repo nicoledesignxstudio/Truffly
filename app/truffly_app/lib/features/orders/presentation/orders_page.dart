@@ -9,12 +9,14 @@ import 'package:truffly_app/features/account/application/account_providers.dart'
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/orders/application/orders_providers.dart';
+import 'package:truffly_app/features/orders/data/orders_service.dart';
 import 'package:truffly_app/features/orders/domain/order_summary.dart';
 import 'package:truffly_app/features/orders/domain/orders_filter.dart';
 import 'package:truffly_app/features/orders/domain/orders_scope.dart';
 import 'package:truffly_app/features/orders/presentation/orders_text.dart';
 import 'package:truffly_app/features/orders/presentation/widgets/order_card.dart';
 import 'package:truffly_app/features/orders/presentation/widgets/order_filter_chip_group.dart';
+import 'package:truffly_app/l10n/app_localizations.dart';
 
 class OrdersPage extends ConsumerWidget {
   const OrdersPage({super.key});
@@ -110,7 +112,17 @@ class OrdersPage extends ConsumerWidget {
                         ) ...[
                           OrderCard(
                             key: ValueKey('order-card-${visible[index].id}'),
-                            order: visible[index],
+                            title: visible[index].type.localizedName(
+                              AppLocalizations.of(context)!,
+                            ),
+                            imageUrl: visible[index].primaryImageUrl,
+                            fallbackAssetPath:
+                                visible[index].type.guideAssetImagePath,
+                            status: visible[index].status,
+                            totalPrice: visible[index].totalPrice,
+                            weightGrams: visible[index].weightGrams,
+                            createdAt: visible[index].createdAt,
+                            shortReference: visible[index].shortReference(),
                             isSalesScope:
                                 isSeller && scope == OrdersScope.sales,
                             onTap: () {
@@ -128,11 +140,21 @@ class OrdersPage extends ConsumerWidget {
                     );
                   },
                   loading: () => const _LoadingState(),
-                  error: (_, _) => _ErrorState(
-                    onRetry: () {
-                      ref.invalidate(currentUserOrdersProvider);
-                    },
-                  ),
+                  error: (error, _) {
+                    if (error is OrdersServiceException &&
+                        error.failure == OrdersFailure.notFound) {
+                      return _EmptyState(
+                        filter: filter,
+                        isSalesScope: isSeller && scope == OrdersScope.sales,
+                      );
+                    }
+
+                    return _ErrorState(
+                      onRetry: () {
+                        ref.invalidate(currentUserOrdersProvider);
+                      },
+                    );
+                  },
                 ),
               ],
             ),

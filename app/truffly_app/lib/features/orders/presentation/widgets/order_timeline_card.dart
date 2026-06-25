@@ -25,7 +25,7 @@ class OrderTimelineCard extends StatelessWidget {
         trailing: const OrderStatusBadge(status: OrderStatus.cancelled),
         child: Text(
           orderStatusDescription(context, status, isSellerView: isSellerView),
-          style: AppTextStyles.bodyLarge.copyWith(
+          style: AppTextStyles.bodySmall.copyWith(
             color: AppColors.black80,
             fontWeight: FontWeight.w400,
           ),
@@ -48,16 +48,13 @@ class OrderTimelineCard extends StatelessWidget {
 
     return OrderSectionCard(
       title: timelineTitle(context),
-      trailing: OrderStatusBadge(
-        status: status,
-        sellerTone: isSellerView,
-      ),
+      trailing: OrderStatusBadge(status: status, sellerTone: isSellerView),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             orderStatusDescription(context, status, isSellerView: isSellerView),
-            style: AppTextStyles.bodyLarge.copyWith(
+            style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.w400,
               color: AppColors.black80,
             ),
@@ -94,8 +91,8 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lineColor = (isReached || isCurrent)
-        ? AppColors.accent
+    final lineColor = isReached || isCurrent
+        ? AppColors.black
         : AppColors.black20;
 
     return IntrinsicHeight(
@@ -103,34 +100,29 @@ class _TimelineRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 44,
+            width: 48,
             child: Column(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: isReached
-                        ? AppColors.accent
-                        : isCurrent
-                        ? const Color(0xFFFFEEE8)
+                    color: isReached || isCurrent
+                        ? AppColors.black
                         : AppColors.softGrey,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isReached
-                          ? AppColors.accent
-                          : isCurrent
-                          ? AppColors.accent
+                      color: isReached || isCurrent
+                          ? AppColors.black
                           : AppColors.black20,
+                      width: isCurrent ? 1.5 : 1,
                     ),
                   ),
                   child: Icon(
-                    isReached ? Icons.check_rounded : icon,
+                    isReached || isCurrent ? Icons.check_rounded : icon,
                     size: 20,
-                    color: isReached
+                    color: isReached || isCurrent
                         ? AppColors.white
-                        : isCurrent
-                        ? AppColors.accent
                         : AppColors.black50,
                   ),
                 ),
@@ -138,7 +130,7 @@ class _TimelineRow extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      margin: const EdgeInsets.symmetric(vertical: 3),
                       color: lineColor,
                     ),
                   ),
@@ -149,17 +141,36 @@ class _TimelineRow extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(
-                top: 7,
-                bottom: AppSpacing.spacingM,
+                top: 5,
+                bottom: AppSpacing.spacingS,
               ),
-              child: Text(
-                label,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: isCurrent || isReached
-                      ? AppColors.black
-                      : AppColors.black50,
-                  fontWeight: FontWeight.w400,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: isCurrent || isReached
+                          ? AppColors.black
+                          : AppColors.black50,
+                      fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    timelineStepStateLabel(
+                      context,
+                      isReached: isReached,
+                      isCurrent: isCurrent,
+                    ),
+                    style: AppTextStyles.micro.copyWith(
+                      color: isCurrent || isReached
+                          ? AppColors.black50
+                          : AppColors.black20,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

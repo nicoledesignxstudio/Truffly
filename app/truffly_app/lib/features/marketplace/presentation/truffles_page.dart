@@ -13,6 +13,8 @@ import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_butt
 import 'package:truffly_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:truffly_app/features/home/presentation/widgets/home_nav_bar.dart';
 import 'package:truffly_app/features/marketplace/application/marketplace_providers.dart';
+import 'package:truffly_app/features/marketplace/domain/truffle_listing_filters.dart';
+import 'package:truffly_app/features/marketplace/domain/truffle_listing_state.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/listing_filter_button.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_filters_sheet.dart';
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_listing_card.dart';
@@ -21,6 +23,7 @@ import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_li
 import 'package:truffly_app/features/marketplace/presentation/widgets/truffle_type_chips.dart';
 import 'package:truffly_app/features/truffle/application/publish_truffle_providers.dart';
 import 'package:truffly_app/features/truffle/application/truffle_providers.dart';
+import 'package:truffly_app/features/truffle/domain/italian_region.dart';
 import 'package:truffly_app/features/truffle/domain/seller_publish_gate_state.dart';
 import 'package:truffly_app/features/truffle/presentation/publish_truffle_page.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
@@ -63,13 +66,7 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
     final favoriteNotifier = ref.read(favoriteIdsNotifierProvider.notifier);
     final publishGateState = ref.watch(currentSellerPublishGateStateProvider);
     final sellerRegion = publishGateState.region;
-
-    if (_searchController.text != state.searchQuery) {
-      _searchController.value = _searchController.value.copyWith(
-        text: state.searchQuery,
-        selection: TextSelection.collapsed(offset: state.searchQuery.length),
-      );
-    }
+    final activeFilters = _buildActiveFilters(l10n, state);
 
     return Scaffold(
       bottomNavigationBar: const HomeNavBar(activeTab: HomeNavTab.truffles),
@@ -119,17 +116,22 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
                   Expanded(
                     child: AuthTextField(
                       controller: _searchController,
-                      labelText: l10n.truffleSearchHint.replaceFirst('Latin', 'latin'),
+                      labelText: l10n.truffleSearchHint,
                       prefixIcon: const Icon(Icons.search_rounded),
                       textInputAction: TextInputAction.search,
                       onFieldSubmitted: (_) {
-                        notifier.updateSearchQuery(_searchController.text.trim());
+                        notifier.updateSearchQuery(
+                          _searchController.text.trim(),
+                        );
                       },
                       onChanged: (value) {
                         _searchDebounce?.cancel();
-                        _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-                          notifier.updateSearchQuery(value.trim());
-                        });
+                        _searchDebounce = Timer(
+                          const Duration(milliseconds: 350),
+                          () {
+                            notifier.updateSearchQuery(value.trim());
+                          },
+                        );
                       },
                     ),
                   ),
@@ -139,12 +141,15 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
                       FocusScope.of(context).unfocus();
                       final draft = await showModalBottomSheet(
                         context: context,
-                        useSafeArea: true,
                         isScrollControlled: true,
+                        useSafeArea: true,
                         backgroundColor: Colors.transparent,
                         builder: (context) {
-                          return TruffleFiltersSheet(
-                            initialFilters: state.appliedFilters,
+                          return FractionallySizedBox(
+                            heightFactor: 0.75,
+                            child: TruffleFiltersSheet(
+                              initialFilters: state.appliedFilters,
+                            ),
                           );
                         },
                       );
@@ -155,14 +160,14 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingM),
+              const SizedBox(height: AppSpacing.spacingXS),
               if (publishGateState.isError) ...[
                 _PublishAccessErrorBanner(
                   message: l10n.publishTruffleAccessError,
                   retryLabel: l10n.truffleRetry,
                   onRetry: _retryPublishGateCheck,
                 ),
-                const SizedBox(height: AppSpacing.spacingM),
+                const SizedBox(height: AppSpacing.spacingXS),
               ],
               TruffleTypeChips(
                 selectedType: state.appliedFilters.selectedType,
@@ -170,6 +175,14 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
                   notifier.selectTypeChip(selectedType);
                 },
               ),
+              if (activeFilters.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.spacingXS),
+                Wrap(
+                  spacing: AppSpacing.spacingXS,
+                  runSpacing: AppSpacing.spacingXS,
+                  children: activeFilters,
+                ),
+              ],
               const SizedBox(height: AppSpacing.spacingM),
               if (state.isInitialLoading)
                 const TruffleListingSkeletonGrid()
@@ -186,16 +199,20 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
                     crossAxisCount: 2,
                     mainAxisSpacing: AppSpacing.spacingXS,
                     crossAxisSpacing: AppSpacing.spacingXS,
-                    childAspectRatio: 0.58,
+                    childAspectRatio: 0.68,
                   ),
                   itemBuilder: (context, index) {
                     final item = state.items[index];
                     return TruffleListingCard(
                       item: item,
                       isFavorite: favoriteState.ids.contains(item.id),
-                      isFavoritePending: favoriteState.pendingIds.contains(item.id),
-                      onTap: () => context.push(AppRoutes.truffleDetailPath(item.id)),
-                      onFavoriteTap: () => favoriteNotifier.toggleFavorite(item.id),
+                      isFavoritePending: favoriteState.pendingIds.contains(
+                        item.id,
+                      ),
+                      onTap: () =>
+                          context.push(AppRoutes.truffleDetailPath(item.id)),
+                      onFavoriteTap: () =>
+                          favoriteNotifier.toggleFavorite(item.id),
                     );
                   },
                 ),
@@ -246,9 +263,9 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
       case SellerPublishGateStatus.allowed:
         return FloatingActionButton(
           onPressed: () async {
-            final didPublish = await Navigator.of(context).push<bool>(
-              buildPublishTruffleRoute(initialRegion: sellerRegion),
-            );
+            final didPublish = await Navigator.of(
+              context,
+            ).push<bool>(buildPublishTruffleRoute(initialRegion: sellerRegion));
 
             if (!mounted || didPublish != true) return;
             ref.invalidate(currentSellerPublishAccessProvider);
@@ -272,6 +289,151 @@ class _TrufflesPageState extends ConsumerState<TrufflesPage> {
 
   void _retryPublishGateCheck() {
     ref.invalidate(currentSellerPublishAccessProvider);
+  }
+
+  List<Widget> _buildActiveFilters(
+    AppLocalizations l10n,
+    TruffleListingState state,
+  ) {
+    final notifier = ref.read(truffleListingNotifierProvider.notifier);
+    final filters = state.appliedFilters;
+    final widgets = <Widget>[];
+
+    if (state.searchQuery.isNotEmpty) {
+      widgets.add(
+        _ActiveFilterChip(
+          label: l10n.sellerActiveSearchFilter(state.searchQuery),
+          onRemoved: () {
+            _searchDebounce?.cancel();
+            _searchController.clear();
+            notifier.updateSearchQuery('');
+          },
+        ),
+      );
+    }
+
+    for (final quality in filters.qualities) {
+      widgets.add(
+        _ActiveFilterChip(
+          label: quality.choiceLabel(l10n),
+          onRemoved: () {
+            final next = Set.of(filters.qualities)..remove(quality);
+            notifier.applyFilters(filters.copyWith(qualities: next));
+          },
+        ),
+      );
+    }
+
+    if (filters.minPrice != TruffleListingFilterBounds.minPriceEuro ||
+        filters.maxPrice != TruffleListingFilterBounds.maxPriceEuro) {
+      widgets.add(
+        _ActiveFilterChip(
+          label: '${filters.minPrice.round()}-${filters.maxPrice.round()} €',
+          onRemoved: () {
+            notifier.applyFilters(
+              filters.copyWith(
+                minPrice: TruffleListingFilterBounds.minPriceEuro,
+                maxPrice: TruffleListingFilterBounds.maxPriceEuro,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    if (filters.minWeight != TruffleListingFilterBounds.minWeightGrams ||
+        filters.maxWeight != TruffleListingFilterBounds.maxWeightGrams) {
+      widgets.add(
+        _ActiveFilterChip(
+          label: '${filters.minWeight.round()}-${filters.maxWeight.round()} g',
+          onRemoved: () {
+            notifier.applyFilters(
+              filters.copyWith(
+                minWeight: TruffleListingFilterBounds.minWeightGrams,
+                maxWeight: TruffleListingFilterBounds.maxWeightGrams,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    if (filters.harvestDatePreset != HarvestDatePreset.all) {
+      final label = switch (filters.harvestDatePreset) {
+        HarvestDatePreset.today => l10n.truffleHarvestToday,
+        HarvestDatePreset.last2Days => l10n.truffleHarvestLast2Days,
+        HarvestDatePreset.last3Days => l10n.truffleHarvestLast3Days,
+        HarvestDatePreset.last5Days => l10n.truffleHarvestLast5Days,
+        HarvestDatePreset.all => '',
+      };
+      widgets.add(
+        _ActiveFilterChip(
+          label: label,
+          onRemoved: () => notifier.applyFilters(
+            filters.copyWith(harvestDatePreset: HarvestDatePreset.all),
+          ),
+        ),
+      );
+    }
+
+    for (final region in filters.regions) {
+      widgets.add(
+        _ActiveFilterChip(
+          label: ItalianRegions.localizedLabel(l10n, region),
+          onRemoved: () {
+            final next = Set.of(filters.regions)..remove(region);
+            notifier.applyFilters(filters.copyWith(regions: next));
+          },
+        ),
+      );
+    }
+
+    return widgets;
+  }
+}
+
+class _ActiveFilterChip extends StatelessWidget {
+  const _ActiveFilterChip({required this.label, required this.onRemoved});
+
+  final String label;
+  final VoidCallback onRemoved;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.black10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: AppSpacing.spacingS,
+          top: AppSpacing.spacingXS,
+          right: 4,
+          bottom: AppSpacing.spacingXS,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.black),
+            ),
+            const SizedBox(width: 4),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: onRemoved,
+                icon: const Icon(Icons.close_rounded, size: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -328,24 +490,16 @@ class _PublishAccessErrorBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              color: AppColors.error,
-            ),
+            const Icon(Icons.error_outline_rounded, color: AppColors.error),
             const SizedBox(width: AppSpacing.spacingS),
             Expanded(
               child: Text(
                 message,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.error,
-                ),
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
               ),
             ),
             const SizedBox(width: AppSpacing.spacingS),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(retryLabel),
-            ),
+            TextButton(onPressed: onRetry, child: Text(retryLabel)),
           ],
         ),
       ),

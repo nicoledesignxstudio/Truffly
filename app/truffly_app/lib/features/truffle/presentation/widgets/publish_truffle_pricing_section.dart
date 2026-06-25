@@ -66,7 +66,7 @@ class PublishTrufflePricingSection extends StatelessWidget {
           onChanged: onWeightChanged,
           errorText: weightErrorText,
         ),
-        const SizedBox(height: AppSpacing.spacingM),
+        const SizedBox(height: AppSpacing.spacingXS),
         AuthTextField(
           controller: totalPriceController,
           labelText: totalPriceLabel,
@@ -78,7 +78,7 @@ class PublishTrufflePricingSection extends StatelessWidget {
           onChanged: onTotalPriceChanged,
           errorText: totalPriceErrorText,
         ),
-        const SizedBox(height: AppSpacing.spacingM),
+        const SizedBox(height: AppSpacing.spacingXS),
         DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.softGrey,
@@ -104,12 +104,12 @@ class PublishTrufflePricingSection extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.spacingL),
+        const SizedBox(height: AppSpacing.spacingM),
         Text(
           shippingTitle,
           style: AppTextStyles.sectionTitle,
         ),
-        const SizedBox(height: AppSpacing.spacingS),
+        const SizedBox(height: AppSpacing.spacingXS),
         AuthTextField(
           controller: shippingItalyController,
           labelText: shippingItalyLabel,
@@ -121,7 +121,7 @@ class PublishTrufflePricingSection extends StatelessWidget {
           onChanged: onShippingItalyChanged,
           errorText: shippingItalyErrorText,
         ),
-        const SizedBox(height: AppSpacing.spacingM),
+        const SizedBox(height: AppSpacing.spacingXS),
         AuthTextField(
           controller: shippingAbroadController,
           labelText: shippingAbroadLabel,

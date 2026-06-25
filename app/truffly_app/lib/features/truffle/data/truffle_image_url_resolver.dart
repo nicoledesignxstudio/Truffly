@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:truffly_app/core/config/runtime_config.dart';
+import 'package:truffly_app/core/config/local_backend_url_resolver.dart';
 
 final class TruffleImageUrlResolver {
   TruffleImageUrlResolver(this._supabaseClient);
@@ -71,13 +72,13 @@ final class TruffleImageUrlResolver {
   }
 
   String _normalizeAbsoluteUrlHost(String value) {
-    final uri = Uri.tryParse(value);
-    if (uri == null) return value;
-    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    final host = uri.host.toLowerCase();
-    if (!isAndroid || (host != '127.0.0.1' && host != 'localhost')) {
+    try {
+      return LocalBackendUrlResolver.normalize(
+        value,
+        androidHostOverride: RuntimeConfig.androidDeviceHost,
+      );
+    } on StateError {
       return value;
     }
-    return uri.replace(host: '10.0.2.2').toString();
   }
 }

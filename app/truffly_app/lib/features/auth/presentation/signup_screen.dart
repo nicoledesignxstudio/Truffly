@@ -18,7 +18,12 @@ import 'package:truffly_app/features/auth/presentation/widgets/auth_text_field.d
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({
+    super.key,
+    this.prefilledEmail,
+  });
+
+  final String? prefilledEmail;
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -31,6 +36,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isSubmitting = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    final prefilledEmail = widget.prefilledEmail?.trim();
+    if (prefilledEmail != null && prefilledEmail.isNotEmpty) {
+      _emailController.text = prefilledEmail;
+    }
+  }
 
   @override
   void dispose() {
@@ -49,7 +63,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    final result = await ref.read(authNotifierProvider.notifier).signUp(
+    final result = await ref
+        .read(authNotifierProvider.notifier)
+        .signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -73,9 +89,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     return AuthScaffold(
       children: [
-        AuthBackButton(
-          onPressed: () => context.go(AppRoutes.welcome),
-        ),
+        AuthBackButton(onPressed: () => context.go(AppRoutes.welcome)),
         const SizedBox(height: AppSpacing.authGroupGap),
         AuthTextBlock(
           child: Text(
@@ -83,7 +97,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             style: AppTextStyles.authScreenTitle,
           ),
         ),
-        const SizedBox(height: AppSpacing.authFieldGap),
+        const SizedBox(height: AppSpacing.authTitleSubtitleGap),
         AuthTextBlock(
           child: Text(
             l10n.authSignupSubtitle,
@@ -107,7 +121,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     AutofillHints.email,
                   ],
                   prefixIcon: const Icon(Icons.mail_outline_rounded, size: 20),
-                  validator: (value) => AuthValidators.validateEmail(value, l10n),
+                  validator: (value) =>
+                      AuthValidators.validateEmail(value, l10n),
                 ),
                 const SizedBox(height: AppSpacing.authFieldGap),
                 AuthPasswordField(
@@ -133,7 +148,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 const SizedBox(height: AppSpacing.authFieldGap),
                 AuthErrorMessage(message: _errorMessage),
-                const SizedBox(height: AppSpacing.authGroupGap),
+                const SizedBox(height: AppSpacing.authSubmitGap),
                 AuthPrimaryButton(
                   label: l10n.authSignupButton,
                   isLoading: _isSubmitting,

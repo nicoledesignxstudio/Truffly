@@ -7,7 +7,6 @@ import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/account/application/shipping_addresses_notifier.dart';
 import 'package:truffly_app/features/account/domain/shipping_address.dart';
-import 'package:truffly_app/features/account/presentation/widgets/account_section_card.dart';
 import 'package:truffly_app/features/account/presentation/widgets/shipping_address_card.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
@@ -29,6 +28,7 @@ class ShippingAddressesPage extends ConsumerWidget {
         surfaceTintColor: AppColors.white,
         scrolledUnderElevation: 0,
         centerTitle: true,
+        titleSpacing: 0,
         leadingWidth: 66,
         leading: Padding(
           padding: const EdgeInsets.only(left: AppSpacing.spacingM),
@@ -44,6 +44,7 @@ class ShippingAddressesPage extends ConsumerWidget {
         ),
         title: Text(
           l10n.shippingAddressesTitle,
+          textAlign: TextAlign.center,
           style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
         ),
       ),
@@ -73,76 +74,62 @@ class ShippingAddressesPage extends ConsumerWidget {
         child: state.isLoading && state.items.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : state.errorMessage != null && state.items.isEmpty
-                ? _ShippingAddressesErrorState(
-                    message: _messageForState(l10n, state.errorMessage!),
-                    onRetry: notifier.load,
-                  )
-                : RefreshIndicator(
-                    onRefresh: notifier.load,
-                    child: state.items.isEmpty
-                        ? _ShippingAddressesEmptyState(
-                            onAddPressed: () => _openAddPage(context, notifier),
-                          )
-                        : ListView(
-                            padding: const EdgeInsets.fromLTRB(
-                              AppSpacing.spacingM,
-                              AppSpacing.spacingS,
-                              AppSpacing.spacingM,
-                              AppSpacing.spacingXXL,
+            ? _ShippingAddressesErrorState(
+                message: _messageForState(l10n, state.errorMessage!),
+                onRetry: notifier.load,
+              )
+            : RefreshIndicator(
+                onRefresh: notifier.load,
+                child: state.items.isEmpty
+                    ? _ShippingAddressesEmptyState(
+                        onAddPressed: () => _openAddPage(context, notifier),
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.spacingM,
+                          AppSpacing.spacingS,
+                          AppSpacing.spacingM,
+                          AppSpacing.spacingXXL,
+                        ),
+                        children: [
+                          Text(
+                            l10n.shippingAddressesSubtitle,
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.black80,
                             ),
-                            children: [
-                              Text(
-                                l10n.shippingAddressesSubtitle,
-                                style: AppTextStyles.bodyLarge.copyWith(
-                                  color: AppColors.black80,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.spacingM),
-                              AccountSectionCard(
-                                title: l10n.shippingAddressesSectionTitle,
-                                children: [
-                                  for (var index = 0;
-                                      index < state.items.length;
-                                      index++) ...[
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        AppSpacing.spacingS,
-                                        AppSpacing.spacingS,
-                                        AppSpacing.spacingS,
-                                        AppSpacing.spacingS,
-                                      ),
-                                      child: ShippingAddressCard(
-                                        key: Key(
-                                          'shipping_address_card_${state.items[index].id}',
-                                        ),
-                                        address: state.items[index],
-                                        onTap: () => _openEditPage(
-                                          context,
-                                          notifier,
-                                          state.items[index],
-                                        ),
-                                      ),
-                                    ),
-                                    if (index != state.items.length - 1)
-                                      const Divider(
-                                        height: 1,
-                                        color: AppColors.black10,
-                                      ),
-                                  ],
-                                ],
-                              ),
-                              if (state.errorMessage != null) ...[
-                                const SizedBox(height: AppSpacing.spacingM),
-                                Text(
-                                  _messageForState(l10n, state.errorMessage!),
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.error,
-                                  ),
-                                ),
-                              ],
-                            ],
                           ),
-                  ),
+                          const SizedBox(height: AppSpacing.spacingM),
+                          for (
+                            var index = 0;
+                            index < state.items.length;
+                            index++
+                          ) ...[
+                            ShippingAddressCard(
+                              key: Key(
+                                'shipping_address_card_${state.items[index].id}',
+                              ),
+                              address: state.items[index],
+                              onTap: () => _openEditPage(
+                                context,
+                                notifier,
+                                state.items[index],
+                              ),
+                            ),
+                            if (index != state.items.length - 1)
+                              const SizedBox(height: AppSpacing.spacingS),
+                          ],
+                          if (state.errorMessage != null) ...[
+                            const SizedBox(height: AppSpacing.spacingM),
+                            Text(
+                              _messageForState(l10n, state.errorMessage!),
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+              ),
       ),
     );
   }
@@ -213,9 +200,7 @@ class ShippingAddressesPage extends ConsumerWidget {
 }
 
 class _ShippingAddressesEmptyState extends StatelessWidget {
-  const _ShippingAddressesEmptyState({
-    required this.onAddPressed,
-  });
+  const _ShippingAddressesEmptyState({required this.onAddPressed});
 
   final VoidCallback onAddPressed;
 
@@ -227,18 +212,24 @@ class _ShippingAddressesEmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.spacingL),
       children: [
         const SizedBox(height: 72),
+        const Icon(
+          Icons.local_shipping_outlined,
+          size: 48,
+          color: AppColors.black50,
+        ),
+        const SizedBox(height: AppSpacing.spacingM),
         Text(
           l10n.shippingAddressesEmptyTitle,
           textAlign: TextAlign.center,
-          style: AppTextStyles.sectionTitle.copyWith(fontSize: 24),
+          style: AppTextStyles.sectionTitle.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: AppSpacing.spacingS),
         Text(
           l10n.shippingAddressesEmptySubtitle,
           textAlign: TextAlign.center,
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: AppColors.black80,
-          ),
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.black80),
         ),
         const SizedBox(height: AppSpacing.spacingL),
         AuthPrimaryButton(

@@ -7,6 +7,7 @@ import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/account/application/shipping_addresses_providers.dart';
 import 'package:truffly_app/features/account/domain/shipping_address.dart';
 import 'package:truffly_app/features/account/presentation/widgets/shipping_address_card.dart';
@@ -22,16 +23,15 @@ import 'package:truffly_app/features/truffle/domain/truffle_detail.dart';
 import 'package:truffly_app/features/truffle/presentation/widgets/truffle_ui_formatters.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
-final checkoutShippingAddressesProvider =
-    FutureProvider<List<ShippingAddress>>((ref) {
-      return ref.read(shippingAddressesServiceProvider).fetchAddresses();
-    });
+final checkoutShippingAddressesProvider = FutureProvider<List<ShippingAddress>>(
+  (ref) {
+    ref.watch(authNotifierProvider);
+    return ref.read(shippingAddressesServiceProvider).fetchAddresses();
+  },
+);
 
 class CheckoutPage extends ConsumerStatefulWidget {
-  const CheckoutPage({
-    super.key,
-    required this.truffleId,
-  });
+  const CheckoutPage({super.key, required this.truffleId});
 
   final String truffleId;
 
@@ -70,7 +70,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         ),
         title: Text(
           _isItalian ? 'Pagamento' : 'Payment',
-          style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
+          style: AppTextStyles.sectionTitle.copyWith(fontSize: 18),
         ),
       ),
       body: detailAsync.when(
@@ -80,7 +80,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             return _CheckoutLoadedBody(
               detail: detail,
               selectedAddress: selectedAddress,
-              hasAddresses: addresses.isNotEmpty,
               isItalian: _isItalian,
               isSubmitting: _isSubmitting,
               shippingCost: _shippingCost(detail, selectedAddress),
@@ -90,9 +89,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               onSubmit: selectedAddress == null
                   ? null
                   : () => _startCheckout(
-                        detail: detail,
-                        selectedAddress: selectedAddress,
-                      ),
+                      detail: detail,
+                      selectedAddress: selectedAddress,
+                    ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -108,7 +107,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           message: _isItalian
               ? 'Non riusciamo a caricare questo tartufo.'
               : 'We could not load this truffle.',
-          onRetry: () => ref.invalidate(truffleDetailProvider(widget.truffleId)),
+          onRetry: () =>
+              ref.invalidate(truffleDetailProvider(widget.truffleId)),
         ),
       ),
     );
@@ -133,10 +133,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     return addresses.first;
   }
 
-  double _shippingCost(
-    TruffleDetail detail,
-    ShippingAddress? selectedAddress,
-  ) {
+  double _shippingCost(TruffleDetail detail, ShippingAddress? selectedAddress) {
     final countryCode = selectedAddress?.countryCode.toUpperCase();
     if (countryCode == null || countryCode == 'IT') {
       return detail.shippingPriceItaly;
@@ -164,27 +161,50 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               children: [
                 Text(
                   _isItalian
-                      ? 'Scegli l\'indirizzo di spedizione'
-                      : 'Choose your shipping address',
+                      ? 'Scegli indirizzo di spedizione'
+                      : 'Choose shipping address',
                   style: AppTextStyles.sectionTitle.copyWith(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spacingM),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: addresses.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.spacingS),
-                    itemBuilder: (context, index) {
-                      final address = addresses[index];
-                      return ShippingAddressCard(
-                        address: address,
-                        onTap: () => Navigator.of(context).pop(address),
-                      );
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: addresses.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.spacingS),
+                  itemBuilder: (context, index) {
+                    final address = addresses[index];
+                    return ShippingAddressCard(
+                      address: address,
+                      onTap: () => Navigator.of(context).pop(address),
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.spacingM),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.black,
+                      foregroundColor: AppColors.white,
+                      minimumSize: const Size.fromHeight(
+                        AppSpacing.authControlHeight,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.spacingS,
+                      ),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _openAddAddressForm();
                     },
+                    child: Text(
+                      _isItalian ? 'Aggiungi indirizzo' : 'Add address',
+                      style: AppTextStyles.buttonText.copyWith(fontSize: 16),
+                    ),
                   ),
                 ),
               ],
@@ -225,10 +245,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       try {
         ref.invalidate(currentUserOrdersProvider);
         final orders = await ref.read(currentUserOrdersProvider.future);
-        final matches = orders
-            .where((order) => order.truffleId == truffleId)
-            .toList(growable: false)
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        final matches =
+            orders
+                .where((order) => order.truffleId == truffleId)
+                .toList(growable: false)
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         if (matches.isNotEmpty) {
           return matches.first;
         }
@@ -303,10 +324,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   hasOrder
                       ? (_isItalian ? 'Ordine confermato' : 'Order confirmed')
                       : (_isItalian
-                          ? 'Pagamento riuscito'
-                          : 'Payment successful'),
+                            ? 'Pagamento riuscito'
+                            : 'Payment successful'),
                   style: AppTextStyles.sectionTitle.copyWith(
-                    fontSize: 22,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -314,12 +335,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 Text(
                   hasOrder
                       ? (_isItalian
-                          ? 'Il tuo ordine è stato creato ed è pronto nella sezione Ordini.'
-                          : 'Your order is ready in the Orders section.')
+                            ? 'Il tuo ordine è stato creato ed è pronto nella sezione Ordini.'
+                            : 'Your order is ready in the Orders section.')
                       : (_isItalian
-                          ? 'Il pagamento è andato a buon fine. L\'ordine apparirà a breve nella sezione Ordini.'
-                          : 'Your payment went through. The order will appear in the Orders section shortly.'),
-                  style: AppTextStyles.bodyLarge,
+                            ? 'Il pagamento è andato a buon fine. L\'ordine apparirà a breve nella sezione Ordini.'
+                            : 'Your payment went through. The order will appear in the Orders section shortly.'),
+                  style: AppTextStyles.bodyLarge.copyWith(fontSize: 14),
                 ),
                 const SizedBox(height: AppSpacing.spacingL),
                 SizedBox(
@@ -335,9 +356,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         if (orderId == null) {
                           return;
                         }
-                        context.go(
-                          AppRoutes.accountOrderDetailPath(orderId),
-                        );
+                        context.go(AppRoutes.accountOrderDetailPath(orderId));
                       } else {
                         context.go(AppRoutes.accountOrders);
                       }
@@ -346,8 +365,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       hasOrder
                           ? (_isItalian ? 'Apri ordine' : 'Open order')
                           : (_isItalian
-                              ? 'Vai ai miei ordini'
-                              : 'Go to my orders'),
+                                ? 'Vai ai miei ordini'
+                                : 'Go to my orders'),
                     ),
                   ),
                 ),
@@ -372,7 +391,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     });
 
     try {
-      final result = await ref.read(checkoutPaymentServiceProvider).presentPaymentSheet(
+      final result = await ref
+          .read(checkoutPaymentServiceProvider)
+          .presentPaymentSheet(
             truffle: detail,
             shippingAddress: selectedAddress,
           );
@@ -392,9 +413,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           }
           _refreshPurchaseSurfaces(detail.id);
           if (finalizedOrderId != null && finalizedOrderId.isNotEmpty) {
-            context.go(
-              AppRoutes.accountOrderDetailPath(finalizedOrderId),
-            );
+            context.go(AppRoutes.accountOrderDetailPath(finalizedOrderId));
             return;
           }
           final confirmedOrder = await _waitForConfirmedOrder(detail.id);
@@ -402,9 +421,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             return;
           }
           if (confirmedOrder != null) {
-            context.go(
-              AppRoutes.accountOrderDetailPath(confirmedOrder.id),
-            );
+            context.go(AppRoutes.accountOrderDetailPath(confirmedOrder.id));
             return;
           }
           await _showPaymentOutcomeSheet(order: null);
@@ -413,30 +430,42 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           break;
         case CheckoutPaymentStatus.failure:
           final message = switch (result.failure ?? CheckoutFailure.unknown) {
-            CheckoutFailure.network => _isItalian
-                ? 'Il checkout non e raggiungibile in questo momento.'
-                : 'Checkout is temporarily unavailable.',
-            CheckoutFailure.unauthenticated => _isItalian
-                ? 'La sessione e scaduta. Accedi di nuovo.'
-                : 'Your session expired. Please sign in again.',
-            CheckoutFailure.forbidden => _isItalian
-                ? 'Questo acquisto non e consentito.'
-                : 'This purchase is not allowed.',
-            CheckoutFailure.notFound => _isItalian
-                ? 'Il tartufo non e piu disponibile.'
-                : 'This truffle is no longer available.',
-            CheckoutFailure.validation => _isItalian
-                ? 'Non siamo riusciti a preparare il pagamento.'
-                : 'We could not prepare the payment.',
-            CheckoutFailure.paymentCanceled => _isItalian
-                ? 'Pagamento annullato. Nessun addebito confermato.'
-                : 'Payment canceled. No charge was confirmed.',
-            CheckoutFailure.paymentFailed => _isItalian
-                ? 'Il pagamento non e andato a buon fine.'
-                : 'The payment could not be completed.',
-            CheckoutFailure.unknown => _isItalian
-                ? 'Non siamo riusciti a completare il checkout.'
-                : 'We could not complete the checkout.',
+            CheckoutFailure.network =>
+              _isItalian
+                  ? 'Il checkout non e raggiungibile in questo momento.'
+                  : 'Checkout is temporarily unavailable.',
+            CheckoutFailure.unauthenticated =>
+              _isItalian
+                  ? 'La sessione e scaduta. Accedi di nuovo.'
+                  : 'Your session expired. Please sign in again.',
+            CheckoutFailure.forbidden =>
+              _isItalian
+                  ? 'Questo acquisto non e consentito.'
+                  : 'This purchase is not allowed.',
+            CheckoutFailure.notFound =>
+              _isItalian
+                  ? 'Il tartufo non e piu disponibile.'
+                  : 'This truffle is no longer available.',
+            CheckoutFailure.sellerNotReady =>
+              _isItalian
+                  ? 'Il venditore deve completare Stripe prima di ricevere pagamenti.'
+                  : 'The seller must finish Stripe setup before receiving payments.',
+            CheckoutFailure.validation =>
+              _isItalian
+                  ? 'Non siamo riusciti a preparare il pagamento.'
+                  : 'We could not prepare the payment.',
+            CheckoutFailure.paymentCanceled =>
+              _isItalian
+                  ? 'Pagamento annullato. Nessun addebito confermato.'
+                  : 'Payment canceled. No charge was confirmed.',
+            CheckoutFailure.paymentFailed =>
+              _isItalian
+                  ? 'Il pagamento non e andato a buon fine.'
+                  : 'The payment could not be completed.',
+            CheckoutFailure.unknown =>
+              _isItalian
+                  ? 'Non siamo riusciti a completare il checkout.'
+                  : 'We could not complete the checkout.',
           };
 
           ScaffoldMessenger.of(
@@ -457,7 +486,6 @@ class _CheckoutLoadedBody extends StatelessWidget {
   const _CheckoutLoadedBody({
     required this.detail,
     required this.selectedAddress,
-    required this.hasAddresses,
     required this.isItalian,
     required this.isSubmitting,
     required this.shippingCost,
@@ -467,7 +495,6 @@ class _CheckoutLoadedBody extends StatelessWidget {
 
   final TruffleDetail detail;
   final ShippingAddress? selectedAddress;
-  final bool hasAddresses;
   final bool isItalian;
   final bool isSubmitting;
   final double shippingCost;
@@ -502,12 +529,11 @@ class _CheckoutLoadedBody extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.spacingS),
               _SimpleInfoCard(
-                title: isItalian
-                    ? 'Modalita di spedizione'
-                    : 'Shipping method',
+                title: isItalian ? 'Modalita di spedizione' : 'Shipping method',
                 trailing: Text(
                   formatEuro(shippingCost),
                   style: AppTextStyles.bodyLarge.copyWith(
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -524,19 +550,17 @@ class _CheckoutLoadedBody extends StatelessWidget {
                         isItalian
                             ? 'Consegna a casa in 48h'
                             : 'Home delivery in 48h',
-                        style: AppTextStyles.bodyLarge,
+                        style: AppTextStyles.bodyLarge.copyWith(fontSize: 14),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.spacingS),
-              _PaymentMethodCard(
-                isItalian: isItalian,
-              ),
-              const SizedBox(height: AppSpacing.spacingS),
+              const SizedBox(height: AppSpacing.spacingXS),
+              _PaymentMethodCard(isItalian: isItalian),
+              const SizedBox(height: AppSpacing.spacingXS),
               _GuaranteeCard(isItalian: isItalian),
-              const SizedBox(height: AppSpacing.spacingS),
+              const SizedBox(height: AppSpacing.spacingXS),
               _SimpleInfoCard(
                 title: isItalian ? 'Riepilogo del prezzo' : 'Price summary',
                 child: Column(
@@ -547,21 +571,12 @@ class _CheckoutLoadedBody extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.spacingXS),
                     _SummaryRow(
-                      label: isItalian
-                          ? 'Spedizione'
-                          : 'Shipping',
+                      label: isItalian ? 'Spedizione' : 'Shipping',
                       value: formatEuro(shippingCost),
                     ),
                   ],
                 ),
               ),
-              if (!hasAddresses) ...[
-                const SizedBox(height: AppSpacing.spacingS),
-                _MissingAddressCard(
-                  isItalian: isItalian,
-                  onAddAddress: onChooseAddress,
-                ),
-              ],
             ],
           ),
         ),
@@ -602,16 +617,14 @@ class _ProductCard extends StatelessWidget {
               child: ColoredBox(
                 color: const Color(0xFFE0E0E3),
                 child: imageUrl == null
-                    ? const Icon(
-                        Icons.image_outlined,
-                        color: AppColors.black50,
+                    ? _CheckoutFallbackImage(
+                        assetPath: detail.type.guideAssetImagePath,
                       )
                     : Image.network(
                         imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.broken_image_outlined,
-                          color: AppColors.black50,
+                        errorBuilder: (_, _, _) => _CheckoutFallbackImage(
+                          assetPath: detail.type.guideAssetImagePath,
                         ),
                       ),
               ),
@@ -644,7 +657,7 @@ class _ProductCard extends StatelessWidget {
                       Text(
                         formatEuro(detail.priceTotal),
                         style: AppTextStyles.sectionTitle.copyWith(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -652,6 +665,7 @@ class _ProductCard extends StatelessWidget {
                       Text(
                         '\u2022',
                         style: AppTextStyles.bodyLarge.copyWith(
+                          fontSize: 14,
                           color: AppColors.black80,
                           fontWeight: FontWeight.w500,
                         ),
@@ -660,6 +674,7 @@ class _ProductCard extends StatelessWidget {
                       Text(
                         formatWeightGrams(detail.weightGrams),
                         style: AppTextStyles.bodyLarge.copyWith(
+                          fontSize: 14,
                           color: AppColors.black80,
                           fontWeight: FontWeight.w500,
                         ),
@@ -672,6 +687,22 @@ class _ProductCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CheckoutFallbackImage extends StatelessWidget {
+  const _CheckoutFallbackImage({required this.assetPath});
+
+  final String assetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) =>
+          const Icon(Icons.image_outlined, color: AppColors.black50),
     );
   }
 }
@@ -694,9 +725,7 @@ class _AddressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _CardHeader(
-            title: isItalian
-                ? 'Indirizzo di spedizione'
-                : 'Shipping address',
+            title: isItalian ? 'Indirizzo di spedizione' : 'Shipping address',
             onPressed: onPressed,
           ),
           const SizedBox(height: AppSpacing.spacingXS),
@@ -705,7 +734,7 @@ class _AddressCard extends StatelessWidget {
               isItalian
                   ? 'Aggiungi un indirizzo per continuare.'
                   : 'Add a shipping address to continue.',
-              style: AppTextStyles.bodyLarge,
+              style: AppTextStyles.bodyLarge.copyWith(fontSize: 14),
             )
           else
             Builder(
@@ -717,13 +746,20 @@ class _AddressCard extends StatelessWidget {
                     Text(
                       address.fullName,
                       style: AppTextStyles.bodyLarge.copyWith(
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(address.street, style: AppTextStyles.bodyLarge),
+                    Text(
+                      address.street,
+                      style: AppTextStyles.bodyLarge.copyWith(fontSize: 14),
+                    ),
                     const SizedBox(height: 2),
-                    Text(address.cityLine, style: AppTextStyles.bodyLarge),
+                    Text(
+                      address.cityLine,
+                      style: AppTextStyles.bodyLarge.copyWith(fontSize: 14),
+                    ),
                   ],
                 );
               },
@@ -746,42 +782,22 @@ class _PaymentMethodCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isItalian ? 'Metodo di pagamento' : 'Payment method',
+            isItalian
+                ? 'Metodi di pagamento accettati'
+                : 'Accepted payment methods',
             style: AppTextStyles.sectionTitle.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: AppSpacing.spacingS),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _CardMethodBadge(),
-              const SizedBox(width: AppSpacing.spacingS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isItalian
-                          ? 'Carta e wallet supportati'
-                          : 'Card and supported wallets',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isItalian
-                          ? 'Il checkout mostra la carta e, quando disponibili, Apple Pay o Google Pay nel Payment Sheet di Stripe.'
-                          : 'Checkout shows card and, when available, Apple Pay or Google Pay in the Stripe Payment Sheet.',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.black80,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: const [
+              _PaymentMethodBadge(label: 'Card', icon: Icons.credit_card_rounded),
+              _PaymentMethodBadge(label: 'Apple Pay', icon: Icons.apple),
+              _PaymentMethodBadge(label: 'Google Pay', icon: Icons.payments_outlined),
             ],
           ),
         ],
@@ -799,7 +815,7 @@ class _GuaranteeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _LightCard(
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 34,
@@ -808,10 +824,12 @@ class _GuaranteeCard extends StatelessWidget {
               color: const Color(0xFFFFF1EA),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.verified_user_outlined,
-              color: AppColors.accent,
-              size: 18,
+            child: const Center(
+              child: Icon(
+                Icons.verified_user_outlined,
+                color: AppColors.accent,
+                size: 18,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.spacingS),
@@ -823,16 +841,18 @@ class _GuaranteeCard extends StatelessWidget {
                   isItalian
                       ? 'Pagamento sicuro con garanzia'
                       : 'Secure payment with protection',
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: AppTextStyles.sectionTitle.copyWith(
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spacingXS),
                 Text(
                   isItalian
-                      ? 'Il pagamento viene bloccato in modo sicuro e rilasciato al venditore solo dopo la conferma della ricezione del pacco.'
-                      : 'The payment is held securely and released to the seller only after delivery is confirmed.',
+                      ? 'Il pagamento viene gestito in modo sicuro e il payout al venditore parte solo dopo la conferma della ricezione del pacco.'
+                      : 'The payment is handled securely and the seller payout starts only after delivery is confirmed.',
                   style: AppTextStyles.bodySmall.copyWith(
+                    fontSize: 14,
                     color: AppColors.black80,
                   ),
                 ),
@@ -890,6 +910,7 @@ class _FooterCheckoutBar extends StatelessWidget {
                     child: Text(
                       isItalian ? 'Totale da pagare' : 'Total to pay',
                       style: AppTextStyles.bodyLarge.copyWith(
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -897,6 +918,7 @@ class _FooterCheckoutBar extends StatelessWidget {
                   Text(
                     totalLabel,
                     style: AppTextStyles.bodyLarge.copyWith(
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -909,7 +931,8 @@ class _FooterCheckoutBar extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.black,
                     foregroundColor: AppColors.white,
-                    minimumSize: const Size.fromHeight(56),
+                    minimumSize: const Size.fromHeight(48),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -924,19 +947,14 @@ class _FooterCheckoutBar extends StatelessWidget {
                             color: AppColors.white,
                           ),
                         )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const _MastercardMark(size: 18),
-                            const SizedBox(width: AppSpacing.spacingXS),
-                            Text(
-                              isItalian ? 'Paga' : 'Pay',
-                              style: AppTextStyles.buttonText.copyWith(
-                                fontSize: 20,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ],
+                      : Text(
+                          isItalian
+                              ? 'Procedi al pagamento'
+                              : 'Proceed to payment',
+                          style: AppTextStyles.buttonText.copyWith(
+                            fontSize: 16,
+                            color: AppColors.white,
+                          ),
                         ),
                 ),
               ),
@@ -956,6 +974,7 @@ class _FooterCheckoutBar extends StatelessWidget {
                           ? 'I dettagli del tuo pagamento sono crittografati e sicuri'
                           : 'Your payment details are encrypted and secure',
                       style: AppTextStyles.micro.copyWith(
+                        fontSize: 12,
                         color: AppColors.black50,
                       ),
                       textAlign: TextAlign.center,
@@ -1011,10 +1030,7 @@ class _SimpleInfoCard extends StatelessWidget {
 }
 
 class _CardHeader extends StatelessWidget {
-  const _CardHeader({
-    required this.title,
-    required this.onPressed,
-  });
+  const _CardHeader({required this.title, required this.onPressed});
 
   final String title;
   final VoidCallback onPressed;
@@ -1047,10 +1063,7 @@ class _CardHeader extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-  });
+  const _SummaryRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -1062,57 +1075,20 @@ class _SummaryRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.black80),
+            style: AppTextStyles.bodyLarge.copyWith(
+              fontSize: 14,
+              color: AppColors.black80,
+            ),
           ),
         ),
         Text(
           value,
           style: AppTextStyles.bodyLarge.copyWith(
+            fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MissingAddressCard extends StatelessWidget {
-  const _MissingAddressCard({
-    required this.isItalian,
-    required this.onAddAddress,
-  });
-
-  final bool isItalian;
-  final VoidCallback onAddAddress;
-
-  @override
-  Widget build(BuildContext context) {
-    return _LightCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isItalian
-                ? 'Aggiungi un indirizzo per continuare'
-                : 'Add a shipping address to continue',
-            style: AppTextStyles.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.spacingXS),
-          Text(
-            isItalian
-                ? 'Il backend crea il tentativo di pagamento usando l\'indirizzo selezionato.'
-                : 'The backend creates the payment attempt using the selected address.',
-            style: AppTextStyles.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.spacingM),
-          FilledButton(
-            onPressed: onAddAddress,
-            child: Text(isItalian ? 'Aggiungi indirizzo' : 'Add address'),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -1128,10 +1104,7 @@ class _LightCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
-        border: Border.all(
-          color: AppColors.black10,
-          width: 1.2,
-        ),
+        border: Border.all(color: AppColors.black10, width: 1.2),
         boxShadow: AppShadows.authField,
       ),
       child: Padding(
@@ -1142,59 +1115,38 @@ class _LightCard extends StatelessWidget {
   }
 }
 
-class _CardMethodBadge extends StatelessWidget {
-  const _CardMethodBadge();
+class _PaymentMethodBadge extends StatelessWidget {
+  const _PaymentMethodBadge({
+    required this.label,
+    required this.icon,
+  });
+
+  final String label;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 48,
-      height: 32,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F6),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(999),
         border: Border.all(color: AppColors.black10),
       ),
-      child: const Center(
-        child: _MastercardMark(size: 14),
-      ),
-    );
-  }
-}
-
-class _MastercardMark extends StatelessWidget {
-  const _MastercardMark({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size * 1.8,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Positioned(
-            left: 0,
-            child: Container(
-              width: size,
-              height: size,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEA001B),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            child: Container(
-              width: size,
-              height: size,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF9F1A),
-                shape: BoxShape.circle,
-              ),
+          Icon(icon, size: 15, color: AppColors.black),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
             ),
           ),
         ],
@@ -1204,10 +1156,7 @@ class _MastercardMark extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({
-    required this.message,
-    required this.onRetry,
-  });
+  const _ErrorView({required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;
@@ -1228,7 +1177,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: AppSpacing.spacingM),
             Text(
               message,
-              style: AppTextStyles.bodyLarge,
+              style: AppTextStyles.bodyLarge.copyWith(fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.spacingM),

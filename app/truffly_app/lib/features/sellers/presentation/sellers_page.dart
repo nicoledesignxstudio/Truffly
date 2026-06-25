@@ -57,13 +57,6 @@ class _SellersPageState extends ConsumerState<SellersPage> {
     final state = ref.watch(sellerListingNotifierProvider);
     final notifier = ref.read(sellerListingNotifierProvider.notifier);
 
-    if (_searchController.text != state.searchQuery) {
-      _searchController.value = _searchController.value.copyWith(
-        text: state.searchQuery,
-        selection: TextSelection.collapsed(offset: state.searchQuery.length),
-      );
-    }
-
     final activeFilters = _buildActiveFilters(l10n, state);
 
     return Scaffold(
@@ -115,13 +108,18 @@ class _SellersPageState extends ConsumerState<SellersPage> {
                       prefixIcon: const Icon(Icons.search_rounded),
                       textInputAction: TextInputAction.search,
                       onFieldSubmitted: (_) {
-                        notifier.updateSearchQuery(_searchController.text.trim());
+                        notifier.updateSearchQuery(
+                          _searchController.text.trim(),
+                        );
                       },
                       onChanged: (value) {
                         _searchDebounce?.cancel();
-                        _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-                          notifier.updateSearchQuery(value.trim());
-                        });
+                        _searchDebounce = Timer(
+                          const Duration(milliseconds: 350),
+                          () {
+                            notifier.updateSearchQuery(value.trim());
+                          },
+                        );
                       },
                     ),
                   ),
@@ -132,7 +130,6 @@ class _SellersPageState extends ConsumerState<SellersPage> {
                       final draft = await showModalBottomSheet(
                         context: context,
                         useSafeArea: true,
-                        isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (context) {
                           return SellerFiltersSheet(
@@ -147,7 +144,7 @@ class _SellersPageState extends ConsumerState<SellersPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.spacingM),
+              const SizedBox(height: AppSpacing.spacingXS),
               SellerRegionChips(
                 selectedRegion: state.appliedFilters.selectedRegion,
                 onSelected: (region) {
@@ -155,7 +152,7 @@ class _SellersPageState extends ConsumerState<SellersPage> {
                 },
               ),
               if (activeFilters.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.spacingM),
+                const SizedBox(height: AppSpacing.spacingXS),
                 Wrap(
                   spacing: AppSpacing.spacingXS,
                   runSpacing: AppSpacing.spacingXS,
@@ -175,28 +172,21 @@ class _SellersPageState extends ConsumerState<SellersPage> {
                   },
                 )
               else
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final cardWidth =
-                        (constraints.maxWidth - AppSpacing.spacingXS) / 2;
-
-                    return Wrap(
-                      spacing: AppSpacing.spacingXS,
-                      runSpacing: AppSpacing.spacingXS,
-                      children: [
-                        for (final item in state.items)
-                          SizedBox(
-                            width: cardWidth,
-                            child: SellerListingCard(
-                              item: item,
-                              onTap: () => context.push(
-                                AppRoutes.sellerProfilePath(item.id),
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
+                Column(
+                  children: [
+                    for (var index = 0; index < state.items.length; index++) ...[
+                      SellerListingCard(
+                        item: state.items[index],
+                        layout: SellerListingCardLayout.horizontal,
+                        onTap: () =>
+                            context.push(AppRoutes.sellerProfilePath(
+                          state.items[index].id,
+                        )),
+                      ),
+                      if (index != state.items.length - 1)
+                        const SizedBox(height: AppSpacing.spacingS),
+                    ],
+                  ],
                 ),
               if (state.isLoadingMore) ...[
                 const SizedBox(height: AppSpacing.spacingM),
@@ -222,6 +212,8 @@ class _SellersPageState extends ConsumerState<SellersPage> {
         _ActiveFilterChip(
           label: l10n.sellerActiveSearchFilter(state.searchQuery),
           onRemoved: () {
+            _searchDebounce?.cancel();
+            _searchController.clear();
             notifier.clearSearch();
           },
         ),
@@ -276,10 +268,7 @@ class _SellersPageState extends ConsumerState<SellersPage> {
 }
 
 class _ActiveFilterChip extends StatelessWidget {
-  const _ActiveFilterChip({
-    required this.label,
-    required this.onRemoved,
-  });
+  const _ActiveFilterChip({required this.label, required this.onRemoved});
 
   final String label;
   final VoidCallback onRemoved;
@@ -304,9 +293,7 @@ class _ActiveFilterChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.black,
-              ),
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.black),
             ),
             const SizedBox(width: 4),
             SizedBox(
@@ -315,10 +302,7 @@ class _ActiveFilterChip extends StatelessWidget {
               child: IconButton(
                 padding: EdgeInsets.zero,
                 onPressed: onRemoved,
-                icon: const Icon(
-                  Icons.close_rounded,
-                  size: 16,
-                ),
+                icon: const Icon(Icons.close_rounded, size: 16),
               ),
             ),
           ],

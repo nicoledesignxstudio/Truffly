@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "227895447148",
+    "project_id": "truffly-6368a",
+    "storage_bucket": "truffly-6368a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227895447148:android:c0df2a3af3cdd342cad249",
+        "android_client_info": {
+          "package_name": "com.truffly.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "227895447148-7h9qte1hikce0n6f3gh6m3e39g2vk11r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.truffly.app",
+            "certificate_hash": "ba9462c58d08431edf7cda54ab3862500681718b"
+          }
+        },
+        {
+          "client_id": "227895447148-d5ltgrlqs8su0cq0n0hudtg12fii16i0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.truffly.app",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "227895447148-0s61hit2ungk1910r97mnq2281ofj45e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-9On0TfrsKbFc951Zze_gfUpYYnWvNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "227895447148-0s61hit2ungk1910r97mnq2281ofj45e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "227895447148-7971m2bansd0o2l6n5rcdtsvmeac3drm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.truffly.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

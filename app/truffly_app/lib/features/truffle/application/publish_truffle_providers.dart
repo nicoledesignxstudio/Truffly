@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:truffly_app/core/providers/app_providers.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/truffle/data/publish_truffle_image_validation_service.dart';
 import 'package:truffly_app/features/truffle/data/publish_truffle_service.dart';
 import 'package:truffly_app/features/truffle/domain/seller_publish_access.dart';
@@ -16,6 +17,7 @@ final publishTruffleImageValidationServiceProvider =
 
 final currentSellerPublishAccessProvider =
     FutureProvider<SellerPublishAccess>((ref) {
+  ref.watch(authNotifierProvider);
   return ref.read(publishTruffleServiceProvider).getCurrentSellerPublishAccess();
 });
 

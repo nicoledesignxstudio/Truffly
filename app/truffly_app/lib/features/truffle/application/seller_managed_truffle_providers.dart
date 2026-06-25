@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:truffly_app/core/providers/app_providers.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/truffle/data/seller_managed_truffle_service.dart';
 import 'package:truffly_app/features/truffle/domain/seller_managed_truffle_item.dart';
 import 'package:truffly_app/features/truffle/domain/seller_managed_truffle_status.dart';
@@ -11,6 +12,7 @@ final sellerManagedTruffleServiceProvider =
 
 final sellerManagedTrufflesProvider =
     FutureProvider<List<SellerManagedTruffleItem>>((ref) {
+      ref.watch(authNotifierProvider);
       return ref.read(sellerManagedTruffleServiceProvider).fetchCurrentSellerTruffles();
     });
 

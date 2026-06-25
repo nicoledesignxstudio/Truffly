@@ -17,9 +17,6 @@ class TruffleGuidesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final localeCode = Localizations.localeOf(context).languageCode == 'en'
-        ? 'en'
-        : 'it';
     final guidesAsync = ref.watch(truffleGuidesListProvider);
 
     return Scaffold(
@@ -73,7 +70,6 @@ class TruffleGuidesPage extends ConsumerWidget {
                 final guide = guides[index];
                 return TruffleGuideListCard(
                   guide: guide,
-                  localeCode: localeCode,
                   imageAssetPath: guide.truffleType.guideAssetImagePath,
                   onTap: () => context.push(
                     AppRoutes.truffleGuidePath(guide.truffleType.dbValue),

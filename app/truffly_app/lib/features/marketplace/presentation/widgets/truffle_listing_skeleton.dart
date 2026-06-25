@@ -17,7 +17,7 @@ class TruffleListingSkeletonGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: AppSpacing.spacingXS,
         crossAxisSpacing: AppSpacing.spacingXS,
-        childAspectRatio: 0.66,
+        childAspectRatio: 0.7,
       ),
       itemBuilder: (context, index) => const _SkeletonCard(),
     );
@@ -89,7 +89,7 @@ class _SkeletonCardState extends State<_SkeletonCard>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  flex: 55,
+                  flex: 50,
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.softGrey,

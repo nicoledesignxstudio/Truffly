@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
+import 'package:truffly_app/core/providers/app_providers.dart';
 import 'package:truffly_app/features/account/application/account_providers.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/home/application/seasonal_highlight_provider.dart';
@@ -36,6 +38,16 @@ Widget _buildApp(List<Override> overrides) {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       home: const HomeScreen(),
+    ),
+  );
+}
+
+Override _fakeSupabaseOverride() {
+  return supabaseClientProvider.overrideWithValue(
+    sb.SupabaseClient(
+      'https://example.supabase.co',
+      'anon-key',
+      authOptions: const sb.AuthClientOptions(autoRefreshToken: false),
     ),
   );
 }
@@ -76,6 +88,7 @@ void main() {
   testWidgets('buyer sees seasonal section', (tester) async {
     await tester.pumpWidget(
       _buildApp([
+        _fakeSupabaseOverride(),
         currentUserAccountProfileProvider.overrideWith(
           (ref) async => _profile(role: 'buyer'),
         ),
@@ -92,6 +105,7 @@ void main() {
   testWidgets('seller does not see buyer seasonal section', (tester) async {
     await tester.pumpWidget(
       _buildApp([
+        _fakeSupabaseOverride(),
         currentUserAccountProfileProvider.overrideWith(
           (ref) async => _profile(role: 'seller'),
         ),
@@ -111,6 +125,7 @@ void main() {
     final completer = Completer<CurrentUserProfile>();
     await tester.pumpWidget(
       _buildApp([
+        _fakeSupabaseOverride(),
         currentUserAccountProfileProvider.overrideWith(
           (ref) => completer.future,
         ),
@@ -124,6 +139,7 @@ void main() {
   testWidgets('shows safe error fallback when profile fails', (tester) async {
     await tester.pumpWidget(
       _buildApp([
+        _fakeSupabaseOverride(),
         currentUserAccountProfileProvider.overrideWith(
           (ref) async => throw Exception('profile load failed'),
         ),

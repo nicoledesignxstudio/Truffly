@@ -111,7 +111,7 @@ class _SellerMyTrufflesPageState extends ConsumerState<SellerMyTrufflesPage> {
                   crossAxisCount: 2,
                   mainAxisSpacing: AppSpacing.spacingXS,
                   crossAxisSpacing: AppSpacing.spacingXS,
-                  childAspectRatio: 0.58,
+                  childAspectRatio: 0.7,
                 ),
                 itemBuilder: (context, index) {
                   final item = filteredItems[index];

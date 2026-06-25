@@ -4,18 +4,17 @@ import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/guides/domain/truffle_guide.dart';
+import 'package:truffly_app/l10n/app_localizations.dart';
 
 class TruffleGuideListCard extends StatelessWidget {
   const TruffleGuideListCard({
     super.key,
     required this.guide,
-    required this.localeCode,
     required this.imageAssetPath,
     required this.onTap,
   });
 
   final TruffleGuide guide;
-  final String localeCode;
   final String imageAssetPath;
   final VoidCallback onTap;
 
@@ -63,7 +62,7 @@ class TruffleGuideListCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          guide.titleForLocale(localeCode),
+                          guide.titleForLocale(AppLocalizations.of(context)!),
                           style: AppTextStyles.cardTitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

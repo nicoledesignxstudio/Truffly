@@ -32,7 +32,9 @@ final class SeasonalHighlightResponse {
 
     return SeasonalHighlightResponse(
       mode: SeasonalHighlightMode.fromValue(json['mode'] as String? ?? ''),
-      cards: rawCards.map(SeasonalHighlightCardItem.fromJson).toList(growable: false),
+      cards: rawCards
+          .map(SeasonalHighlightCardItem.fromJson)
+          .toList(growable: false),
       countdown: rawCountdown is Map<String, dynamic>
           ? SeasonalHighlightCountdown.fromJson(rawCountdown)
           : null,
@@ -61,7 +63,9 @@ final class SeasonalHighlightCardItem {
 
   factory SeasonalHighlightCardItem.fromJson(Map<String, dynamic> json) {
     return SeasonalHighlightCardItem(
-      truffleType: TruffleType.fromDbValue((json['truffle_type'] as String? ?? '').trim()),
+      truffleType: TruffleType.fromDbValue(
+        (json['truffle_type'] as String? ?? '').trim(),
+      ),
       priority: (json['priority'] as num?)?.toInt() ?? 0,
       title: (json['title'] as String? ?? '').trim(),
       subtitle: (json['subtitle'] as String? ?? '').trim(),
@@ -91,7 +95,9 @@ final class SeasonalHighlightCountdown {
 
   factory SeasonalHighlightCountdown.fromJson(Map<String, dynamic> json) {
     return SeasonalHighlightCountdown(
-      truffleType: TruffleType.fromDbValue((json['truffle_type'] as String? ?? '').trim()),
+      truffleType: TruffleType.fromDbValue(
+        (json['truffle_type'] as String? ?? '').trim(),
+      ),
       title: (json['title'] as String? ?? '').trim(),
       subtitle: (json['subtitle'] as String? ?? '').trim(),
       imageKey: (json['image_key'] as String?)?.trim(),

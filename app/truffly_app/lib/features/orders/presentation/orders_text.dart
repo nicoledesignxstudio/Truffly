@@ -52,16 +52,16 @@ String orderStatusDescription(
     OrderStatus.paid =>
       isSellerView
           ? (italian
-                ? "Hai ricevuto il pagamento in escrow. Spedisci entro 48 ore per mantenere l'ordine attivo."
-                : 'Payment is secured in escrow. Ship within 48 hours to keep the order active.')
+                ? "Il pagamento e stato confermato. Spedisci entro 48 ore per mantenere l'ordine attivo."
+                : 'Payment has been confirmed. Ship within 48 hours to keep the order active.')
           : (italian
                 ? 'Il pagamento e confermato. Il venditore sta preparando la spedizione.'
                 : 'Payment is confirmed. The seller is preparing shipment.'),
     OrderStatus.shipped =>
       isSellerView
           ? (italian
-                ? 'La spedizione e stata registrata. Il pagamento restera bloccato fino alla conferma di ricezione.'
-                : 'Shipment has been registered. Funds remain on hold until delivery is confirmed.')
+                ? 'La spedizione e stata registrata. Il payout partira dopo la conferma di ricezione.'
+                : 'Shipment has been registered. The payout starts after delivery is confirmed.')
           : (italian
                 ? 'Il tuo ordine e in viaggio. Controlla il tracking per seguire il pacco.'
                 : 'Your order is on the way. Check tracking to follow the package.'),
@@ -176,14 +176,22 @@ String boughtOnLabel(BuildContext context) {
   return isItalianOrders(context) ? 'Acquistato il' : 'Purchased on';
 }
 
-String shippingDetailsTitle(BuildContext context) {
-  return isItalianOrders(context) ? 'Dettagli spedizione' : 'Shipping details';
+String shippingAddressTitle(BuildContext context) {
+  return isItalianOrders(context)
+      ? 'Indirizzo di spedizione'
+      : 'Shipping address';
 }
 
 String trackPackageTitle(BuildContext context) {
   return isItalianOrders(context)
       ? 'Traccia il tuo pacco'
       : 'Track your parcel';
+}
+
+String trackingCodeCopiedMessage(BuildContext context) {
+  return isItalianOrders(context)
+      ? 'Codice tracking copiato.'
+      : 'Tracking code copied.';
 }
 
 String confirmReceiptLabel(BuildContext context) {
@@ -198,6 +206,24 @@ String cancelOrderLabel(BuildContext context) {
   return isItalianOrders(context) ? 'Annulla ordine' : 'Cancel order';
 }
 
+String cancelOrderDialogTitle(BuildContext context) {
+  return isItalianOrders(context) ? 'Annullare l\'ordine?' : 'Cancel order?';
+}
+
+String cancelOrderDialogMessage(BuildContext context) {
+  return isItalianOrders(context)
+      ? 'Il buyer riceverà automaticamente un rimborso Stripe e l\'ordine verrà segnato come annullato.'
+      : 'The buyer will be automatically refunded via Stripe and the order will be marked as cancelled.';
+}
+
+String cancelOrderDialogConfirmLabel(BuildContext context) {
+  return isItalianOrders(context) ? 'Annulla ordine' : 'Cancel order';
+}
+
+String cancelOrderDialogCancelLabel(BuildContext context) {
+  return isItalianOrders(context) ? 'Torna indietro' : 'Go back';
+}
+
 String shippingDeadlineTitle(BuildContext context) {
   return isItalianOrders(context) ? 'Limite spedizione' : 'Shipping deadline';
 }
@@ -206,6 +232,23 @@ String shippingDeadlineCopy(BuildContext context) {
   return isItalianOrders(context)
       ? "Spedisci entro 48 ore dall'acquisto. Se non viene registrata una spedizione in tempo, l'ordine puo essere annullato."
       : 'Ship within 48 hours from purchase. If shipping is not registered in time, the order may be cancelled.';
+}
+
+String shippingDeadlineHighlight(
+  BuildContext context,
+  DateTime purchasedAt,
+) {
+  final deadline = purchasedAt.toLocal().add(const Duration(hours: 48));
+  final localizations = MaterialLocalizations.of(context);
+  final date = localizations.formatMediumDate(deadline);
+  final time = localizations.formatTimeOfDay(
+    TimeOfDay.fromDateTime(deadline),
+    alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+  );
+
+  return isItalianOrders(context)
+      ? 'Da spedire entro $date alle $time'
+      : 'Ship by $date at $time';
 }
 
 String paymentStatusTitle(BuildContext context) {
@@ -217,20 +260,20 @@ String paymentStatusCopy(BuildContext context, OrderStatus status) {
   return switch (status) {
     OrderStatus.paid =>
       italian
-          ? 'Pagamento ricevuto e trattenuto in sicurezza fino alla spedizione.'
-          : 'Payment received and held securely until shipment.',
+          ? 'Pagamento confermato e gestito da Stripe fino alla spedizione.'
+          : 'Payment confirmed and handled by Stripe until shipment.',
     OrderStatus.shipped =>
       italian
-          ? 'Pagamento bloccato fino alla conferma di ricezione o al completamento.'
-          : 'Payment is held until delivery is confirmed or the order is completed.',
+          ? 'Il payout al seller partira dopo conferma di ricezione o completamento.'
+          : 'Seller payout starts after delivery is confirmed or the order is completed.',
     OrderStatus.completed =>
       italian
-          ? 'Pagamento confermato e sbloccato.'
-          : 'Payment confirmed and released.',
+          ? 'Ordine completato e payout gestito lato backend.'
+          : 'Order completed and payout handled server-side.',
     OrderStatus.cancelled =>
       italian
-          ? 'Ordine annullato. Il pagamento non verra rilasciato.'
-          : 'Order cancelled. Payment will not be released.',
+          ? 'Ordine annullato. Il rimborso viene gestito lato backend.'
+          : 'Order cancelled. Refund is handled server-side.',
   };
 }
 
@@ -272,8 +315,8 @@ String financialStatusCopy(
                 ? 'Il payout al seller e stato registrato.'
                 : 'Seller payout has been recorded.')
           : (italian
-                ? 'L ordine e completato e i fondi sono stati rilasciati al seller.'
-                : 'The order is complete and funds have been released to the seller.');
+                ? 'L ordine e completato e il payout al seller e stato registrato.'
+                : 'The order is complete and the seller payout has been recorded.');
     }
     if (payoutStatus == 'failed') {
       return italian
@@ -318,6 +361,21 @@ String timelineStepShipped(BuildContext context) {
 
 String timelineStepCompleted(BuildContext context) {
   return isItalianOrders(context) ? 'Completato' : 'Completed';
+}
+
+String timelineStepStateLabel(
+  BuildContext context, {
+  required bool isReached,
+  required bool isCurrent,
+}) {
+  final italian = isItalianOrders(context);
+  if (isCurrent) {
+    return italian ? 'In corso' : 'In progress';
+  }
+  if (isReached) {
+    return italian ? 'Completato' : 'Done';
+  }
+  return italian ? 'In attesa' : 'Pending';
 }
 
 String trackingCodeLabel(BuildContext context) {

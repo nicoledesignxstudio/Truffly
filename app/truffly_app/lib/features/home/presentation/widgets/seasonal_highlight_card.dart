@@ -10,16 +10,20 @@ class SeasonalHighlightCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.badgeLabel,
+    required this.imageAssetPath,
     this.footnote,
   });
 
   final String title;
   final String subtitle;
   final String badgeLabel;
+  final String imageAssetPath;
   final String? footnote;
 
   @override
   Widget build(BuildContext context) {
+    final formattedTitle = _sentenceCase(title);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -33,17 +37,22 @@ class SeasonalHighlightCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              flex: 64,
+              flex: 66,
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.spacingM),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.spacingS,
+                  AppSpacing.spacingS,
+                  AppSpacing.spacingXS,
+                  AppSpacing.spacingS,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.spacingS,
-                        vertical: AppSpacing.spacingXXS,
+                        vertical: AppSpacing.spacingXXS + 1,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.white,
@@ -57,53 +66,69 @@ class SeasonalHighlightCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const Spacer(),
-                    Text(
-                      title,
-                      style: AppTextStyles.sectionTitle.copyWith(
-                        color: AppColors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(height: 2),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          formattedTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.cardTitle.copyWith(
+                            color: AppColors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                    ),
-                    const SizedBox(height: AppSpacing.spacingXXS),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.white.withValues(alpha: 0.8),
-                        fontSize: 14,
-                        height: 1.35,
-                      ),
-                    ),
-                    if (footnote != null && footnote!.trim().isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.spacingS),
-                      Text(
-                        footnote!,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.white.withValues(alpha: 0.9),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: AppSpacing.spacingXXS),
+                        Text(
+                          subtitle,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                    ],
+                        if (footnote != null && footnote!.trim().isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.spacingS),
+                          Text(
+                            footnote!,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.9),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ),
             ),
             Expanded(
-              flex: 36,
-              child: const _SeasonalImage(),
+              flex: 34,
+              child: _SeasonalImage(assetPath: imageAssetPath),
             ),
           ],
         ),
       ),
     );
   }
+
+  String _sentenceCase(String value) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized.isEmpty) return normalized;
+    return normalized[0].toUpperCase() + normalized.substring(1);
+  }
 }
 
 class _SeasonalImage extends StatelessWidget {
-  const _SeasonalImage();
+  const _SeasonalImage({required this.assetPath});
+
+  final String assetPath;
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +136,12 @@ class _SeasonalImage extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Image.asset(
-          'assets/images/auth/welcome_screen.webp',
+          assetPath,
           fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => const ColoredBox(
+            color: AppColors.softGrey,
+            child: Icon(Icons.image_outlined, color: AppColors.black50),
+          ),
         ),
         DecoratedBox(
           decoration: BoxDecoration(

@@ -3,6 +3,8 @@ import 'package:truffly_app/features/onboarding/domain/onboarding_path.dart';
 enum OnboardingNotificationPermissionStatus {
   notRequested,
   granted,
+  provisional,
+  notDetermined,
   denied,
 }
 

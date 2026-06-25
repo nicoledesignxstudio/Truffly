@@ -8,16 +8,11 @@ class SellerListingSkeletonList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: 6,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: AppSpacing.spacingXS,
-        crossAxisSpacing: AppSpacing.spacingXS,
-        childAspectRatio: 0.62,
-      ),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.spacingS),
       itemBuilder: (context, index) => const _SkeletonCard(),
     );
   }
@@ -87,38 +82,54 @@ class _SkeletonCardState extends State<_SkeletonCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  flex: 56,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.softGrey,
-                      borderRadius: BorderRadius.circular(10),
+                Row(
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: AppColors.softGrey,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.spacingM),
-                Expanded(
-                  flex: 44,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(height: 16, color: AppColors.softGrey),
-                      const SizedBox(height: AppSpacing.spacingXS),
-                      Container(height: 14, width: 100, color: AppColors.softGrey),
-                      const SizedBox(height: AppSpacing.spacingS),
-                      Row(
+                    const SizedBox(width: AppSpacing.spacingM),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Container(height: 34, color: AppColors.softGrey),
+                          Container(
+                            height: 15,
+                            width: double.infinity,
+                            color: AppColors.softGrey,
                           ),
-                          const SizedBox(width: AppSpacing.spacingXS),
-                          Expanded(
-                            child: Container(height: 34, color: AppColors.softGrey),
+                          const SizedBox(height: AppSpacing.spacingXS),
+                          Container(
+                            height: 13,
+                            width: 100,
+                            color: AppColors.softGrey,
+                          ),
+                          const SizedBox(height: AppSpacing.spacingS),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 34,
+                                  color: AppColors.softGrey,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.spacingXS),
+                              Expanded(
+                                child: Container(
+                                  height: 34,
+                                  color: AppColors.softGrey,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),

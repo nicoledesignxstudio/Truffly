@@ -28,16 +28,21 @@
   "authErrorTimeout": "Request timeout. Please try again.",
   "authErrorUnknown": "Something went wrong. Please try again.",
   "authErrorEmailAlreadyUsed": "This email is already in use.",
+  "authErrorEmailResendRateLimited": "You requested too many verification emails. Wait a few minutes and try again.",
+  "authErrorEmailDeliveryRestricted": "We cannot send the verification email to this address. Check the email you entered or configure custom SMTP.",
+  "authPasswordResetRateLimitedError": "You requested too many reset links. Wait a few minutes and try again.",
+  "authPasswordResetDeliveryRestrictedError": "We cannot send the reset email to this address. Check the email you entered or configure custom SMTP.",
   "authErrorLoginFallback": "Unable to sign in. Please try again.",
   "authErrorSignupFallback": "Unable to create your account. Please try again.",
   "authVerifyEmailTitle": "Verify your email",
   "authVerifyEmailSubtitle": "We\u2019ve sent a verification link to your email address. Please confirm it to continue.",
   "authVerifyEmailCurrentEmail": "Email",
   "authVerifyEmailRecheckButton": "I verified my email",
+  "authVerifyEmailWrongEmailCta": "I entered the wrong email",
   "authVerifyEmailNotYetVerified": "Your email is not verified yet.",
   "authVerifyEmailSessionExpired": "Your session expired. Please sign in again.",
   "authVerifyEmailResendButton": "Resend email",
-  "authVerifyEmailResendSuccess": "Verification email sent again.",
+  "authVerifyEmailResendSuccess": "We sent you a new verification email. Check your inbox.",
   "authVerifyEmailMissingEmail": "Unable to find your email for resend.",
   "authVerifyEmailAutoContinueHint": "After clicking the link in your email, the app will continue automatically.",
   "authVerifyEmailSignOutButton": "Sign out",
@@ -45,7 +50,7 @@
   "authForgotPasswordTitle": "Reset password",
   "authForgotPasswordSubtitle": "Enter your email and we\u2019ll send you a link to reset your password.",
   "authForgotPasswordButton": "Send reset link",
-  "authForgotPasswordSuccess": "If the email exists, a reset link has been sent.",
+  "authForgotPasswordSuccess": "Check your email: we sent you a link to reset your password.",
   "authForgotPasswordErrorFallback": "Unable to send reset email. Please try again.",
   "authForgotPasswordBackToLogin": "Back to login",
   "authResetPasswordTitle": "Reset password",
@@ -59,12 +64,17 @@
   "authResetPasswordSuccessTitle": "Password updated",
   "authResetPasswordSuccessMessage": "Your password has been successfully updated.",
   "authResetPasswordSuccessButton": "Back to login",
-  "authWelcomeTitleLeading": "Buy and sell",
-  "authWelcomeTitleAccent": "premium truffles",
-  "authWelcomeSubtitle": "Join a trusted marketplace built around\nquality, transparency, and real reviews.",
-  "authWelcomeCreateAccountButton": "Create account",
-  "authWelcomeGoogleButton": "Continue with Google",
+  "authWelcomeTitle": "Bring the authentic taste of truffles home",
+  "authWelcomeSubtitle": "The first marketplace dedicated to fresh truffles",
+  "authWelcomeCreateAccountButton": "Sign up to Truffly",
   "authWelcomeLoginButton": "I already have an account",
+  "authWelcomeFooterInfo": "About Truffly: Our platform",
+  "welcomeFreshTrufflesHome": "Fresh truffles at your door",
+  "welcomeRealFreshTruffle": "Real fresh truffle",
+  "welcomeDiscoverNewFlavors": "Discover new flavors",
+  "welcomeVerifiedHunters": "Verified truffle hunters",
+  "welcomeSelectedQuality": "Selected quality",
+  "welcomeProtectedPurchases": "Protected purchases",
   "onboardingNameTitle": "Tell us your name",
   "onboardingNameSubtitle": "This will be used to complete your onboarding profile details.",
   "onboardingFirstNameLabel": "First name",
@@ -106,7 +116,7 @@
   "onboardingRegionVeneto": "Veneto",
   "onboardingBuyerLocationRegionHelper": "Region is only required for buyers in Italy.",
   "onboardingSellerRegionTitle": "Select your region",
-  "onboardingSellerRegionSubtitle": "Seller country is treated as Italy in this onboarding flow, so only region is required here.",
+  "onboardingSellerRegionSubtitle": "At the moment, only truffle hunters residing in Italy can sell on Truffly. By continuing, you confirm that you reside in Italy.",
   "onboardingSellerDocumentsTitle": "Upload your seller documents",
   "onboardingSellerDocumentsSubtitle": "Select the required documents locally. Nothing is uploaded during onboarding until the final submit step.",
   "onboardingTesserinoNumberLabel": "Tesserino number",
@@ -130,44 +140,51 @@
   "onboardingDocumentGalleryUnavailableError": "Gallery unavailable.",
   "onboardingDocumentPickerUnavailableError": "Unable to select an image right now.",
   "onboardingSellerDocumentsLocalOnlyHelper": "Files stay local on this device for now. Upload happens only at final submit.",
-  "onboardingNotificationsTitle": "Stay updated with notifications",
-  "onboardingNotificationsSubtitle": "Notifications help you follow the most important moments of your Truffly experience.",
-  "onboardingNotificationsBenefitOrderUpdates": "Order updates from purchase to completion.",
-  "onboardingNotificationsBenefitShippingUpdates": "Shipping and delivery updates for active orders.",
-  "onboardingNotificationsBenefitSellerApproval": "Seller approval updates if you apply to sell on Truffly.",
-  "onboardingNotificationsBenefitPayments": "Payment and payout related updates when relevant.",
-  "onboardingNotificationsEnableButton": "Enable Notifications",
-  "onboardingNotificationsContinueWithoutButton": "Continue Without Notifications",
+  "onboardingNotificationsBuyerTitle": "Enable notifications",
+  "onboardingNotificationsBuyerSubtitle": "Receive updates about your orders, shipments, and favorite truffles.",
+  "onboardingNotificationsBuyerBenefit1": "Order confirmations and shipping updates.",
+  "onboardingNotificationsBuyerBenefit2": "Delivery and tracking notifications.",
+  "onboardingNotificationsBuyerBenefit3": "New truffles matching your interests.",
+  "onboardingNotificationsSellerTitle": "Never miss a sale",
+  "onboardingNotificationsSellerSubtitle": "Enable notifications to stay updated on orders, shipments, payments, and seller activity.",
+  "onboardingNotificationsSellerBenefit1": "Instant notifications for new orders.",
+  "onboardingNotificationsSellerBenefit2": "Shipping reminders for active orders.",
+  "onboardingNotificationsSellerBenefit3": "Payment and payout updates.",
+  "onboardingNotificationsEnableButton": "Enable notifications",
+  "onboardingNotificationsContinueWithoutButton": "Not now",
   "onboardingNotificationsFooter": "You can always manage notifications later in settings.",
   "onboardingNotificationsStatusIdle": "Notifications are not enabled yet.",
   "onboardingNotificationsStatusPending": "Permission request in progress.",
   "onboardingNotificationsStatusGranted": "Notifications enabled successfully.",
+  "onboardingNotificationsStatusProvisional": "Notifications are provisionally enabled on iOS.",
+  "onboardingNotificationsStatusNotDetermined": "Notification permission has not been decided yet.",
   "onboardingNotificationsStatusDenied": "Permission denied. You can continue and enable notifications later in settings.",
   "onboardingNotificationsStatusSkipped": "You chose to continue without notifications for now.",
   "onboardingNotificationsPermissionError": "Unable to request notification permission right now. You can continue and try again later.",
-  "onboardingWelcomeBuyerTitle": "Welcome to Truffly",
+  "onboardingWelcomeBuyerTitle": "Your truffle journey starts here",
   "onboardingWelcomeBuyerSubtitle": "Your buyer onboarding is complete.",
-  "onboardingWelcomeBuyerMessage": "You are ready to start exploring premium truffles, trusted sellers, and secure purchases in the app.",
-  "onboardingWelcomeSellerTitle": "Your Truffly profile is ready",
-  "onboardingWelcomeSellerSubtitle": "You are ready to complete seller onboarding.",
-  "onboardingWelcomeSellerMessage": "Enter the app to continue with your account. We will keep the seller review flow separate from approval and update you as it progresses.",
+  "onboardingWelcomeBuyerMessage": "Discover freshly harvested truffles, meet passionate hunters, and experience the authentic world of truffles.",
+  "onboardingWelcomeBuyerReadyLabel": "You're ready",
+  "onboardingWelcomeSellerTitle": "Application submitted",
+  "onboardingWelcomeSellerSubtitle": "Your seller request is under review.",
+  "onboardingWelcomeSellerMessage": "Your seller request has been successfully submitted and is now under review.\nYou’ll receive a notification as your application status progresses.",
   "onboardingWelcomeDefaultTitle": "Welcome to Truffly",
   "onboardingWelcomeDefaultSubtitle": "You are almost ready to enter the app.",
   "onboardingWelcomeDefaultMessage": "Review your onboarding details and continue when you are ready.",
-  "onboardingBuyerInfo1Title": "Fresh truffles, selected for quality",
-  "onboardingBuyerInfo1Description": "Truffly is built for people who want access to premium truffles with a simple mobile experience focused on freshness, origin, and product quality.",
-  "onboardingBuyerInfo2Title": "Secure purchases with escrow logic",
-  "onboardingBuyerInfo2Description": "Payments are designed to follow a protected order flow. Truffly keeps the purchase experience clear and secure while the order moves from payment to shipment to completion.",
-  "onboardingBuyerInfo3Title": "Verified sellers and trust signals",
-  "onboardingBuyerInfo3Description": "Buyers can explore a marketplace built around verified sellers, transparent profiles, reviews, and a stronger sense of trust across the community.",
-  "onboardingSellerInfo1Title": "Sell your truffles to a focused market",
-  "onboardingSellerInfo1Description": "Truffly helps truffle hunters reach buyers through a dedicated mobile marketplace designed around quality, trust, and clear order management.",
-  "onboardingSellerInfo2Title": "A clear commission model",
-  "onboardingSellerInfo2Description": "Truffly applies a 10% commission on completed sales. The goal is to keep seller economics simple and predictable from the beginning.",
-  "onboardingSellerInfo3Title": "Shipping timing matters",
-  "onboardingSellerInfo3Description": "Orders follow strict timing expectations. Sellers are expected to ship quickly, and the current MVP flow is built around a 48-hour shipping rule.",
-  "onboardingSellerInfo4Title": "Approval, escrow, and payout expectations",
-  "onboardingSellerInfo4Description": "Seller onboarding includes review and approval steps. Payments and payouts follow a structured flow, and Stripe-related setup happens only after approval.",
+  "onboardingBuyerInfo1Title": "The true taste of fresh truffles",
+  "onboardingBuyerInfo1Description": "Discover the taste and aroma of freshly harvested truffles, shipped directly from truffle hunters.",
+  "onboardingBuyerInfo2Title": "Verified hunters, real reviews",
+  "onboardingBuyerInfo2Description": "Buy with confidence from verified truffle hunters and discover authentic reviews shared by other buyers.",
+  "onboardingBuyerInfo3Title": "We've got the security covered",
+  "onboardingBuyerInfo3Description": "With Truffly, your payment remains protected until your order reaches its destination.",
+  "onboardingSellerInfo1Title": "Give your truffles the value they deserve",
+  "onboardingSellerInfo1Description": "Sell directly to a community of truffle enthusiasts, without intermediaries. Set your own price and reach buyers ready to purchase.",
+  "onboardingSellerInfo2Title": "No upfront costs",
+  "onboardingSellerInfo2Description": "No registration fees and no upfront costs. We retain a 10% commission only on completed sales.",
+  "onboardingSellerInfo3Title": "A marketplace built around freshness",
+  "onboardingSellerInfo3Description": "To preserve quality and freshness, listings remain active for 5 days and orders must be shipped within 2 business days of the sale.",
+  "onboardingSellerInfo4Title": "A verified community",
+  "onboardingSellerInfo4Description": "To sell on Truffly, you'll need to verify your identity and truffle license. Payments are transferred through Stripe after the buyer confirms delivery.",
   "onboardingFlowTitleBuyer": "Buyer onboarding",
   "onboardingFlowTitleSeller": "Seller onboarding",
   "onboardingFlowTitleDefault": "Onboarding",
@@ -218,8 +235,8 @@
   "onboardingCountrySpain": "Spain",
   "onboardingCountryUnitedKingdom": "United Kingdom",
   "onboardingCountryUnitedStates": "United States",
-  "onboardingRoleSelectionTitle": "How would you like to use Truffly",
-  "onboardingRoleSelectionSubtitle": "Choose how you want to get started.\nYou can always change this later.",
+  "onboardingRoleSelectionTitle": "How would you like to use Truffly?",
+  "onboardingRoleSelectionSubtitle": "Buy fresh truffles from the best truffle hunters or start selling yours directly to the community.",
   "onboardingRoleSelectionBuyerTitle": "Buy truffles",
   "onboardingRoleSelectionBuyerDescription": "See the 7-step buyer onboarding flow.",
   "onboardingRoleSelectionSellerTitle": "Sell truffles",
@@ -235,12 +252,12 @@
   "truffleDetailTitle": "Truffle detail",
   "truffleDetailError": "Unable to load this truffle right now.",
   "truffleDetailPricePerKg": "Price per kg",
-  "truffleSearchHint": "Search by name or Latin name",
+  "truffleSearchHint": "What are you looking for?",
   "truffleSearchApply": "Search",
   "truffleLoadError": "Unable to load truffles right now. Please try again.",
   "truffleRetry": "Retry",
-  "truffleEmptyTitle": "No products match your search",
-  "truffleEmptySubtitle": "Try changing filters or check again later.",
+  "truffleEmptyTitle": "No matching products",
+  "truffleEmptySubtitle": "Try changing filters\nor check again later.",
   "truffleFiltersTitle": "Filters",
   "truffleFiltersReset": "Reset",
   "truffleFiltersApply": "Apply filters",
@@ -263,9 +280,9 @@
   "truffleTypeUncinatum": "Uncinato",
   "truffleTypeBorchii": "Bianchetto",
   "truffleTypeBrumale": "Brumale",
-  "truffleTypeMacrosporum": "Smooth Black Truffle",
-  "truffleTypeBrumaleMoschatum": "Musky Brumal Truffle",
-  "truffleTypeMesentericum": "Mesenteric Truffle",
+  "truffleTypeMacrosporum": "Smooth Black",
+  "truffleTypeBrumaleMoschatum": "Musky Brumal",
+  "truffleTypeMesentericum": "Mesenteric",
   "homeTitle": "Home",
   "homeGreetingPrefix": "Hello",
   "homeLoadError": "Unable to load the home screen right now.",
@@ -363,6 +380,25 @@
       }
     }
   },
+  "sellerProfileInfoTab": "Info",
+  "sellerProfileReviewsTab": "Reviews",
+  "sellerProfileTrufflesTab": "Truffles",
+  "sellerProfileRatingStarsLabel": "Rating",
+  "sellerProfileOrdersLabel": "Orders",
+  "sellerProfileActiveTrufflesLabel": "Active truffles",
+  "sellerProfileBioFallback": "This seller has not added a description yet.",
+  "sellerProfileJoinedPlatformLabel": "Joined the platform",
+  "sellerProfileSummaryTitle": "Seller summary",
+  "sellerProfileJoinedLabel": "Joined",
+  "sellerProfileRegionLabel": "Region",
+  "sellerProfileUnavailable": "Unavailable",
+  "sellerProfileRecentReviewsTitle": "Recent reviews",
+  "sellerProfileReadAll": "Read all",
+  "sellerProfileNoReviews": "No reviews for this seller yet.",
+  "sellerProfileActiveTrufflesTitle": "Active truffles",
+  "sellerProfileNoActiveTruffles": "This seller has no active truffles right now.",
+  "sellerProfileUnableToLoadReviews": "Unable to load reviews right now.",
+  "sellerProfileLoadError": "Unable to load this seller profile right now.",
   "accountDetailsTitle": "Account details",
   "accountDetailsSubtitle": "Keep your account information up to date. Email changes require a new verification step.",
   "accountDetailsSaveCta": "Save changes",
@@ -377,14 +413,25 @@
   "accountDetailsChangeEmailCta": "Change email",
   "accountDetailsSaveNewEmailCta": "Save new email",
   "accountDetailsCancelEmailChangeCta": "Cancel",
-  "accountDetailsPhotoHelper": "You can update the seller avatar from camera or gallery. If you remove the current photo, the profile falls back to initials.",
-  "accountDetailsPhotoPendingHelper": "You selected a new photo locally. The final upload connection will be added in the next step without polluting the current data model.",
+  "accountDetailsPhotoHelper": "You can update your profile photo from camera or gallery. The new image uploads right away after selection.",
+  "accountDetailsPhotoUploadPending": "Uploading profile photo...",
+  "accountDetailsPhotoUploadSuccess": "Profile photo updated successfully.",
+  "accountDetailsPhotoRemoveSuccess": "Profile photo removed.",
+  "accountDetailsPhotoPickerUnavailable": "Unable to pick an image right now.",
+  "accountDetailsPhotoPermissionDeniedError": "Permission denied. Allow access to your photos and try again.",
+  "accountDetailsPhotoCameraUnavailableError": "Camera unavailable right now.",
+  "accountDetailsPhotoGalleryUnavailableError": "Gallery unavailable right now.",
+  "accountDetailsPhotoFileNotFoundError": "The selected file could not be found.",
+  "accountDetailsPhotoTooLargeError": "The selected image must be 5 MB or smaller.",
+  "accountDetailsPhotoUnsupportedFormatError": "Use a JPG, PNG, or WebP image.",
+  "accountDetailsPhotoInvalidFileError": "The selected image could not be read.",
+  "accountDetailsPhotoUploadFailedError": "Unable to upload the profile photo right now. Please try again.",
+  "accountDetailsPhotoDeleteFailedError": "Unable to remove the profile photo right now. Please try again.",
   "accountDetailsChangePhotoCta": "Change photo",
   "accountDetailsRemovePhotoCta": "Remove photo",
   "accountDetailsTakePhotoOption": "Take photo",
   "accountDetailsChooseFromGalleryOption": "Choose from gallery",
   "accountDetailsPhotoSourceCancelOption": "Cancel",
-  "accountDetailsPhotoUploadPending": "The new photo is ready as a local preview. We will connect the final upload in the next technical step.",
   "accountDetailsSellerCountryLockedHelper": "Seller accounts stay linked to Italy according to the current domain rules.",
   "accountDetailsRegionHiddenHelper": "Region is only required when the selected country is Italy. Saving with another country will clear the region.",
   "accountDetailsRequiredFieldError": "This field is required.",
@@ -394,9 +441,9 @@
   "accountDetailsLoadError": "Unable to load your account details right now.",
   "accountDetailsSaveError": "Unable to save your account details right now. Please try again.",
   "accountDetailsSaveSuccess": "Account details updated successfully.",
-  "accountDetailsEmailVerificationSent": "We sent a verification link to your new email address. Verify your email to continue.",
-  "shippingAddressesTitle": "Shipping addresses",
-  "shippingAddressesSubtitle": "Choose which address to keep ready for checkout and update it whenever your delivery details change.",
+  "accountDetailsEmailVerificationSent": "Check both your current and new email addresses and confirm both links to complete the change.",
+  "shippingAddressesTitle": "Shipping",
+  "shippingAddressesSubtitle": "Add and manage shipping addresses for your orders.",
   "shippingAddressesSectionTitle": "Saved addresses",
   "shippingAddressesAddCta": "Add address",
   "shippingAddressesEmptyTitle": "No saved addresses",
@@ -492,7 +539,9 @@
   "publishTruffleValidationImageProcessingFailed": "Unable to prepare this image for upload.",
   "publishTruffleImagePickerUnavailable": "Unable to pick an image right now.",
   "publishTruffleSubmitUnauthenticated": "Your session expired. Sign in again before publishing.",
-  "publishTruffleSubmitNotAllowed": "Only approved sellers with Stripe onboarding completed can publish truffles.",
+  "publishTruffleSubmitNotAllowed": "You cannot publish this truffle right now.",
+  "publishTruffleSubmitStripeVerificationPending": "Stripe is still verifying your account. You can manage verification directly in Stripe.",
+  "publishTruffleSubmitStripeOnboardingRequired": "Complete Stripe registration to publish this truffle.",
   "publishTruffleSubmitInProgress": "A publish request for this truffle is already in progress. Please wait a few seconds and try again.",
   "publishTruffleSubmitValidation": "Some product data is invalid. Review the form and try again.",
   "publishTruffleSubmitInvalidImage": "One or more selected images are invalid. Review them and try again.",
@@ -532,20 +581,68 @@
   "accountLanguageItalian": "Italiano",
   "accountLanguageEnglish": "English",
   "accountSupportTitle": "Support",
-  "accountSupportIntro": "Find quick answers about orders, shipping, and delivery support.",
-  "accountSupportFaqSection": "FAQ",
-  "accountSupportFaqOrderFlowQuestion": "How does an order work on Truffly?",
-  "accountSupportFaqOrderFlowAnswer": "Choose your truffle, confirm the order, and we will keep you updated until delivery.",
-  "accountSupportFaqShippingTimingQuestion": "When is the truffle shipped?",
-  "accountSupportFaqShippingTimingAnswer": "Fresh truffles are prepared and shipped as quickly as possible after order confirmation.",
-  "accountSupportFaqOrderTrackingQuestion": "How can I follow my order status?",
-  "accountSupportFaqOrderTrackingAnswer": "You can check the latest order status from the My orders section in your account.",
-  "accountSupportFaqCancellationQuestion": "Can I cancel an order?",
-  "accountSupportFaqCancellationAnswer": "If you need to cancel an order, contact support as soon as possible and we will review the request.",
-  "accountSupportFaqDeliveryIssueQuestion": "What happens if there is a delivery problem?",
-  "accountSupportFaqDeliveryIssueAnswer": "Write to support with your order details and we will help you resolve the issue quickly.",
-  "accountSupportFaqContactQuestion": "How can I contact support?",
-  "accountSupportFaqContactAnswer": "Use the email below to contact the Truffly team directly.",
+  "accountSupportIntro": "Find quick answers about buying, selling, payments, shipping, and your account.",
+  "accountSupportFaqBuyingOrdersSection": "Buying & Orders",
+  "accountSupportFaqBuyTruffleQuestion": "How do I buy a truffle?",
+  "accountSupportFaqBuyTruffleAnswer": "Browse available truffles, open a listing, review the product details, select a shipping address, and complete payment securely through Truffly.",
+  "accountSupportFaqTrackOrderQuestion": "How can I track my order?",
+  "accountSupportFaqTrackOrderAnswer": "Once the seller ships your order and provides a tracking number, it will appear on the Order Details page.",
+  "accountSupportFaqAfterOrderQuestion": "What happens after I place an order?",
+  "accountSupportFaqAfterOrderAnswer": "After payment, the seller has up to 48 hours to ship the truffles and provide tracking information. You will receive updates through the app and, if enabled, push notifications.",
+  "accountSupportFaqSellerDoesNotShipQuestion": "What happens if the seller does not ship?",
+  "accountSupportFaqSellerDoesNotShipAnswer": "If the seller does not provide tracking information within the required timeframe, the order may be automatically cancelled and refunded.",
+  "accountSupportFaqConfirmDeliveryQuestion": "How do I confirm delivery?",
+  "accountSupportFaqConfirmDeliveryAnswer": "When your order arrives, open the Order Details page and tap \"Confirm Delivery\". This confirms that the order was received successfully.",
+  "accountSupportFaqTrufflesQualitySection": "Truffles & Quality",
+  "accountSupportFaqTrufflesFreshQuestion": "Are the truffles fresh?",
+  "accountSupportFaqTrufflesFreshAnswer": "Yes. Sellers are required to publish freshly harvested truffles and provide the harvest date for each listing.",
+  "accountSupportFaqQualityGradesQuestion": "What do the quality grades mean?",
+  "accountSupportFaqQualityGradesAnswer": "Quality grades help describe the appearance and condition of the truffles. First Quality generally includes the most regular and visually appealing truffles, while lower grades may have cosmetic imperfections but remain suitable for consumption.",
+  "accountSupportFaqStoreTrufflesQuestion": "How should I store fresh truffles?",
+  "accountSupportFaqStoreTrufflesAnswer": "Fresh truffles should be stored in the refrigerator in a sealed container with absorbent paper. Replace the paper daily and consume the truffles as soon as possible for the best experience.",
+  "accountSupportFaqDamagedOrderQuestion": "What should I do if my order arrives damaged?",
+  "accountSupportFaqDamagedOrderAnswer": "Contact support as soon as possible and provide photos of the product, packaging, and shipping label. We will review the situation and assist where possible.",
+  "accountSupportFaqShippingDeliverySection": "Shipping & Delivery",
+  "accountSupportFaqSupportedCountriesQuestion": "Which countries can I order from?",
+  "accountSupportFaqSupportedCountriesAnswer": "Buyers located within supported European countries can place orders through Truffly.",
+  "accountSupportFaqShippingCostQuestion": "How much does shipping cost?",
+  "accountSupportFaqShippingCostAnswer": "Shipping costs are determined by the seller and are displayed before checkout.",
+  "accountSupportFaqTrackingNumberQuestion": "Will I receive a tracking number?",
+  "accountSupportFaqTrackingNumberAnswer": "Yes. Sellers must provide tracking information when shipping an order.",
+  "accountSupportFaqPackageDelayedQuestion": "What happens if my package is delayed?",
+  "accountSupportFaqPackageDelayedAnswer": "Delivery times depend on the shipping carrier. If your package appears delayed, check the tracking information first. If the issue persists, contact support.",
+  "accountSupportFaqPaymentsRefundsSection": "Payments & Refunds",
+  "accountSupportFaqSecurePaymentsQuestion": "Are payments secure?",
+  "accountSupportFaqSecurePaymentsAnswer": "Yes. Payments are processed securely through Stripe. Truffly does not store your full payment card details.",
+  "accountSupportFaqPaymentChargedQuestion": "When is my payment charged?",
+  "accountSupportFaqPaymentChargedAnswer": "Your payment is charged when the order is successfully placed.",
+  "accountSupportFaqRefundsWorkQuestion": "How do refunds work?",
+  "accountSupportFaqRefundsWorkAnswer": "Refunds may be issued in accordance with the Refund & Cancellation Policy. Refund eligibility depends on the order status and the circumstances of the request.",
+  "accountSupportFaqRefundTimingQuestion": "How long does a refund take?",
+  "accountSupportFaqRefundTimingAnswer": "Refund processing times vary depending on your bank and payment provider. Most refunds are completed within a few business days.",
+  "accountSupportFaqSellingSection": "Selling on Truffly",
+  "accountSupportFaqBecomeSellerQuestion": "How do I become a seller?",
+  "accountSupportFaqBecomeSellerAnswer": "Complete the seller application process, upload the required documents, and wait for approval from the Truffly team.",
+  "accountSupportFaqVerifyIdentityQuestion": "Why do I need to verify my identity?",
+  "accountSupportFaqVerifyIdentityAnswer": "Verification helps maintain trust and safety on the platform and ensures that only eligible sellers can publish products.",
+  "accountSupportFaqSellerApprovalTimingQuestion": "How long does seller approval take?",
+  "accountSupportFaqSellerApprovalTimingAnswer": "Most applications are reviewed within a few business days, although processing times may vary.",
+  "accountSupportFaqPublishAfterApprovalQuestion": "Can I publish truffles immediately after approval?",
+  "accountSupportFaqPublishAfterApprovalAnswer": "Before publishing, approved sellers must complete the required Stripe onboarding process for receiving payouts.",
+  "accountSupportFaqSellerPaymentsSection": "Seller Payments",
+  "accountSupportFaqSellerPaymentTimingQuestion": "When do I receive payment?",
+  "accountSupportFaqSellerPaymentTimingAnswer": "Payments are released after the order has been completed according to the Truffly payment process.",
+  "accountSupportFaqStripeAccountQuestion": "Why do I need a Stripe account?",
+  "accountSupportFaqStripeAccountAnswer": "Stripe securely handles seller payouts and helps verify payment information and identity requirements.",
+  "accountSupportFaqCommissionQuestion": "How much commission does Truffly charge?",
+  "accountSupportFaqCommissionAnswer": "Truffly charges a fixed commission on completed sales. The current commission is displayed during the seller onboarding process.",
+  "accountSupportFaqAccountPrivacySection": "Account & Privacy",
+  "accountSupportFaqDeleteAccountQuestion": "How do I delete my account?",
+  "accountSupportFaqDeleteAccountAnswer": "You can request account deletion from the Settings page inside the app.",
+  "accountSupportFaqAfterDeleteAccountQuestion": "What happens when I delete my account?",
+  "accountSupportFaqAfterDeleteAccountAnswer": "Personal data will be deleted or anonymized where possible. Certain records may be retained where required by law or necessary for security, accounting, or fraud prevention purposes.",
+  "accountSupportFaqProtectDataQuestion": "How does Truffly protect my data?",
+  "accountSupportFaqProtectDataAnswer": "Truffly uses secure authentication, protected storage, access controls, and other technical measures designed to protect user information.",
   "accountSupportContactTitle": "Contact support",
   "accountSupportContactBody": "If you need help with an order or delivery, write to us and include the main details.",
   "accountSupportContactCta": "Write to support",
@@ -563,10 +660,304 @@
   "accountSettingsAccountSection": "Account",
   "accountSettingsDeleteAccountLabel": "Delete account",
   "accountSettingsDeleteAccountDialogTitle": "Delete your account?",
-  "accountSettingsDeleteAccountDialogBody": "This action is not available yet from the app. Confirm only if you want to continue as soon as the flow is ready.",
+  "accountSettingsDeleteAccountDialogBody": "We will delete your account if there is no transaction history. If you have orders or sold truffles, we will deactivate and anonymize it instead.",
   "accountSettingsDeleteAccountDialogCancel": "Cancel",
   "accountSettingsDeleteAccountDialogConfirm": "Confirm",
-  "accountSettingsDeleteAccountPendingMessage": "Account deletion is not available in-app yet. Contact support if you need immediate help.",
+  "accountSettingsDeleteAccountDeletedMessage": "Your account was deleted. You have been signed out.",
+  "accountSettingsDeleteAccountDeactivatedMessage": "Your account was deactivated for compliance. You have been signed out.",
+  "accountSettingsDeleteAccountUnauthorizedMessage": "Your session expired. Sign in again to delete your account.",
+  "accountSettingsDeleteAccountInactiveMessage": "This account is already inactive.",
+  "accountSettingsDeleteAccountErrorMessage": "Unable to process your account request right now. Please try again.",
+  "notificationsInboxTitle": "Notifications",
+  "notificationsMarkAllRead": "Mark all as read",
+  "notificationsUnreadLabel": "Unread",
+  "notificationsReadLabel": "Read",
+  "notificationsEmptyState": "You are all caught up. New updates will appear here.",
+  "notificationsErrorState": "Unable to load notifications right now.",
+  "notificationsRetryButton": "Retry",
+  "notificationGenericTitle": "Notification",
+  "notificationGenericMessage": "Open the notification center to view the latest update.",
+  "notificationFallbackTruffleName": "your truffle",
+  "notificationFallbackSellerName": "the seller",
+  "notificationFallbackTrackingCode": "tracking unavailable",
+  "notificationFallbackSellerAmount": "your payout",
+  "notificationOrderConfirmedTitle": "Order confirmed",
+  "notificationOrderConfirmedMessage": "Your order “{truffleName}” has been confirmed. The seller has 48 hours to ship it.",
+  "@notificationOrderConfirmedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationPaymentFailedTitle": "Payment failed",
+  "notificationPaymentFailedMessage": "The payment for “{truffleName}” failed. You can try again from checkout.",
+  "@notificationPaymentFailedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderShippedTitle": "Order shipped",
+  "notificationOrderShippedMessage": "Your order “{truffleName}” has been shipped.",
+  "@notificationOrderShippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationTrackingAvailableTitle": "Tracking available",
+  "notificationTrackingAvailableMessage": "Tracking is available for “{truffleName}”: {trackingCode}.",
+  "@notificationTrackingAvailableMessage": {
+    "placeholders": {
+      "truffleName": {},
+      "trackingCode": {}
+    }
+  },
+  "notificationDeliveryConfirmationReminderTitle": "Confirm delivery",
+  "notificationDeliveryConfirmationReminderMessage": "Have you received “{truffleName}”? Confirm delivery to complete the order.",
+  "@notificationDeliveryConfirmationReminderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderCompletedTitle": "Order completed",
+  "notificationOrderCompletedMessage": "The order “{truffleName}” has been completed.",
+  "@notificationOrderCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderAutoCompletedTitle": "Order automatically completed",
+  "notificationOrderAutoCompletedMessage": "The order “{truffleName}” was automatically completed.",
+  "@notificationOrderAutoCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderCancelledBySellerTitle": "Order cancelled",
+  "notificationOrderCancelledBySellerMessage": "The order “{truffleName}” was cancelled by the seller. Your refund will be started.",
+  "@notificationOrderCancelledBySellerMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderAutoCancelledUnshippedTitle": "Order cancelled",
+  "notificationOrderAutoCancelledUnshippedMessage": "The order “{truffleName}” was cancelled because it was not shipped within 48 hours.",
+  "@notificationOrderAutoCancelledUnshippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationRefundStartedTitle": "Refund started",
+  "notificationRefundStartedMessage": "The refund for “{truffleName}” has been started.",
+  "@notificationRefundStartedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationRefundCompletedTitle": "Refund completed",
+  "notificationRefundCompletedMessage": "The refund for “{truffleName}” has been completed.",
+  "@notificationRefundCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationReviewRequestTitle": "Leave a review",
+  "notificationReviewRequestMessage": "How was your experience with “{sellerName}”? Leave a review for “{truffleName}”.",
+  "@notificationReviewRequestMessage": {
+    "placeholders": {
+      "sellerName": {},
+      "truffleName": {}
+    }
+  },
+  "notificationReviewAutoCreatedTitle": "Automatic review",
+  "notificationReviewAutoCreatedMessage": "We automatically completed the review for “{truffleName}”.",
+  "@notificationReviewAutoCreatedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationFavoriteTruffleUnavailableTitle": "Truffle no longer available",
+  "notificationFavoriteTruffleUnavailableMessage": "“{truffleName}” is no longer available.",
+  "@notificationFavoriteTruffleUnavailableMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationFavoriteTruffleExpiringTitle": "Listing expiring soon",
+  "notificationFavoriteTruffleExpiringMessage": "“{truffleName}” is still available, but the listing is about to expire.",
+  "@notificationFavoriteTruffleExpiringMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerApplicationSubmittedTitle": "Request submitted",
+  "notificationSellerApplicationSubmittedMessage": "Your request to sell on Truffly has been submitted. We’ll notify you once it has been reviewed.",
+  "notificationSellerApprovedTitle": "Seller approved",
+  "notificationSellerApprovedMessage": "You have been approved as a seller. Complete Stripe to start publishing truffles.",
+  "notificationSellerRejectedTitle": "Request not approved",
+  "notificationSellerRejectedMessage": "Your seller request was not approved. Check the details or contact support.",
+  "notificationStripeOnboardingRequiredTitle": "Set up payments",
+  "notificationStripeOnboardingRequiredMessage": "Complete your payment setup to start selling on Truffly.",
+  "notificationStripeOnboardingCompletedTitle": "Payments set up",
+  "notificationStripeOnboardingCompletedMessage": "Payments are set up. You can now publish your truffles.",
+  "notificationTrufflePublishedTitle": "Truffle published",
+  "notificationTrufflePublishedMessage": "“{truffleName}” has been published and is now visible to users.",
+  "@notificationTrufflePublishedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationTruffleDeletedTitle": "Truffle deleted",
+  "notificationTruffleDeletedMessage": "“{truffleName}” has been deleted.",
+  "@notificationTruffleDeletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationTruffleExpiredTitle": "Listing expired",
+  "notificationTruffleExpiredMessage": "The listing “{truffleName}” has expired and is no longer visible.",
+  "@notificationTruffleExpiredMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerNewOrderTitle": "New order received",
+  "notificationSellerNewOrderMessage": "You received a new order for “{truffleName}”. Ship it within 48 hours.",
+  "@notificationSellerNewOrderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerShipping24hReminderTitle": "Shipping reminder",
+  "notificationSellerShipping24hReminderMessage": "Remember to ship “{truffleName}”. You still have 24 hours to add tracking.",
+  "@notificationSellerShipping24hReminderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerShippingFinalReminderTitle": "Final shipping reminder",
+  "notificationSellerShippingFinalReminderMessage": "Last hours to ship “{truffleName}”. If you do not add tracking, the order will be cancelled.",
+  "@notificationSellerShippingFinalReminderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerOrderCancelledUnshippedTitle": "Order cancelled",
+  "notificationSellerOrderCancelledUnshippedMessage": "The order “{truffleName}” was cancelled because it was not shipped within 48 hours.",
+  "@notificationSellerOrderCancelledUnshippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerOrderMarkedShippedTitle": "Order shipped",
+  "notificationSellerOrderMarkedShippedMessage": "You marked “{truffleName}” as shipped. We’ll notify the buyer.",
+  "@notificationSellerOrderMarkedShippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerDeliveryConfirmedByBuyerTitle": "Delivery confirmed",
+  "notificationSellerDeliveryConfirmedByBuyerMessage": "The buyer confirmed delivery of “{truffleName}”.",
+  "@notificationSellerDeliveryConfirmedByBuyerMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerOrderAutoCompletedTitle": "Order automatically completed",
+  "notificationSellerOrderAutoCompletedMessage": "The order “{truffleName}” was automatically completed.",
+  "@notificationSellerOrderAutoCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerPaymentReleasedTitle": "Payment released",
+  "notificationSellerPaymentReleasedMessage": "The payment for “{truffleName}” has been released. You will receive {sellerAmount}.",
+  "@notificationSellerPaymentReleasedMessage": {
+    "placeholders": {
+      "truffleName": {},
+      "sellerAmount": {}
+    }
+  },
+  "notificationSellerPaymentProcessingTitle": "Payment processing",
+  "notificationSellerPaymentProcessingMessage": "The payment for “{truffleName}” is being processed.",
+  "@notificationSellerPaymentProcessingMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerPaymentFailedTitle": "Payment issue",
+  "notificationSellerPaymentFailedMessage": "There is an issue with the payment for “{truffleName}”. We are checking it.",
+  "@notificationSellerPaymentFailedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerNewReviewTitle": "New review",
+  "notificationSellerNewReviewMessage": "You received a new review for “{truffleName}”.",
+  "@notificationSellerNewReviewMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerAutoReviewReceivedTitle": "Automatic review received",
+  "notificationSellerAutoReviewReceivedMessage": "An automatic review was added for the order “{truffleName}”.",
+  "@notificationSellerAutoReviewReceivedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationBuyerWelcomeTitle": "Welcome to Truffly 👋",
+  "notificationBuyerWelcomeMessage": "Explore fresh truffles, discover new hunters, and bring the authentic taste of truffles home.",
+  "notificationProfileUpdatedTitle": "Profile updated",
+  "notificationProfileUpdatedMessage": "Your profile changes have been saved.",
+  "notificationSecurityNewLoginTitle": "New login",
+  "notificationSecurityNewLoginMessage": "A new login to your account was detected.",
+  "notificationTitleGeneric": "Notification",
+  "notificationTitleOrderPlaced": "Order update",
+  "notificationTitleOrderShipped": "Order shipped",
+  "notificationTitleOrderCompleted": "Order completed",
+  "notificationTitleOrderCancelled": "Order cancelled",
+  "notificationTitleSellerApplicationSubmitted": "Seller application",
+  "notificationTitleSellerApproved": "Seller approved",
+  "notificationTitleSellerRejected": "Seller rejected",
+  "notificationTitlePayoutReleased": "Payout released",
+  "notificationTitleFavoriteTruffleDeleted": "Saved truffle unavailable",
+  "notificationMessageOrderPlaced": "Your order has been confirmed. The seller can now prepare it.",
+  "notificationMessageOrderShipped": "The seller has shipped your order.",
+  "notificationMessageOrderCompleted": "Your order has been completed.",
+  "notificationMessageOrderCancelled": "Your order was cancelled or refunded.",
+  "notificationMessageOrderAutoCancelledUnshippedBuyer": "Your order was cancelled and refunded because the seller did not ship it within 48 hours.",
+  "notificationMessageOrderAutoCancelledUnshippedSeller": "The order was cancelled and refunded because it was not shipped within 48 hours.",
+  "notificationTitleBuyerReviewCreated": "New review",
+  "notificationMessageBuyerReviewCreated": "A buyer left a review for one of your completed orders.",
+  "notificationTitleAutoReviewCreated": "Automatic review",
+  "notificationMessageAutoReviewCreated": "An automatic review was created after the review window expired.",
+  "notificationTitleOrderDeliveryConfirmationReminder": "Delivery reminder",
+  "notificationMessageOrderDeliveryConfirmationReminder": "Please confirm delivery within 48 hours or the order will be auto-completed.",
+  "notificationMessageSellerApplicationSubmitted": "We have received your request. Your documents are under review.",
+  "notificationMessageSellerApproved": "Your request to become a seller has been approved.",
+  "notificationMessageSellerRejected": "Your request to become a seller was not approved.",
+  "notificationMessagePayoutReleased": "A payout has been released.",
+  "notificationMessageFavoriteTruffleDeleted": "A truffle you saved is no longer available.",
+  "reviewSectionTitle": "Review your order",
+  "reviewSectionCopy": "Your review helps other buyers choose with more confidence and highlights the seller's work.",
+  "reviewUnavailableCopy": "Reviewing is no longer available for this order.",
+  "reviewLeaveCta": "Leave a review",
+  "reviewSubmittedLabel": "Review sent",
+  "reviewSubmittedSnackBar": "Thanks, your review has been published.",
+  "reviewSubmitErrorMessage": "Unable to submit the review right now.",
+  "reviewSheetTitle": "How was your experience?",
+  "reviewSheetSubtitle": "Your review helps other buyers choose with more confidence and highlights the seller's work.",
+  "reviewRatingLabel": "Rating",
+  "reviewCommentLabel": "Comment",
+  "reviewCommentPlaceholder": "Tell us how it went: freshness, shipping, truffle quality…",
+  "reviewWindowNote": "You have 48 hours to leave a review. After that, a 5-star automatic review will be published.",
+  "reviewSubmitCta": "Publish review",
+  "reviewCancelCta": "Later",
+  "reviewRatingRequiredError": "Please choose a rating.",
+  "reviewAutoLabel": "Automatically created review",
+  "reviewAutoCommentCompletedSuccess": "Automatic review: order completed successfully.",
+  "reviewAutoCommentUnshipped48h": "Automatic review: order was not shipped within 48 hours.",
+  "reviewWindowExpiredMessage": "The time to leave a review has expired. If you did not submit one, the planned automatic rating will be recorded.",
+  "reviewAlreadySubmittedMessage": "You already left a review for this order.",
   "accountPrivacyPolicyTitle": "Privacy Policy",
   "accountPrivacyPolicyLeadTitle": "Your privacy on Truffly",
   "accountPrivacyPolicyLeadBody": "This summary explains how Truffly handles the information used to create your account, manage orders, and support your activity in the app.",
@@ -588,5 +979,13 @@
   "accountTermsSectionSupportTitle": "Support and issues",
   "accountTermsSectionSupportBody": "If there is an issue with an order or delivery, contact support promptly so the team can review the situation and guide you on the next steps.",
   "accountTermsSectionUpdatesTitle": "Future updates",
-  "accountTermsSectionUpdatesBody": "These texts are an MVP version and may be updated as Truffly expands its legal and operational flows."
+  "accountTermsSectionUpdatesBody": "These texts are an MVP version and may be updated as Truffly expands its legal and operational flows.",
+  "accountSettingsRefundAndCancellationLabel": "Refund & Cancellation",
+  "accountSettingsLegalInformationLabel": "Legal Information",
+  "accountRefundAndCancellationTitle": "Refund & Cancellation",
+  "accountLegalInformationTitle": "Legal Information",
+  "accountPrivacyPolicyContent": "Last updated: [Date]\n\nTruffly respects your privacy and is committed to protecting your personal data.\n\nThis Privacy Policy explains how Truffly collects, uses, stores, shares, and protects personal information when you use the Truffly mobile application and related services.\n\n1. Data Controller\n\nThe data controller is:\n\n[Legal owner / Company name]\nAddress: [Legal address]\nCountry: Italy\nEmail: [Privacy email]\nSupport email: truffly@gmail.com\n\n2. What Truffly is\n\nTruffly is a marketplace that connects buyers with verified Italian truffle hunters and sellers.\n\nTruffly provides the digital platform, account management, payment flow, order tools, seller verification tools, notifications, and support features.\n\nTruffly does not directly sell the truffles listed by sellers unless expressly stated otherwise.\n\n3. Personal data we collect\n\nWhen you use Truffly, we may collect the following data:\n\nAccount data\n• first name\n• last name\n• email address\n• password credentials managed through our authentication provider\n• country\n• region, where applicable\n• profile image, if uploaded\n• account role, such as buyer or seller\n\nBuyer data\n• shipping addresses\n• phone number for delivery\n• order history\n• favorite products\n• reviews submitted\n• support requests\n\nSeller data\n• seller profile information\n• region\n• bio\n• seller application status\n• truffle license or permit information\n• seller verification documents\n• Stripe Connect onboarding status\n• published products\n• sales history\n• reviews received\n\nOrder and payment data\n• purchased product\n• seller and buyer IDs\n• order amount\n• shipping cost\n• commission amount\n• payment status\n• refund status\n• Stripe transaction identifiers\n• tracking code\n• order status\n\nTruffly does not store full card numbers or complete payment card details. Payments are processed by Stripe.\n\nTechnical data\n• device information\n• operating system\n• IP address\n• app logs\n• security logs\n• push notification token\n• authentication session data\n\n4. Why we use your data\n\nWe process personal data to:\n• create and manage your account\n• allow you to buy and sell truffles\n• verify seller applications\n• process payments and refunds\n• manage orders and shipping information\n• send order-related notifications\n• provide customer support\n• prevent fraud and misuse\n• secure the platform\n• comply with legal obligations\n• manage account deletion and data requests\n\n5. Legal basis for processing\n\nWe process your data under the following legal bases:\n\nContract performance\nTo provide the Truffly service, manage accounts, process orders, and enable payments.\n\nLegal obligations\nTo comply with applicable laws, accounting obligations, consumer protection rules, and requests from competent authorities.\n\nLegitimate interest\nTo protect the platform, prevent fraud, verify sellers, maintain audit logs, and improve security.\n\nConsent\nFor push notifications and any optional processing where consent is required.\n\nYou can withdraw consent for notifications at any time through your device settings or Truffly settings where available.\n\n6. Seller verification documents\n\nIf you apply to become a seller, Truffly may request documents to verify your identity and your eligibility to sell truffles.\n\nThese documents are used only for verification and platform safety.\n\nWhere possible, identity documents are deleted after the verification process is completed, unless retention is required by law or necessary to protect Truffly against fraud, disputes, or legal claims.\n\nSeller license or permit information may be retained for as long as your seller account remains active and for any additional period required by law or legitimate compliance needs.\n\n7. Payments\n\nPayments are processed through Stripe.\n\nStripe may collect and process payment data, identity verification data, tax information, bank account details, and other information required to provide payment services.\n\nTruffly may receive and store payment identifiers, order status, refund status, and seller payout status, but does not store full payment card details.\n\n8. Push notifications\n\nTruffly may send push notifications related to:\n• order confirmations\n• shipment updates\n• refund updates\n• seller approval or rejection\n• payment release\n• important account or security notices\n\nYou can disable push notifications through your device settings.\n\nSome important service communications may still be shown inside the app.\n\n9. Who we share data with\n\nWe may share data with:\n• Stripe, for payments and seller onboarding\n• Supabase, for authentication, database, and storage\n• Firebase Cloud Messaging, for push notifications\n• hosting, infrastructure, security, and technical service providers\n• competent authorities, where legally required\n• buyers and sellers, only where necessary to complete an order\n\nFor example, a seller may receive shipping information needed to fulfill an order. A buyer may see seller profile information, ratings, and order-related details.\n\n10. International transfers\n\nSome service providers may process data outside the European Economic Area.\n\nWhere this happens, Truffly relies on appropriate safeguards, such as Standard Contractual Clauses or other lawful transfer mechanisms under applicable data protection laws.\n\n11. Data retention\n\nWe keep personal data only for as long as necessary.\n\nIndicatively:\n• account data: for as long as the account is active\n• order data: for the period required by law and accounting obligations\n• seller verification data: for the time necessary for verification and compliance\n• support requests: for the time necessary to manage the request and protect legal rights\n• security logs: for security, fraud prevention, and audit purposes\n• deleted accounts: data is deleted or anonymized unless retention is legally required\n\nIf an account has completed orders, reviews, payments, refunds, or seller activity, some data may need to be retained to comply with legal obligations and protect the rights of users and Truffly.\n\n12. Account deletion\n\nYou may request deletion of your account from within the app.\n\nWhen you delete your account, Truffly will delete or anonymize personal data where possible.\n\nSome data may be retained where necessary to:\n• comply with legal obligations\n• maintain accounting records\n• manage disputes\n• prevent fraud\n• protect the rights of Truffly, buyers, or sellers\n\nIf you are a seller or have completed transactions, order records may be retained in anonymized or limited form.\n\n13. Your rights\n\nUnder applicable data protection laws, you may have the right to:\n• access your personal data\n• correct inaccurate data\n• request deletion of your data\n• restrict processing\n• object to processing\n• request data portability\n• withdraw consent\n• lodge a complaint with a data protection authority\n\nTo exercise your rights, contact us at:\n\n[Privacy email]\n\n14. Security\n\nTruffly uses technical and organizational measures designed to protect personal data, including access controls, authentication systems, protected storage, server-side business logic, and security logs.\n\nNo digital system can be guaranteed to be completely secure.\n\n15. Children\n\nTruffly is not intended for users under 18 years old.\n\nIf we become aware that a minor has created an account, we may delete the account and associated data.\n\n16. Changes to this Privacy Policy\n\nWe may update this Privacy Policy from time to time.\n\nWhen changes are significant, we may notify users through the app or other appropriate channels.\n\n17. Contact\n\nFor privacy-related requests:\n[Privacy email]\n\nFor general support:\ntruffly@gmail.com",
+  "accountTermsContent": "Last updated: [Date]\n\nWelcome to Truffly.\n\nThese Terms & Conditions govern your access to and use of the Truffly mobile application and related services.\n\nBy creating an account or using Truffly, you agree to these Terms.\n\n1. Operator of the platform\n\nTruffly is operated by:\n\n[Legal owner / Company name]\nAddress: [Legal address]\nCountry: Italy\nSupport email: truffly@gmail.com\n\n2. What Truffly does\n\nTruffly is a digital marketplace that allows buyers to purchase fresh truffles from verified Italian sellers.\n\nTruffly provides:\n• the mobile platform\n• account registration\n• seller verification tools\n• product listing tools\n• order management\n• payment flow through Stripe\n• notifications\n• review tools\n• support tools\n\nUnless expressly stated otherwise, Truffly is not the direct seller of the products listed on the platform.\n\nThe sales contract for the product is concluded between the buyer and the seller.\n\n3. User eligibility\n\nTo use Truffly, you must:\n• be at least 18 years old\n• provide accurate information\n• keep your account credentials secure\n• use the platform lawfully\n• comply with these Terms\n\nTruffly may suspend or terminate accounts that violate these Terms or applicable law.\n\n4. Buyer accounts\n\nBuyers may:\n• browse truffles\n• view seller profiles\n• purchase available products\n• manage shipping addresses\n• track orders\n• confirm delivery\n• leave reviews\n• contact support\n\nBuyers must provide accurate shipping and contact information.\n\nTruffly is not responsible for failed deliveries caused by incorrect or incomplete information provided by the buyer.\n\n5. Seller accounts\n\nOnly approved sellers may publish truffles on Truffly.\n\nSellers must:\n• be based in Italy\n• provide accurate identity and eligibility information\n• hold any license, permit, authorization, or requirement applicable to truffle harvesting and sale\n• publish truthful product information\n• use real product images\n• ship products within the required timeframe\n• provide valid tracking information\n• comply with tax, food, consumer, and commercial laws applicable to their activity\n\nSellers are responsible for the products they publish and sell.\n\nTruffly may approve, reject, suspend, or remove seller access where necessary to protect users, comply with law, or preserve platform trust.\n\n6. Product listings\n\nEach product listing must contain accurate information, including where applicable:\n• truffle type\n• quality\n• weight\n• price\n• harvest date\n• region\n• shipping cost\n• images\n\nSellers must not publish misleading, false, illegal, unsafe, or unavailable products.\n\nTruffly may remove listings that violate these Terms or platform rules.\n\n7. Product freshness and availability\n\nTruffles are fresh and perishable products.\n\nAvailability may be limited and time-sensitive.\n\nA product may become unavailable if it is sold, expired, removed, or cancelled according to platform rules.\n\n8. Orders\n\nWhen a buyer completes payment, the order is created and the seller must ship the product according to the rules shown in the app.\n\nThe seller must insert tracking information within the required timeframe.\n\nOrder statuses may include:\n• paid\n• shipped\n• completed\n• cancelled\n\nTruffly may use automated systems to update order status according to platform rules.\n\n9. Payments\n\nPayments are processed through Stripe.\n\nWhen a buyer purchases a product, payment is collected securely and held according to the platform payment flow.\n\nSeller payouts are released according to the order completion rules.\n\nTruffly applies a fixed commission of [10%] on completed transactions, unless otherwise stated.\n\nThe commission is calculated by the platform.\n\n10. Shipping\n\nThe seller is responsible for preparing and shipping the product properly.\n\nSellers must use packaging suitable for fresh truffles and must comply with applicable shipping and food safety requirements.\n\nShipping times and costs may vary depending on destination and seller settings.\n\nTruffly is not responsible for delays caused by couriers, incorrect addresses, force majeure, or events outside Truffly’s reasonable control.\n\n11. Buyer confirmation and automatic completion\n\nAfter shipment, the buyer may confirm delivery in the app.\n\nIf the buyer does not confirm within the timeframe shown in the app, the order may be automatically completed after the applicable waiting period.\n\nWhen an order is completed, seller payout may be released according to the payment flow.\n\n12. Cancellations\n\nOrders may be cancelled in the cases described in the Refund & Cancellation Policy.\n\nIf the seller does not ship within the required timeframe, the order may be automatically cancelled and refunded.\n\nBuyers cannot freely cancel an order after payment unless allowed by law, platform policy, or support review.\n\n13. Right of withdrawal\n\nFresh truffles are perishable food products.\n\nFor this reason, the right of withdrawal may not apply to purchases of fresh truffles where the product is liable to deteriorate or expire rapidly.\n\nThis does not affect any mandatory consumer rights that cannot be excluded by law.\n\n14. Reviews\n\nBuyers may leave one review for each completed order.\n\nReviews must be honest, relevant, and based on a real purchase.\n\nUsers may not post:\n• false reviews\n• offensive content\n• discriminatory content\n• spam\n• private personal data\n• threats\n• illegal content\n\nTruffly may remove reviews that violate these Terms or applicable law.\n\nIf the app provides automatic reviews after a certain period, this will be disclosed in the app.\n\n15. User content\n\nUsers may upload or publish content such as profile information, product images, descriptions, and reviews.\n\nBy uploading content, you confirm that:\n• you have the right to use it\n• it is accurate and lawful\n• it does not infringe third-party rights\n• it does not contain illegal, harmful, or misleading material\n\nTruffly may remove content that violates these Terms.\n\n16. Prohibited use\n\nYou must not:\n• create fake accounts\n• impersonate another person\n• publish false product information\n• manipulate reviews\n• attempt to bypass payment systems\n• harass other users\n• upload illegal or harmful content\n• interfere with platform security\n• use Truffly for fraud or unlawful activity\n\n17. Platform role and limitation of responsibility\n\nTruffly acts as a marketplace platform and technology intermediary.\n\nSellers are responsible for the products they publish and sell.\n\nBuyers and sellers are responsible for complying with laws applicable to their own conduct.\n\nTo the maximum extent permitted by law, Truffly is not responsible for:\n• false information provided by users\n• product quality issues caused by sellers\n• misuse of products\n• courier delays\n• incorrect shipping information\n• tax obligations of sellers\n• disputes not caused by Truffly’s own breach\n\nNothing in these Terms limits rights that cannot be excluded under applicable consumer law.\n\n18. Taxes\n\nSellers are responsible for determining and fulfilling their own tax, invoicing, accounting, and reporting obligations.\n\nTruffly does not provide tax advice.\n\nBuyers and sellers should consult a qualified professional where needed.\n\n19. Account suspension or termination\n\nTruffly may suspend or terminate an account if:\n• the user violates these Terms\n• the user provides false information\n• fraud or abuse is suspected\n• required by law\n• necessary to protect users or the platform\n\nUsers may delete their account from within the app, subject to legal retention obligations.\n\n20. Changes to the service\n\nTruffly may update, modify, suspend, or discontinue parts of the platform.\n\nWhere changes materially affect users, Truffly may provide notice through the app or other appropriate channels.\n\n21. Governing law\n\nThese Terms are governed by the laws of Italy, without prejudice to mandatory consumer protection rights that may apply in the buyer’s country of residence.\n\n22. Contact\n\nFor support:\ntruffly@gmail.com\n\nFor legal inquiries:\n[Legal email]",
+  "accountRefundAndCancellationContent": "Last updated: [Date]\n\nThis Refund & Cancellation Policy explains how cancellations, refunds, shipment deadlines, and payment releases work on Truffly.\n\n1. General principle\n\nTruffly is a marketplace for fresh truffles sold by verified Italian sellers.\n\nFresh truffles are perishable products. For this reason, refunds and cancellations are managed according to product freshness, shipment status, seller obligations, and applicable consumer protection laws.\n\n2. Payment protection\n\nWhen a buyer pays for an order, the payment is processed securely through Stripe.\n\nThe payment may be held according to the Truffly payment flow until the order is shipped, confirmed, completed, cancelled, or refunded.\n\n3. Seller shipping deadline\n\nSellers must ship the product and provide tracking information within the timeframe shown in the app.\n\nFor Truffly’s standard flow, sellers are expected to ship within 48 hours from order confirmation, unless otherwise stated.\n\n4. Automatic cancellation if the seller does not ship\n\nIf the seller does not provide tracking information within the required timeframe, Truffly may automatically cancel the order.\n\nIn this case:\n• the buyer receives a refund\n• the seller does not receive the payout\n• the product may become available again where applicable\n\n5. Buyer cancellation\n\nBecause fresh truffles are perishable and time-sensitive products, buyers generally cannot cancel an order after payment once the seller has started preparing or shipping the product.\n\nA buyer may contact support if:\n• the order was placed by mistake\n• the shipping address is incorrect\n• the seller has not shipped yet\n• there is another serious issue\n\nTruffly will evaluate the request but cannot guarantee cancellation in every case.\n\n6. Seller cancellation\n\nA seller may cancel an order before shipment only where allowed by the app flow or by Truffly support.\n\nReasons may include:\n• product no longer suitable for sale\n• product quality issue\n• inability to ship\n• incorrect listing information\n\nIf the seller cancels before shipment, the buyer will receive a refund.\n\nRepeated seller cancellations may lead to account review or suspension.\n\n7. Refund after shipment\n\nAfter an order has been shipped, refunds are not automatic.\n\nA buyer may contact support if:\n• the product was not delivered\n• the product arrived damaged\n• the product is materially different from the listing\n• there is a serious issue with freshness or quality\n• tracking information shows a delivery problem\n\nTruffly may ask the buyer to provide evidence, such as photos, tracking information, or order details.\n\n8. Delivery confirmation\n\nWhen the buyer receives the product, they may confirm delivery in the app.\n\nOnce delivery is confirmed, the order may be completed and the seller payout may be released.\n\n9. Automatic completion\n\nIf the buyer does not confirm delivery or report an issue within the timeframe shown in the app, the order may be automatically completed.\n\nAfter automatic completion, the seller payout may be released.\n\nThis does not remove mandatory legal rights that cannot be excluded.\n\n10. Right of withdrawal\n\nFresh truffles are perishable food products and may deteriorate or expire rapidly.\n\nFor this reason, the legal right of withdrawal may not apply to purchases of fresh truffles.\n\nThis does not affect any mandatory rights that consumers may have under applicable law, including rights related to defective, damaged, or non-conforming products.\n\n11. Refund method and timing\n\nRefunds are processed through the original payment method where possible.\n\nRefund timing may depend on:\n• Stripe processing times\n• the buyer’s bank or card issuer\n• payment method used\n• fraud or compliance checks\n\nTruffly cannot control delays caused by banks or payment providers.\n\n12. Shipping costs\n\nWhere an order is cancelled before shipment due to seller failure, shipping costs paid by the buyer may be refunded.\n\nWhere a refund is requested after shipment, shipping costs may be refunded or excluded depending on the reason for the refund, applicable law, and support review.\n\n13. Disputes\n\nIf there is a problem with an order, the buyer should contact support as soon as possible.\n\nSupport email:\ntruffly@gmail.com\n\nThe buyer should include:\n• order number\n• description of the issue\n• photos, if relevant\n• tracking details, if available\n\n14. Abuse\n\nTruffly may refuse refunds, suspend accounts, or restrict access where fraud, abuse, false claims, or repeated misuse of the refund process is suspected.\n\n15. Contact\n\nFor refund and cancellation requests:\ntruffly@gmail.com",
+  "accountLegalInformationContent": "Last updated: [Date]\n\nThis page provides legal information about Truffly and the operator of the platform.\n\nPlatform operator\n\nTruffly is operated by:\n\n[Legal owner / Company name]\nAddress: [Legal address]\nCountry: Italy\nEmail: [Legal email]\nSupport email: truffly@gmail.com\n\nVAT / tax information:\n[VAT number / Tax code / Not applicable / To be added]\n\nNature of the service\n\nTruffly is a digital marketplace that connects buyers with verified Italian sellers of fresh truffles.\n\nUnless expressly stated otherwise, Truffly does not directly sell the products listed in the app.\n\nThe sales contract for each product is concluded between the buyer and the seller.\n\nSeller responsibility\n\nSellers are responsible for:\n• the accuracy of their listings\n• the quality and condition of the products they sell\n• compliance with applicable harvesting, food, tax, commercial, and consumer laws\n• packaging and shipping the product correctly\n• providing valid tracking information\n\nBuyer responsibility\n\nBuyers are responsible for:\n• providing accurate account information\n• providing a correct shipping address\n• checking order details before payment\n• reporting delivery or product issues promptly\n• using the platform lawfully\n\nPayments\n\nPayments are processed securely through Stripe.\n\nTruffly may apply a platform commission to completed transactions.\n\nSeller payouts, refunds, and payment releases are managed according to the applicable payment flow and platform policies.\n\nConsumer information\n\nBefore completing a purchase, buyers are shown key order information, including product details, price, shipping cost, seller information where available, and total amount.\n\nFresh truffles are perishable food products. The right of withdrawal may not apply where products are liable to deteriorate or expire rapidly.\n\nAccount deletion and data requests\n\nUsers can request account deletion from within the app.\n\nSome data may be retained where required by law or necessary for security, accounting, fraud prevention, disputes, or legal claims.\n\nPrivacy-related requests can be sent to:\n[Privacy email]\n\nSupport\n\nFor general support:\ntruffly@gmail.com\n\nLegal notices\n\nAll trademarks, logos, app designs, text, images, and platform materials are owned by Truffly or used with permission, unless otherwise stated.\n\nUsers may not copy, reproduce, distribute, or misuse Truffly content without authorization.\n\nGoverning law\n\nThe platform is operated from Italy.\n\nThese legal notices are governed by Italian law, without prejudice to mandatory consumer protection rights that may apply in the user’s country of residence."
 }

@@ -13,12 +13,18 @@ class OnboardingInfoPage extends StatelessWidget {
     required this.description,
     required this.assetName,
     required this.fallbackIcon,
+    this.assetAlignment = Alignment.center,
+    this.expandAsset = false,
+    this.assetFirst = false,
   });
 
   final String title;
   final String description;
   final String assetName;
   final IconData fallbackIcon;
+  final Alignment assetAlignment;
+  final bool expandAsset;
+  final bool assetFirst;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +35,20 @@ class OnboardingInfoPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (assetFirst) ...[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: _OnboardingInfoIllustration(
+                    assetName: assetName,
+                    fallbackIcon: fallbackIcon,
+                    assetAlignment: assetAlignment,
+                    expandAsset: expandAsset,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.authGroupGap),
+            ],
             AuthTextBlock(
               alignment: Alignment.centerLeft,
               maxWidth: 440,
@@ -50,15 +70,20 @@ class OnboardingInfoPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.authGroupGap),
-            Expanded(
-              child: Center(
-                child: _OnboardingInfoIllustration(
-                  assetName: assetName,
-                  fallbackIcon: fallbackIcon,
+            if (!assetFirst) ...[
+              const SizedBox(height: AppSpacing.authGroupGap),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: _OnboardingInfoIllustration(
+                    assetName: assetName,
+                    fallbackIcon: fallbackIcon,
+                    assetAlignment: assetAlignment,
+                    expandAsset: expandAsset,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -70,13 +95,26 @@ class _OnboardingInfoIllustration extends StatelessWidget {
   const _OnboardingInfoIllustration({
     required this.assetName,
     required this.fallbackIcon,
+    required this.assetAlignment,
+    required this.expandAsset,
   });
 
   final String assetName;
   final IconData fallbackIcon;
+  final Alignment assetAlignment;
+  final bool expandAsset;
 
   @override
   Widget build(BuildContext context) {
+    final image = Image.asset(
+      'assets/images/onboarding/$assetName.webp',
+      fit: BoxFit.cover,
+      alignment: assetAlignment,
+      errorBuilder: (context, error, stackTrace) => _FallbackIllustration(
+        icon: fallbackIcon,
+      ),
+    );
+
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.white,
@@ -85,17 +123,13 @@ class _OnboardingInfoIllustration extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: AppRadii.authBorderRadius,
-        child: SizedBox(
-          width: double.infinity,
-          height: 260,
-          child: Image.asset(
-            'assets/images/onboarding/$assetName.webp',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _FallbackIllustration(
-              icon: fallbackIcon,
-            ),
-          ),
-        ),
+        child: expandAsset
+            ? SizedBox.expand(child: image)
+            : SizedBox(
+                width: double.infinity,
+                height: 260,
+                child: image,
+              ),
       ),
     );
   }

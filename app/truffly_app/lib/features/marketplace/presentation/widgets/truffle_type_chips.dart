@@ -33,7 +33,7 @@ class TruffleTypeChips extends StatelessWidget {
           for (final type in TruffleType.valuesInUiOrder) ...[
             const SizedBox(width: AppSpacing.spacingXS),
             _StyledTypeChip(
-              label: type.localizedName(l10n),
+              label: type.chipLabel(l10n),
               selected: selectedType == type,
               onTap: () => onSelected(type),
             ),
@@ -61,7 +61,9 @@ class _StyledTypeChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: selected ? AppColors.black : AppColors.white,
         borderRadius: AppRadii.authBorderRadius,
-        border: Border.all(color: selected ? AppColors.black : AppColors.black10),
+        border: Border.all(
+          color: selected ? AppColors.black : AppColors.black10,
+        ),
         boxShadow: AppShadows.authField,
       ),
       child: Material(
@@ -71,8 +73,8 @@ class _StyledTypeChip extends StatelessWidget {
           borderRadius: AppRadii.authBorderRadius,
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.spacingM + 2,
-              vertical: AppSpacing.spacingS,
+              horizontal: AppSpacing.spacingM,
+              vertical: AppSpacing.spacingXS + 2,
             ),
             child: Text(
               label,

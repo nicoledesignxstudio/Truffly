@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
+import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/auth/application/auth_notifier.dart';
@@ -49,9 +50,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     setState(() => _isSubmitting = true);
     final l10n = AppLocalizations.of(context)!;
-    final result = await ref.read(authNotifierProvider.notifier).sendPasswordResetEmail(
-          email: _emailController.text.trim(),
-        );
+    final result = await ref
+        .read(authNotifierProvider.notifier)
+        .sendPasswordResetEmail(email: _emailController.text.trim());
     if (!mounted) return;
 
     setState(() {
@@ -66,8 +67,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   String _failureMessage(AuthFailure failure, AppLocalizations l10n) {
     return switch (failure) {
+      EmailResendRateLimitedFailure() => l10n.authPasswordResetRateLimitedError,
+      EmailDeliveryRestrictedFailure() =>
+        l10n.authPasswordResetDeliveryRestrictedError,
       NetworkErrorFailure() => l10n.authErrorNetwork,
       TimeoutFailure() => l10n.authErrorTimeout,
+      UnknownAuthFailure() => l10n.authErrorUnknown,
       _ => l10n.authForgotPasswordErrorFallback,
     };
   }
@@ -78,9 +83,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     return AuthScaffold(
       children: [
-        AuthBackButton(
-          onPressed: () => context.go(AppRoutes.login),
-        ),
+        AuthBackButton(onPressed: () => context.go(AppRoutes.login)),
         const SizedBox(height: AppSpacing.authGroupGap),
         AuthTextBlock(
           child: Text(
@@ -88,7 +91,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             style: AppTextStyles.authScreenTitle,
           ),
         ),
-        const SizedBox(height: AppSpacing.authFieldGap),
+        const SizedBox(height: AppSpacing.authTitleSubtitleGap),
         AuthTextBlock(
           child: Text(
             l10n.authForgotPasswordSubtitle,
@@ -113,14 +116,39 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
               const SizedBox(height: AppSpacing.authFieldGap),
               if (_infoMessage != null) ...[
-                Text(
-                  _infoMessage!,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.accent),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.softGrey,
+                    borderRadius: AppRadii.dialogBorderRadius,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 1),
+                        child: Icon(
+                          Icons.mark_email_read_outlined,
+                          size: 18,
+                          color: AppColors.black80,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _infoMessage!,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.black80,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.authFieldGap),
               ],
               AuthErrorMessage(message: _errorMessage),
-              const SizedBox(height: AppSpacing.authGroupGap),
+              const SizedBox(height: AppSpacing.authSubmitGap),
               AuthPrimaryButton(
                 label: l10n.authForgotPasswordButton,
                 isLoading: _isSubmitting,

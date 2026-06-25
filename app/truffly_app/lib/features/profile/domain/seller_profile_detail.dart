@@ -7,6 +7,7 @@ final class SellerProfileDetail {
     required this.firstName,
     required this.lastName,
     required this.profileImageUrl,
+    required this.joinedAt,
     required this.region,
     required this.bio,
     required this.ratingAverage,
@@ -20,6 +21,7 @@ final class SellerProfileDetail {
   final String? firstName;
   final String? lastName;
   final String? profileImageUrl;
+  final DateTime? joinedAt;
   final String? region;
   final String? bio;
   final double ratingAverage;

@@ -186,12 +186,19 @@ class SellerStripeOnboardingService {
   }
 
   SellerStripeStatusSnapshot _mapSnapshotFromRow(Map<String, dynamic> row) {
-    final accountId = _normalizedString(row['stripe_account_id']);
-    final detailsSubmitted = row['stripe_details_submitted'] == true;
-    final chargesEnabled = row['stripe_charges_enabled'] == true;
-    final payoutsEnabled = row['stripe_payouts_enabled'] == true;
-    final requirementsPending = row['stripe_requirements_pending'] != false;
-    final readyAt = _parseIsoDate(row['stripe_ready_at']);
+    final accountId =
+        _normalizedString(row['stripe_account_id']) ??
+        _normalizedString(row['account_id']);
+    final detailsSubmitted =
+        row['stripe_details_submitted'] == true || row['details_submitted'] == true;
+    final chargesEnabled =
+        row['stripe_charges_enabled'] == true || row['charges_enabled'] == true;
+    final payoutsEnabled =
+        row['stripe_payouts_enabled'] == true || row['payouts_enabled'] == true;
+    final requirementsPending = row['stripe_requirements_pending'] != false &&
+        row['requirements_pending'] != false;
+    final readyAt =
+        _parseIsoDate(row['stripe_ready_at']) ?? _parseIsoDate(row['ready_at']);
 
     return SellerStripeStatusSnapshot(
       accountId: accountId,
@@ -200,14 +207,14 @@ class SellerStripeOnboardingService {
         detailsSubmitted: detailsSubmitted,
         chargesEnabled: chargesEnabled,
         payoutsEnabled: payoutsEnabled,
-        requirementsPending: requirementsPending,
-        readyAt: readyAt,
       ),
       detailsSubmitted: detailsSubmitted,
       chargesEnabled: chargesEnabled,
       payoutsEnabled: payoutsEnabled,
       requirementsPending: requirementsPending,
-      onboardingCompletedAt: _parseIsoDate(row['stripe_onboarding_completed_at']),
+      onboardingCompletedAt:
+          _parseIsoDate(row['stripe_onboarding_completed_at']) ??
+          _parseIsoDate(row['onboarding_completed_at']),
       readyAt: readyAt,
     );
   }
@@ -217,8 +224,6 @@ class SellerStripeOnboardingService {
     required bool detailsSubmitted,
     required bool chargesEnabled,
     required bool payoutsEnabled,
-    required bool requirementsPending,
-    required DateTime? readyAt,
   }) {
     if (accountId == null || accountId.isEmpty) {
       return SellerStripeReadinessStatus.notConnected;
@@ -228,9 +233,7 @@ class SellerStripeOnboardingService {
       return SellerStripeReadinessStatus.onboardingInProgress;
     }
 
-    if (payoutsEnabled &&
-        !requirementsPending &&
-        readyAt != null) {
+    if (chargesEnabled && payoutsEnabled) {
       return SellerStripeReadinessStatus.ready;
     }
 

@@ -6,17 +6,17 @@ abstract final class AppTextStyles {
 
   static const TextStyle authHeroTitle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 40,
+    fontSize: 35,
     fontWeight: FontWeight.w600,
-    height: 1.12,
+    height: 1.08,
     color: AppColors.black,
   );
 
   static const TextStyle authScreenTitle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 38,
+    fontSize: 33,
     fontWeight: FontWeight.w600,
-    height: 1.12,
+    height: 1.08,
     color: AppColors.black,
   );
 
@@ -24,7 +24,7 @@ abstract final class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 1.38,
     color: AppColors.black,
   );
 
@@ -32,23 +32,23 @@ abstract final class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    height: 1.45,
+    height: 1.32,
     color: AppColors.black80,
   );
 
   static const TextStyle sectionTitle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
-    height: 1.3,
+    height: 1.18,
     color: AppColors.black,
   );
 
   static const TextStyle cardTitle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
-    height: 1.25,
+    height: 1.16,
     color: AppColors.black,
   );
 
@@ -56,7 +56,7 @@ abstract final class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    height: 1.3,
+    height: 1.22,
     color: AppColors.black50,
   );
 
@@ -64,7 +64,7 @@ abstract final class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 15,
     fontWeight: FontWeight.w500,
-    height: 1.25,
+    height: 1.16,
     color: AppColors.black,
   );
 
@@ -72,7 +72,7 @@ abstract final class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    height: 1.2,
+    height: 1.12,
     color: AppColors.black80,
   );
 

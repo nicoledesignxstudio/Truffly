@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:truffly_app/core/providers/app_providers.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/orders/data/orders_service.dart';
 import 'package:truffly_app/features/orders/domain/order_detail.dart';
 import 'package:truffly_app/features/orders/domain/order_summary.dart';
@@ -11,6 +12,7 @@ final ordersServiceProvider = Provider<OrdersService>((ref) {
 });
 
 final currentUserOrdersProvider = FutureProvider<List<OrderSummary>>((ref) {
+  ref.watch(authNotifierProvider);
   return ref.read(ordersServiceProvider).fetchCurrentUserOrders();
 });
 
@@ -18,6 +20,7 @@ final orderDetailProvider = FutureProvider.family<OrderDetail, String>((
   ref,
   orderId,
 ) {
+  ref.watch(authNotifierProvider);
   return ref.read(ordersServiceProvider).fetchOrderDetail(orderId);
 });
 

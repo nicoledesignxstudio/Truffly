@@ -12,10 +12,16 @@ import 'package:truffly_app/features/auth/data/auth_service.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/auth/domain/auth_failure.dart';
 import 'package:truffly_app/features/auth/domain/auth_state.dart';
+import 'package:truffly_app/features/push/application/push_token_service_provider.dart';
 
 final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(
   AuthNotifier.new,
 );
+
+final passwordRecoveryFlowProvider =
+    NotifierProvider<PasswordRecoveryFlowNotifier, bool>(
+      PasswordRecoveryFlowNotifier.new,
+    );
 
 enum _AuthReevaluationTrigger {
   bootstrapHandoff,
@@ -31,6 +37,8 @@ enum _AuthReevaluationTrigger {
 }
 
 class AuthNotifier extends Notifier<AuthState> {
+  static const _startupRetryDelay = Duration(milliseconds: 600);
+
   StreamSubscription<sb.AuthState>? _authStateSub;
   AppLifecycleListener? _appLifecycleListener;
   final ListQueue<_QueuedAuthEvaluation> _evaluationQueue = ListQueue();
@@ -39,6 +47,7 @@ class AuthNotifier extends Notifier<AuthState> {
   bool _isInitializationScheduled = false;
   bool _isProcessingQueue = false;
   bool _isDisposed = false;
+  bool _hasPendingStartupRetry = false;
   AuthState? _lastResolvedState;
 
   @override
@@ -62,7 +71,9 @@ class AuthNotifier extends Notifier<AuthState> {
     _isInitializationScheduled = false;
     _subscribeToAuthStateChanges();
     _subscribeToAppLifecycle();
-    unawaited(_requestAuthEvaluation(_AuthReevaluationTrigger.bootstrapHandoff));
+    unawaited(
+      _requestAuthEvaluation(_AuthReevaluationTrigger.bootstrapHandoff),
+    );
   }
 
   void _scheduleInitializationForBootstrapState(BootstrapState bootstrapState) {
@@ -83,13 +94,14 @@ class AuthNotifier extends Notifier<AuthState> {
     required String email,
     required String password,
   }) async {
-    final result = await ref.read(authServiceProvider).signUp(
-          email: email,
-          password: password,
-        );
+    final result = await ref
+        .read(authServiceProvider)
+        .signUp(email: email, password: password);
 
     if (result.isFailure) {
-      await _requestAuthEvaluation(_AuthReevaluationTrigger.localActionFallback);
+      await _requestAuthEvaluation(
+        _AuthReevaluationTrigger.localActionFallback,
+      );
     } else if (result.dataOrNull?.sessionEstablished == true) {
       await _requestAuthEvaluation(_AuthReevaluationTrigger.signedIn);
     }
@@ -101,25 +113,35 @@ class AuthNotifier extends Notifier<AuthState> {
     required String email,
     required String password,
   }) async {
-    final result = await ref.read(authServiceProvider).signIn(
-          email: email,
-          password: password,
-        );
+    final result = await ref
+        .read(authServiceProvider)
+        .signIn(email: email, password: password);
 
     if (result.isFailure) {
-      await _requestAuthEvaluation(_AuthReevaluationTrigger.localActionFallback);
+      await _requestAuthEvaluation(
+        _AuthReevaluationTrigger.localActionFallback,
+      );
     }
 
     return result;
   }
 
   Future<AuthResult<AuthUnit>> signOut() async {
+    try {
+      await ref.read(pushTokenServiceProvider).clearCurrentToken();
+    } catch (_) {
+      // Token cleanup should not block signing out.
+    }
+
     final result = await ref.read(authServiceProvider).signOut();
 
     if (result.isSuccess) {
+      ref.read(passwordRecoveryFlowProvider.notifier).clear();
       await _requestAuthEvaluation(_AuthReevaluationTrigger.signedOut);
     } else {
-      await _requestAuthEvaluation(_AuthReevaluationTrigger.localActionFallback);
+      await _requestAuthEvaluation(
+        _AuthReevaluationTrigger.localActionFallback,
+      );
     }
 
     return result;
@@ -131,24 +153,52 @@ class AuthNotifier extends Notifier<AuthState> {
     return ref.read(authServiceProvider).resendVerificationEmail(email: email);
   }
 
+  Future<AuthResult<AuthUnit>> resendEmailChangeVerification({
+    required String email,
+  }) async {
+    return ref
+        .read(authServiceProvider)
+        .resendEmailChangeVerification(email: email);
+  }
+
   Future<AuthResult<AuthUnit>> sendPasswordResetEmail({
     required String email,
     String? emailRedirectTo,
   }) async {
-    return ref.read(authServiceProvider).sendPasswordResetEmail(
-          email: email,
-          emailRedirectTo: emailRedirectTo,
-        );
+    return ref
+        .read(authServiceProvider)
+        .sendPasswordResetEmail(email: email, emailRedirectTo: emailRedirectTo);
   }
 
   Future<AuthResult<AuthUnit>> updatePassword({
     required String newPassword,
   }) async {
-    return ref.read(authServiceProvider).updatePassword(newPassword: newPassword);
+    final result = await ref
+        .read(authServiceProvider)
+        .updatePassword(newPassword: newPassword);
+    if (result.isSuccess) {
+      ref.read(passwordRecoveryFlowProvider.notifier).clear();
+    }
+    return result;
   }
 
   Future<AuthResult<AuthUnit>> recheckVerificationStatus() async {
-    return _requestAuthEvaluation(_AuthReevaluationTrigger.manualVerificationCheck);
+    return _requestAuthEvaluation(
+      _AuthReevaluationTrigger.manualVerificationCheck,
+    );
+  }
+
+  Future<AuthResult<AuthUnit>> completeEmailChange({
+    required String expectedEmail,
+  }) async {
+    final verificationResult = await ref
+        .read(authServiceProvider)
+        .verifyEmailChangeCompleted(expectedEmail: expectedEmail);
+    if (verificationResult.isFailure) {
+      return verificationResult;
+    }
+
+    return signOut();
   }
 
   Future<AuthResult<AuthUnit>> refreshAuthState() async {
@@ -161,6 +211,9 @@ class AuthNotifier extends Notifier<AuthState> {
     final supabase = ref.read(supabaseClientProvider);
     _authStateSub = supabase.auth.onAuthStateChange.listen(
       (authState) {
+        if (authState.event == sb.AuthChangeEvent.passwordRecovery) {
+          ref.read(passwordRecoveryFlowProvider.notifier).activate();
+        }
         final trigger = _mapAuthEventToTrigger(authState.event);
         if (trigger != null) {
           unawaited(_requestAuthEvaluation(trigger));
@@ -245,7 +298,8 @@ class AuthNotifier extends Notifier<AuthState> {
       return const AuthFailureResult<AuthUnit>(UnknownAuthFailure());
     }
 
-    final previousStableState = _lastResolvedState ?? const AuthUnauthenticated();
+    final previousStableState =
+        _lastResolvedState ?? const AuthUnauthenticated();
     final shouldShowCheckingGate =
         _lastResolvedState == null ||
         trigger == _AuthReevaluationTrigger.bootstrapHandoff;
@@ -275,12 +329,16 @@ class AuthNotifier extends Notifier<AuthState> {
         if (fallbackSnapshot != null) {
           latestUserSnapshot = fallbackSnapshot;
         } else {
-          _setResolvedState(
-            _safeStateForFailure(
-              failure,
-              previousStableState: previousStableState,
-              latestUserSnapshot: latestUserSnapshot,
-            ),
+          final nextState = _safeStateForFailure(
+            failure,
+            previousStableState: previousStableState,
+            latestUserSnapshot: latestUserSnapshot,
+          );
+          _setResolvedState(nextState);
+          _scheduleStartupRetryIfNeeded(
+            nextState: nextState,
+            trigger: trigger,
+            latestUserSnapshot: latestUserSnapshot,
           );
           return AuthFailureResult<AuthUnit>(failure);
         }
@@ -308,12 +366,16 @@ class AuthNotifier extends Notifier<AuthState> {
         if (_shouldExpireSessionForFailure(failure, latestUserSnapshot)) {
           await _expireCurrentSession();
         }
-        _setResolvedState(
-          _safeStateForFailure(
-            failure,
-            previousStableState: previousStableState,
-            latestUserSnapshot: latestUserSnapshot,
-          ),
+        final nextState = _safeStateForFailure(
+          failure,
+          previousStableState: previousStableState,
+          latestUserSnapshot: latestUserSnapshot,
+        );
+        _setResolvedState(nextState);
+        _scheduleStartupRetryIfNeeded(
+          nextState: nextState,
+          trigger: trigger,
+          latestUserSnapshot: latestUserSnapshot,
         );
         return AuthFailureResult<AuthUnit>(failure);
       }
@@ -330,20 +392,21 @@ class AuthNotifier extends Notifier<AuthState> {
       }
 
       _setResolvedState(
-        AuthAuthenticatedReady(
-          userId: profile.userId,
-          email: profile.email,
-        ),
+        AuthAuthenticatedReady(userId: profile.userId, email: profile.email),
       );
       return const AuthSuccess<AuthUnit>(AuthUnit.value);
     } catch (error) {
       final failure = _mapUnexpectedError(error);
-      _setResolvedState(
-        _safeStateForFailure(
-          failure,
-          previousStableState: previousStableState,
-          latestUserSnapshot: latestUserSnapshot,
-        ),
+      final nextState = _safeStateForFailure(
+        failure,
+        previousStableState: previousStableState,
+        latestUserSnapshot: latestUserSnapshot,
+      );
+      _setResolvedState(nextState);
+      _scheduleStartupRetryIfNeeded(
+        nextState: nextState,
+        trigger: trigger,
+        latestUserSnapshot: latestUserSnapshot,
       );
       return AuthFailureResult<AuthUnit>(failure);
     }
@@ -362,11 +425,15 @@ class AuthNotifier extends Notifier<AuthState> {
       userId: currentAuthUser.id,
       email: (currentAuthUser.email ?? '').trim(),
       emailVerified: currentAuthUser.emailConfirmedAt != null,
+      pendingEmail: currentAuthUser.newEmail?.trim(),
     );
   }
 
   void _setResolvedState(AuthState nextState) {
     state = nextState;
+    if (nextState is! AuthChecking) {
+      _hasPendingStartupRetry = false;
+    }
     if (nextState is! AuthChecking) {
       _lastResolvedState = nextState;
     }
@@ -387,24 +454,23 @@ class AuthNotifier extends Notifier<AuthState> {
       InvalidCredentialsFailure() => const AuthUnauthenticated(),
       EmailAlreadyUsedFailure() => const AuthUnauthenticated(),
       ResetLinkInvalidFailure() => const AuthUnauthenticated(),
-      UserProfileMissingFailure() =>
-        _profileMissingFallback(
-          latestUserSnapshot: latestUserSnapshot,
-          currentAuthUser: currentAuthUser,
-        ),
-      EmailNotVerifiedFailure() =>
-        _toUnverifiedOrFallback(
-          latestUserSnapshot: latestUserSnapshot,
-          currentAuthUser: currentAuthUser,
-        ),
+      UserProfileMissingFailure() => _profileMissingFallback(
+        latestUserSnapshot: latestUserSnapshot,
+        currentAuthUser: currentAuthUser,
+      ),
+      EmailNotVerifiedFailure() => _toUnverifiedOrFallback(
+        latestUserSnapshot: latestUserSnapshot,
+        currentAuthUser: currentAuthUser,
+      ),
       NetworkErrorFailure() ||
       TimeoutFailure() ||
-      UnknownAuthFailure() =>
-        _conservativeTransientFallback(
-          previousStableState: previousStableState,
-          latestUserSnapshot: latestUserSnapshot,
-          currentAuthUser: currentAuthUser,
-        ),
+      EmailResendRateLimitedFailure() ||
+      EmailDeliveryRestrictedFailure() ||
+      UnknownAuthFailure() => _conservativeTransientFallback(
+        previousStableState: previousStableState,
+        latestUserSnapshot: latestUserSnapshot,
+        currentAuthUser: currentAuthUser,
+      ),
     };
   }
 
@@ -463,6 +529,10 @@ class AuthNotifier extends Notifier<AuthState> {
         userId: currentAuthUser.id,
         email: (currentAuthUser.email ?? '').trim(),
       );
+    }
+
+    if (previousStableState is AuthChecking && currentAuthUser != null) {
+      return const AuthChecking();
     }
 
     return switch (previousStableState) {
@@ -526,6 +596,34 @@ class AuthNotifier extends Notifier<AuthState> {
     return currentAuthUser?.emailConfirmedAt != null;
   }
 
+  void _scheduleStartupRetryIfNeeded({
+    required AuthState nextState,
+    required _AuthReevaluationTrigger trigger,
+    required AuthUserSnapshot? latestUserSnapshot,
+  }) {
+    if (_hasPendingStartupRetry) return;
+    if (nextState is! AuthChecking) return;
+
+    final currentAuthUser = _readCurrentAuthUser();
+    final hasAuthenticatedMaterial =
+        latestUserSnapshot != null || currentAuthUser != null;
+    if (!hasAuthenticatedMaterial) return;
+
+    if (trigger != _AuthReevaluationTrigger.bootstrapHandoff &&
+        trigger != _AuthReevaluationTrigger.tokenRefreshed &&
+        trigger != _AuthReevaluationTrigger.userUpdated &&
+        trigger != _AuthReevaluationTrigger.appResumed) {
+      return;
+    }
+
+    _hasPendingStartupRetry = true;
+    Future.delayed(_startupRetryDelay, () {
+      if (_isDisposed) return;
+      _hasPendingStartupRetry = false;
+      unawaited(_requestAuthEvaluation(_AuthReevaluationTrigger.manualRefresh));
+    });
+  }
+
   Future<void> _expireCurrentSession() async {
     final authUser = _readCurrentAuthUser();
     if (authUser == null) return;
@@ -551,7 +649,9 @@ class AuthNotifier extends Notifier<AuthState> {
     _appLifecycleListener?.dispose();
     _appLifecycleListener = null;
 
-    final disposeResult = const AuthFailureResult<AuthUnit>(UnknownAuthFailure());
+    final disposeResult = const AuthFailureResult<AuthUnit>(
+      UnknownAuthFailure(),
+    );
 
     final active = _activeEvaluation;
     if (active != null && !active.completer.isCompleted) {
@@ -568,13 +668,18 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
+class PasswordRecoveryFlowNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void activate() => state = true;
+
+  void clear() => state = false;
+}
+
 final class _QueuedAuthEvaluation {
-  const _QueuedAuthEvaluation({
-    required this.trigger,
-    required this.completer,
-  });
+  const _QueuedAuthEvaluation({required this.trigger, required this.completer});
 
   final _AuthReevaluationTrigger trigger;
   final Completer<AuthResult<AuthUnit>> completer;
 }
-

@@ -28,16 +28,21 @@
   "authErrorTimeout": "Tempo scaduto. Riprova.",
   "authErrorUnknown": "Si è verificato un errore. Riprova.",
   "authErrorEmailAlreadyUsed": "Questa email è già in uso.",
+  "authErrorEmailResendRateLimited": "Hai richiesto troppe email di verifica. Attendi qualche minuto e riprova.",
+  "authErrorEmailDeliveryRestricted": "Non possiamo inviare l'email di verifica a questo indirizzo. Controlla l'email inserita o configura SMTP personalizzato.",
+  "authPasswordResetRateLimitedError": "Hai richiesto troppi link di reset. Attendi qualche minuto e riprova.",
+  "authPasswordResetDeliveryRestrictedError": "Non possiamo inviare l'email di reset a questo indirizzo. Controlla l'email inserita o configura SMTP personalizzato.",
   "authErrorLoginFallback": "Impossibile accedere. Riprova.",
   "authErrorSignupFallback": "Impossibile creare l'account. Riprova.",
   "authVerifyEmailTitle": "Verifica la tua email",
   "authVerifyEmailSubtitle": "Ti abbiamo inviato un link di verifica al tuo indirizzo email. Confermalo per continuare.",
   "authVerifyEmailCurrentEmail": "Email",
-  "authVerifyEmailRecheckButton": "Ho verificato la mia email",
+  "authVerifyEmailRecheckButton": "Ho verificato l'email",
+  "authVerifyEmailWrongEmailCta": "Ho sbagliato email",
   "authVerifyEmailNotYetVerified": "La tua email non è ancora verificata.",
   "authVerifyEmailSessionExpired": "La sessione è scaduta. Accedi di nuovo.",
   "authVerifyEmailResendButton": "Invia di nuovo email",
-  "authVerifyEmailResendSuccess": "Email di verifica inviata nuovamente.",
+  "authVerifyEmailResendSuccess": "Ti abbiamo inviato una nuova email di verifica. Controlla la tua casella di posta.",
   "authVerifyEmailMissingEmail": "Impossibile trovare l'email per il reinvio.",
   "authVerifyEmailAutoContinueHint": "Dopo aver cliccato il link nell'email, l'app continuerà automaticamente.",
   "authVerifyEmailSignOutButton": "Esci",
@@ -45,7 +50,7 @@
   "authForgotPasswordTitle": "Reimposta password",
   "authForgotPasswordSubtitle": "Inserisci la tua email e ti invieremo un link per reimpostare la password.",
   "authForgotPasswordButton": "Invia link di reset",
-  "authForgotPasswordSuccess": "Se l'email esiste, è stato inviato un link di reset.",
+  "authForgotPasswordSuccess": "Controlla la tua email: ti abbiamo inviato un link per reimpostare la password.",
   "authForgotPasswordErrorFallback": "Impossibile inviare l'email di reset. Riprova.",
   "authForgotPasswordBackToLogin": "Torna al login",
   "authResetPasswordTitle": "Reimposta password",
@@ -59,12 +64,17 @@
   "authResetPasswordSuccessTitle": "Password aggiornata",
   "authResetPasswordSuccessMessage": "La tua password è stata aggiornata con successo.",
   "authResetPasswordSuccessButton": "Torna al login",
-  "authWelcomeTitleLeading": "Compra e vendi",
-  "authWelcomeTitleAccent": "tartufi premium",
-  "authWelcomeSubtitle": "Entra in un marketplace affidabile costruito su\nqualit\u00e0, trasparenza e recensioni reali.",
-  "authWelcomeCreateAccountButton": "Crea account",
-  "authWelcomeGoogleButton": "Continua con Google",
+  "authWelcomeTitle": "Porta a casa il sapore autentico del tartufo",
+  "authWelcomeSubtitle": "Il primo marketplace dedicato ai tartufi freschi",
+  "authWelcomeCreateAccountButton": "Iscriviti a Truffly",
   "authWelcomeLoginButton": "Ho gi\u00e0 un account",
+  "authWelcomeFooterInfo": "Informazioni su Truffly: La nostra piattaforma",
+  "welcomeFreshTrufflesHome": "Tartufi freschi a casa tua",
+  "welcomeRealFreshTruffle": "Il vero tartufo fresco",
+  "welcomeDiscoverNewFlavors": "Scopri nuovi sapori",
+  "welcomeVerifiedHunters": "Tartufai verificati",
+  "welcomeSelectedQuality": "Qualit\u00e0 selezionata",
+  "welcomeProtectedPurchases": "Acquisti protetti",
   "onboardingNameTitle": "Dicci come ti chiami",
   "onboardingNameSubtitle": "Queste informazioni verranno usate per completare i dettagli del tuo profilo.",
   "onboardingFirstNameLabel": "Nome",
@@ -106,7 +116,7 @@
   "onboardingRegionVeneto": "Veneto",
   "onboardingBuyerLocationRegionHelper": "La regione è richiesta solo per gli acquirenti in Italia.",
   "onboardingSellerRegionTitle": "Seleziona la tua regione",
-  "onboardingSellerRegionSubtitle": "Nel flow seller il paese è considerato Italia, quindi qui è richiesta solo la regione.",
+  "onboardingSellerRegionSubtitle": "Al momento, solo i tartufai residenti in Italia possono vendere su Truffly. Proseguendo, dichiari di risiedere in Italia.",
   "onboardingSellerDocumentsTitle": "Carica i documenti seller",
   "onboardingSellerDocumentsSubtitle": "Seleziona localmente i documenti richiesti. Durante l'onboarding non viene caricato nulla fino al submit finale.",
   "onboardingTesserinoNumberLabel": "Numero tesserino",
@@ -130,44 +140,51 @@
   "onboardingDocumentGalleryUnavailableError": "Galleria non disponibile.",
   "onboardingDocumentPickerUnavailableError": "Impossibile selezionare un'immagine ora.",
   "onboardingSellerDocumentsLocalOnlyHelper": "I file restano locali su questo dispositivo. Il caricamento avviene solo al submit finale.",
-  "onboardingNotificationsTitle": "Resta aggiornato con le notifiche",
-  "onboardingNotificationsSubtitle": "Le notifiche ti aiutano a seguire i momenti più importanti della tua esperienza su Truffly.",
-  "onboardingNotificationsBenefitOrderUpdates": "Aggiornamenti sugli ordini dall'acquisto alla conclusione.",
-  "onboardingNotificationsBenefitShippingUpdates": "Aggiornamenti su spedizione e consegna per gli ordini attivi.",
-  "onboardingNotificationsBenefitSellerApproval": "Aggiornamenti sull'approvazione seller se richiedi di vendere su Truffly.",
-  "onboardingNotificationsBenefitPayments": "Aggiornamenti relativi a pagamenti e payout quando rilevanti.",
-  "onboardingNotificationsEnableButton": "Abilita notifiche",
-  "onboardingNotificationsContinueWithoutButton": "Continua senza notifiche",
+  "onboardingNotificationsBuyerTitle": "Attiva le notifiche",
+  "onboardingNotificationsBuyerSubtitle": "Ricevi aggiornamenti sui tuoi ordini, spedizioni e tartufi preferiti.",
+  "onboardingNotificationsBuyerBenefit1": "Conferme ordine e aggiornamenti spedizione.",
+  "onboardingNotificationsBuyerBenefit2": "Notifiche su tracking e consegne.",
+  "onboardingNotificationsBuyerBenefit3": "Nuovi tartufi in linea con i tuoi interessi.",
+  "onboardingNotificationsSellerTitle": "Non perdere nessuna vendita",
+  "onboardingNotificationsSellerSubtitle": "Attiva le notifiche per ricevere aggiornamenti su ordini, spedizioni, pagamenti e attività del tuo account venditore.",
+  "onboardingNotificationsSellerBenefit1": "Notifiche immediate per nuovi ordini.",
+  "onboardingNotificationsSellerBenefit2": "Promemoria per spedizioni attive.",
+  "onboardingNotificationsSellerBenefit3": "Aggiornamenti su pagamenti e accrediti.",
+  "onboardingNotificationsEnableButton": "Attiva notifiche",
+  "onboardingNotificationsContinueWithoutButton": "Non ora",
   "onboardingNotificationsFooter": "Potrai sempre gestire le notifiche più tardi nelle impostazioni.",
   "onboardingNotificationsStatusIdle": "Le notifiche non sono ancora abilitate.",
   "onboardingNotificationsStatusPending": "Richiesta permesso in corso.",
   "onboardingNotificationsStatusGranted": "Notifiche abilitate correttamente.",
+  "onboardingNotificationsStatusProvisional": "Le notifiche sono abilitate in modalità provvisoria su iOS.",
+  "onboardingNotificationsStatusNotDetermined": "La scelta delle notifiche non è ancora stata effettuata.",
   "onboardingNotificationsStatusDenied": "Permesso negato. Puoi continuare e abilitare le notifiche più tardi dalle impostazioni.",
   "onboardingNotificationsStatusSkipped": "Hai scelto di continuare senza notifiche per ora.",
   "onboardingNotificationsPermissionError": "Impossibile richiedere il permesso notifiche in questo momento. Puoi continuare e riprovare più tardi.",
-  "onboardingWelcomeBuyerTitle": "Benvenuto su Truffly",
+  "onboardingWelcomeBuyerTitle": "Inizia il tuo viaggio nel mondo del tartufo",
   "onboardingWelcomeBuyerSubtitle": "Il tuo onboarding acquirente è completo.",
-  "onboardingWelcomeBuyerMessage": "Ora puoi iniziare a scoprire tartufi premium, seller verificati e acquisti protetti direttamente nell'app.",
-  "onboardingWelcomeSellerTitle": "Il tuo profilo Truffly è pronto",
-  "onboardingWelcomeSellerSubtitle": "Sei pronto a completare l'onboarding seller.",
-  "onboardingWelcomeSellerMessage": "Entra nell'app per continuare con il tuo account. La revisione seller resta separata dall'approvazione finale e ti aggiorneremo man mano che procede.",
+  "onboardingWelcomeBuyerMessage": "Porta sulla tua tavola il sapore autentico del tartufo raccolto con passione dai migliori tartufai.",
+  "onboardingWelcomeBuyerReadyLabel": "Sei pronto",
+  "onboardingWelcomeSellerTitle": "Richiesta inviata",
+  "onboardingWelcomeSellerSubtitle": "La tua richiesta seller è in revisione.",
+  "onboardingWelcomeSellerMessage": "La tua richiesta seller è stata inviata correttamente ed è ora in revisione.\nRiceverai una notifica man mano che lo stato della tua candidatura progredisce.",
   "onboardingWelcomeDefaultTitle": "Benvenuto su Truffly",
   "onboardingWelcomeDefaultSubtitle": "Sei quasi pronto a entrare nell'app.",
   "onboardingWelcomeDefaultMessage": "Controlla i dettagli dell'onboarding e continua quando sei pronto.",
-  "onboardingBuyerInfo1Title": "Tartufi freschi, selezionati per qualità",
-  "onboardingBuyerInfo1Description": "Truffly è pensata per chi vuole accedere a tartufi premium con un'esperienza mobile semplice, focalizzata su freschezza, provenienza e qualità del prodotto.",
-  "onboardingBuyerInfo2Title": "Acquisti sicuri con logica escrow",
-  "onboardingBuyerInfo2Description": "I pagamenti seguono un flusso d'ordine protetto. Truffly mantiene l'esperienza di acquisto chiara e sicura mentre l'ordine passa da pagamento a spedizione fino al completamento.",
-  "onboardingBuyerInfo3Title": "Seller verificati e segnali di fiducia",
-  "onboardingBuyerInfo3Description": "Gli acquirenti possono esplorare un marketplace costruito attorno a seller verificati, profili trasparenti, recensioni e un livello di fiducia più forte in tutta la community.",
-  "onboardingSellerInfo1Title": "Vendi i tuoi tartufi a un mercato mirato",
-  "onboardingSellerInfo1Description": "Truffly aiuta i cavatori di tartufi a raggiungere gli acquirenti tramite un marketplace mobile dedicato, progettato attorno a qualità, fiducia e gestione chiara degli ordini.",
-  "onboardingSellerInfo2Title": "Un modello commissionale chiaro",
-  "onboardingSellerInfo2Description": "Truffly applica una commissione del 10% sulle vendite completate. L'obiettivo è mantenere l'economia del seller semplice e prevedibile fin dall'inizio.",
-  "onboardingSellerInfo3Title": "La tempistica di spedizione conta",
-  "onboardingSellerInfo3Description": "Gli ordini seguono aspettative di tempo rigorose. I seller devono spedire rapidamente e il flow MVP attuale è costruito attorno a una regola di spedizione entro 48 ore.",
-  "onboardingSellerInfo4Title": "Aspettative su approvazione, escrow e payout",
-  "onboardingSellerInfo4Description": "L'onboarding seller include step di revisione e approvazione. Pagamenti e payout seguono un flusso strutturato e la configurazione collegata a Stripe avviene solo dopo l'approvazione.",
+  "onboardingBuyerInfo1Title": "Il vero sapore del tartufo fresco",
+  "onboardingBuyerInfo1Description": "Scopri il gusto e l'aroma di tartufi appena raccolti, spediti direttamente dai tartufai.",
+  "onboardingBuyerInfo2Title": "Tartufai verificati, recensioni reali",
+  "onboardingBuyerInfo2Description": "Acquista in sicurezza da tartufai verificati e scopri recensioni autentiche lasciate da altri acquirenti.",
+  "onboardingBuyerInfo3Title": "Pensiamo noi alla sicurezza",
+  "onboardingBuyerInfo3Description": "Con Truffly il pagamento rimane protetto fino a quando il tuo ordine non arriva a destinazione.",
+  "onboardingSellerInfo1Title": "Dai valore\nai tuoi tartufi",
+  "onboardingSellerInfo1Description": "Vendi direttamente a una community di appassionati, senza intermediari. Decidi il tuo prezzo e raggiungi acquirenti pronti ad acquistare.",
+  "onboardingSellerInfo2Title": "Nessun costo iniziale",
+  "onboardingSellerInfo2Description": "Nessuna quota di iscrizione e nessun costo anticipato. Tratteniamo una commissione del 10% solo sulle vendite completate.",
+  "onboardingSellerInfo3Title": "Un marketplace costruito intorno alla freschezza",
+  "onboardingSellerInfo3Description": "Per preservare qualità e freschezza, gli annunci restano attivi per 5 giorni e gli ordini devono essere spediti entro 2 giorni lavorativi dalla vendita.",
+  "onboardingSellerInfo4Title": "Una community verificata",
+  "onboardingSellerInfo4Description": "Per vendere su Truffly dovrai verificare la tua identità e il tuo tesserino. I pagamenti vengono trasferiti tramite Stripe dopo la conferma di consegna dell'ordine.",
   "onboardingFlowTitleBuyer": "Onboarding acquirente",
   "onboardingFlowTitleSeller": "Onboarding venditore",
   "onboardingFlowTitleDefault": "Onboarding",
@@ -218,8 +235,8 @@
   "onboardingCountrySpain": "Spagna",
   "onboardingCountryUnitedKingdom": "Regno Unito",
   "onboardingCountryUnitedStates": "Stati Uniti",
-  "onboardingRoleSelectionTitle": "Come vuoi usare Truffly",
-  "onboardingRoleSelectionSubtitle": "Scegli come vuoi iniziare.\nPotrai sempre cambiare questa scelta più avanti.",
+  "onboardingRoleSelectionTitle": "Come vuoi usare Truffly?",
+  "onboardingRoleSelectionSubtitle": "Acquista tartufi freschi dai migliori tartufai o inizia a vendere i tuoi direttamente alla community.",
   "onboardingRoleSelectionBuyerTitle": "Compra tartufi",
   "onboardingRoleSelectionBuyerDescription": "Visualizza il flow onboarding buyer in 7 step.",
   "onboardingRoleSelectionSellerTitle": "Vendi tartufi",
@@ -235,12 +252,12 @@
   "truffleDetailTitle": "Dettaglio tartufo",
   "truffleDetailError": "Impossibile caricare questo tartufo ora.",
   "truffleDetailPricePerKg": "Prezzo al kg",
-  "truffleSearchHint": "Cerca per nome o nome latino",
+  "truffleSearchHint": "Cosa stai cercando?",
   "truffleSearchApply": "Cerca",
   "truffleLoadError": "Impossibile caricare i tartufi. Riprova.",
   "truffleRetry": "Riprova",
-  "truffleEmptyTitle": "Nessun prodotto corrisponde alla tua ricerca",
-  "truffleEmptySubtitle": "Prova a cambiare filtri oppure riprova più tardi.",
+  "truffleEmptyTitle": "Nessun prodotto corrispondente",
+  "truffleEmptySubtitle": "Prova a cambiare filtri\noppure riprova più tardi.",
   "truffleFiltersTitle": "Filtri",
   "truffleFiltersReset": "Reset",
   "truffleFiltersApply": "Applica filtri",
@@ -263,14 +280,14 @@
   "truffleTypeUncinatum": "Uncinato",
   "truffleTypeBorchii": "Bianchetto",
   "truffleTypeBrumale": "Brumale",
-  "truffleTypeMacrosporum": "Tartufo Nero Liscio",
-  "truffleTypeBrumaleMoschatum": "Tartufo Brumale Moscato",
-  "truffleTypeMesentericum": "Tartufo Mesenterico",
+  "truffleTypeMacrosporum": "Nero Liscio",
+  "truffleTypeBrumaleMoschatum": "Brumale Moscato",
+  "truffleTypeMesentericum": "Ordinario",
   "homeTitle": "Home",
   "homeGreetingPrefix": "Ciao",
   "homeLoadError": "Impossibile caricare la home in questo momento.",
   "homeSeasonalSectionTitle": "In evidenza di stagione",
-  "homeSeasonalInSeasonLabel": "In season",
+  "homeSeasonalInSeasonLabel": "Di stagione",
   "homeSeasonalComingSoonLabel": "Coming soon",
   "homeSeasonalLoadingLabel": "Caricamento stagionalità...",
   "homeSeasonalCountdownLine": "Mancano {days} giorni all'inizio della stagione del {truffleName}",
@@ -301,7 +318,7 @@
   "seasonalTruffleNameBrumale": "Brumale",
   "seasonalTruffleNameMacrosporum": "Tartufo Nero Liscio",
   "seasonalTruffleNameBrumaleMoschatum": "Tartufo Brumale Moscato",
-  "seasonalTruffleNameMesentericum": "Tartufo Mesenterico",
+  "seasonalTruffleNameMesentericum": "Ordinario",
   "guidesPageTitle": "Guide ai tartufi",
   "guidesLoadError": "Impossibile caricare le guide in questo momento.",
   "guidesRetry": "Riprova",
@@ -363,6 +380,25 @@
       }
     }
   },
+  "sellerProfileInfoTab": "Info",
+  "sellerProfileReviewsTab": "Recensioni",
+  "sellerProfileTrufflesTab": "Tartufi",
+  "sellerProfileRatingStarsLabel": "Valutazione",
+  "sellerProfileOrdersLabel": "Ordini",
+  "sellerProfileActiveTrufflesLabel": "Tartufi attivi",
+  "sellerProfileBioFallback": "Questo venditore non ha ancora aggiunto una descrizione.",
+  "sellerProfileJoinedPlatformLabel": "Iscritto alla piattaforma",
+  "sellerProfileSummaryTitle": "Riepilogo seller",
+  "sellerProfileJoinedLabel": "Iscrizione",
+  "sellerProfileRegionLabel": "Regione",
+  "sellerProfileUnavailable": "Non disponibile",
+  "sellerProfileRecentReviewsTitle": "Recensioni recenti",
+  "sellerProfileReadAll": "Leggi tutti",
+  "sellerProfileNoReviews": "Nessuna recensione per questo venditore.",
+  "sellerProfileActiveTrufflesTitle": "Tartufi attivi",
+  "sellerProfileNoActiveTruffles": "Questo venditore non ha tartufi attivi al momento.",
+  "sellerProfileUnableToLoadReviews": "Impossibile caricare le recensioni al momento.",
+  "sellerProfileLoadError": "Impossibile caricare questo profilo venditore al momento.",
   "accountDetailsTitle": "Dettagli account",
   "accountDetailsSubtitle": "Mantieni aggiornati i dati del tuo account. Se cambi email dovrai completare una nuova verifica.",
   "accountDetailsSaveCta": "Salva modifiche",
@@ -377,14 +413,25 @@
   "accountDetailsChangeEmailCta": "Cambia email",
   "accountDetailsSaveNewEmailCta": "Salva nuova email",
   "accountDetailsCancelEmailChangeCta": "Annulla",
-  "accountDetailsPhotoHelper": "Puoi aggiornare l'avatar del seller da camera o galleria. Se rimuovi la foto esistente, il profilo tornerà alle iniziali.",
-  "accountDetailsPhotoPendingHelper": "Hai selezionato una nuova foto in locale. Il collegamento all'upload definitivo verrà aggiunto nel prossimo step senza sporcare il modello dati attuale.",
+  "accountDetailsPhotoHelper": "Puoi aggiornare la tua foto profilo da camera o galleria. La nuova immagine viene caricata subito dopo la selezione.",
+  "accountDetailsPhotoUploadPending": "Caricamento foto profilo...",
+  "accountDetailsPhotoUploadSuccess": "Foto profilo aggiornata correttamente.",
+  "accountDetailsPhotoRemoveSuccess": "Foto profilo rimossa.",
+  "accountDetailsPhotoPickerUnavailable": "Impossibile selezionare un'immagine in questo momento.",
+  "accountDetailsPhotoPermissionDeniedError": "Permesso negato. Consenti l'accesso a foto e file e riprova.",
+  "accountDetailsPhotoCameraUnavailableError": "Fotocamera non disponibile al momento.",
+  "accountDetailsPhotoGalleryUnavailableError": "Galleria non disponibile al momento.",
+  "accountDetailsPhotoFileNotFoundError": "Impossibile trovare il file selezionato.",
+  "accountDetailsPhotoTooLargeError": "L'immagine selezionata deve essere al massimo di 5 MB.",
+  "accountDetailsPhotoUnsupportedFormatError": "Usa un'immagine JPG, PNG o WebP.",
+  "accountDetailsPhotoInvalidFileError": "Non è stato possibile leggere l'immagine selezionata.",
+  "accountDetailsPhotoUploadFailedError": "Impossibile caricare la foto profilo in questo momento. Riprova.",
+  "accountDetailsPhotoDeleteFailedError": "Impossibile rimuovere la foto profilo in questo momento. Riprova.",
   "accountDetailsChangePhotoCta": "Cambia foto",
   "accountDetailsRemovePhotoCta": "Rimuovi foto",
   "accountDetailsTakePhotoOption": "Scatta foto",
   "accountDetailsChooseFromGalleryOption": "Scegli dalla galleria",
   "accountDetailsPhotoSourceCancelOption": "Annulla",
-  "accountDetailsPhotoUploadPending": "La nuova foto è pronta in anteprima locale. Completiamo l'upload definitivo nel prossimo step tecnico.",
   "accountDetailsSellerCountryLockedHelper": "Secondo le regole di dominio attuali, gli account seller restano collegati all'Italia.",
   "accountDetailsRegionHiddenHelper": "La regione è richiesta solo quando il paese selezionato è Italia. Salvando con un altro paese la regione verrà rimossa.",
   "accountDetailsRequiredFieldError": "Questo campo è obbligatorio.",
@@ -394,9 +441,9 @@
   "accountDetailsLoadError": "Impossibile caricare i dettagli account in questo momento.",
   "accountDetailsSaveError": "Impossibile salvare i dettagli account in questo momento. Riprova.",
   "accountDetailsSaveSuccess": "Dettagli account aggiornati correttamente.",
-  "accountDetailsEmailVerificationSent": "Ti abbiamo inviato un link di verifica al nuovo indirizzo email. Verifica l'email per continuare.",
-  "shippingAddressesTitle": "Indirizzi di spedizione",
-  "shippingAddressesSubtitle": "Scegli quale indirizzo tenere pronto per il checkout e aggiornalo quando cambiano i dettagli di consegna.",
+  "accountDetailsEmailVerificationSent": "Controlla sia l'indirizzo email attuale sia quello nuovo e conferma entrambi i link per completare il cambio.",
+  "shippingAddressesTitle": "Spedizione",
+  "shippingAddressesSubtitle": "Aggiungi e gestisci gli indirizzi di spedizione per i tuoi ordini.",
   "shippingAddressesSectionTitle": "Indirizzi salvati",
   "shippingAddressesAddCta": "Aggiungi indirizzo",
   "shippingAddressesEmptyTitle": "Nessun indirizzo salvato",
@@ -447,7 +494,7 @@
   "shippingAddressDeletedSuccess": "Indirizzo di spedizione eliminato correttamente.",
   "publishTruffleTitle": "Pubblica tartufo",
   "publishTrufflePhotosTitle": "Foto prodotto",
-  "publishTrufflePhotosSubtitle": "Aggiungi da 1 a 3 foto. La prima foto verrà usata come cover del prodotto.",
+  "publishTrufflePhotosSubtitle": "Aggiungi da 1 a 3 foto. La prima foto verrà usata come vetrina del prodotto.",
   "publishTruffleAddPhoto": "Aggiungi foto",
   "publishTruffleRemovePhoto": "Rimuovi foto",
   "publishTruffleQualityLabel": "Qualità tartufo",
@@ -492,7 +539,9 @@
   "publishTruffleValidationImageProcessingFailed": "Impossibile preparare questa immagine per il caricamento.",
   "publishTruffleImagePickerUnavailable": "Impossibile selezionare un'immagine in questo momento.",
   "publishTruffleSubmitUnauthenticated": "La tua sessione è scaduta. Accedi di nuovo prima di pubblicare.",
-  "publishTruffleSubmitNotAllowed": "Solo i seller approvati con onboarding Stripe completato possono pubblicare tartufi.",
+  "publishTruffleSubmitNotAllowed": "Non puoi pubblicare questo tartufo in questo momento.",
+  "publishTruffleSubmitStripeVerificationPending": "Stripe sta ancora verificando il tuo account. Puoi gestire la verifica da Stripe.",
+  "publishTruffleSubmitStripeOnboardingRequired": "Completa la registrazione Stripe per pubblicare questo tartufo.",
   "publishTruffleSubmitInProgress": "Una richiesta di pubblicazione per questo tartufo è già in corso. Attendi qualche secondo e riprova.",
   "publishTruffleSubmitValidation": "Alcuni dati del prodotto non sono validi. Controlla il form e riprova.",
   "publishTruffleSubmitInvalidImage": "Una o più immagini selezionate non sono valide. Controllale e riprova.",
@@ -532,20 +581,68 @@
   "accountLanguageItalian": "Italiano",
   "accountLanguageEnglish": "English",
   "accountSupportTitle": "Supporto",
-  "accountSupportIntro": "Trova risposte rapide su ordini, spedizioni e assistenza alla consegna.",
-  "accountSupportFaqSection": "FAQ",
-  "accountSupportFaqOrderFlowQuestion": "Come funziona un ordine su Truffly?",
-  "accountSupportFaqOrderFlowAnswer": "Scegli il tartufo, conferma l'ordine e ti aggiorneremo fino alla consegna.",
-  "accountSupportFaqShippingTimingQuestion": "Quando viene spedito il tartufo?",
-  "accountSupportFaqShippingTimingAnswer": "I tartufi freschi vengono preparati e spediti il prima possibile dopo la conferma dell'ordine.",
-  "accountSupportFaqOrderTrackingQuestion": "Come posso seguire lo stato del mio ordine?",
-  "accountSupportFaqOrderTrackingAnswer": "Puoi controllare l'ultimo aggiornamento dalla sezione I miei ordini del tuo account.",
-  "accountSupportFaqCancellationQuestion": "Posso annullare un ordine?",
-  "accountSupportFaqCancellationAnswer": "Se hai bisogno di annullare un ordine, contatta il supporto il prima possibile e valuteremo la richiesta.",
-  "accountSupportFaqDeliveryIssueQuestion": "Cosa succede se c'è un problema con la consegna?",
-  "accountSupportFaqDeliveryIssueAnswer": "Scrivi al supporto con i dettagli dell'ordine e ti aiuteremo a risolvere il problema rapidamente.",
-  "accountSupportFaqContactQuestion": "Come posso contattare l'assistenza?",
-  "accountSupportFaqContactAnswer": "Usa l'email qui sotto per contattare direttamente il team Truffly.",
+  "accountSupportIntro": "Trova risposte rapide su acquisti, vendite, pagamenti, spedizioni e account.",
+  "accountSupportFaqBuyingOrdersSection": "Acquisti e ordini",
+  "accountSupportFaqBuyTruffleQuestion": "Come posso acquistare un tartufo?",
+  "accountSupportFaqBuyTruffleAnswer": "Esplora i tartufi disponibili, apri un annuncio, controlla i dettagli del prodotto, seleziona un indirizzo di spedizione e completa il pagamento in modo sicuro tramite Truffly.",
+  "accountSupportFaqTrackOrderQuestion": "Come posso tracciare il mio ordine?",
+  "accountSupportFaqTrackOrderAnswer": "Quando il venditore spedisce l'ordine e inserisce il codice di tracciamento, questo apparirà nella pagina Dettagli ordine.",
+  "accountSupportFaqAfterOrderQuestion": "Cosa succede dopo aver effettuato un ordine?",
+  "accountSupportFaqAfterOrderAnswer": "Dopo il pagamento, il venditore ha fino a 48 ore per spedire i tartufi e fornire le informazioni di tracciamento. Riceverai aggiornamenti nell'app e, se abilitate, tramite notifiche push.",
+  "accountSupportFaqSellerDoesNotShipQuestion": "Cosa succede se il venditore non spedisce?",
+  "accountSupportFaqSellerDoesNotShipAnswer": "Se il venditore non fornisce le informazioni di tracciamento entro il tempo previsto, l'ordine può essere annullato e rimborsato automaticamente.",
+  "accountSupportFaqConfirmDeliveryQuestion": "Come posso confermare la consegna?",
+  "accountSupportFaqConfirmDeliveryAnswer": "Quando ricevi l'ordine, apri la pagina Dettagli ordine e tocca \"Conferma consegna\". In questo modo confermi che l'ordine è stato ricevuto correttamente.",
+  "accountSupportFaqTrufflesQualitySection": "Tartufi e qualità",
+  "accountSupportFaqTrufflesFreshQuestion": "I tartufi sono freschi?",
+  "accountSupportFaqTrufflesFreshAnswer": "Sì. I venditori devono pubblicare tartufi appena raccolti e indicare la data di raccolta in ogni annuncio.",
+  "accountSupportFaqQualityGradesQuestion": "Cosa indicano le categorie di qualità?",
+  "accountSupportFaqQualityGradesAnswer": "Le categorie di qualità descrivono l'aspetto e le condizioni dei tartufi. La Prima qualità comprende generalmente i tartufi più regolari e gradevoli esteticamente, mentre le categorie inferiori possono presentare imperfezioni estetiche pur rimanendo adatte al consumo.",
+  "accountSupportFaqStoreTrufflesQuestion": "Come devo conservare i tartufi freschi?",
+  "accountSupportFaqStoreTrufflesAnswer": "Conserva i tartufi freschi in frigorifero, in un contenitore chiuso con carta assorbente. Sostituisci la carta ogni giorno e consumali il prima possibile per apprezzarli al meglio.",
+  "accountSupportFaqDamagedOrderQuestion": "Cosa devo fare se il mio ordine arriva danneggiato?",
+  "accountSupportFaqDamagedOrderAnswer": "Contatta l'assistenza il prima possibile e invia foto del prodotto, dell'imballaggio e dell'etichetta di spedizione. Esamineremo la situazione e ti aiuteremo dove possibile.",
+  "accountSupportFaqShippingDeliverySection": "Spedizione e consegna",
+  "accountSupportFaqSupportedCountriesQuestion": "Da quali Paesi posso ordinare?",
+  "accountSupportFaqSupportedCountriesAnswer": "Gli acquirenti che si trovano nei Paesi europei supportati possono effettuare ordini tramite Truffly.",
+  "accountSupportFaqShippingCostQuestion": "Quanto costa la spedizione?",
+  "accountSupportFaqShippingCostAnswer": "I costi di spedizione sono stabiliti dal venditore e vengono mostrati prima del checkout.",
+  "accountSupportFaqTrackingNumberQuestion": "Riceverò un codice di tracciamento?",
+  "accountSupportFaqTrackingNumberAnswer": "Sì. I venditori devono fornire le informazioni di tracciamento quando spediscono un ordine.",
+  "accountSupportFaqPackageDelayedQuestion": "Cosa succede se il pacco è in ritardo?",
+  "accountSupportFaqPackageDelayedAnswer": "I tempi di consegna dipendono dal corriere. Se il pacco sembra in ritardo, controlla prima le informazioni di tracciamento. Se il problema persiste, contatta l'assistenza.",
+  "accountSupportFaqPaymentsRefundsSection": "Pagamenti e rimborsi",
+  "accountSupportFaqSecurePaymentsQuestion": "I pagamenti sono sicuri?",
+  "accountSupportFaqSecurePaymentsAnswer": "Sì. I pagamenti vengono elaborati in modo sicuro tramite Stripe. Truffly non conserva i dati completi della tua carta.",
+  "accountSupportFaqPaymentChargedQuestion": "Quando viene addebitato il pagamento?",
+  "accountSupportFaqPaymentChargedAnswer": "Il pagamento viene addebitato quando l'ordine viene effettuato correttamente.",
+  "accountSupportFaqRefundsWorkQuestion": "Come funzionano i rimborsi?",
+  "accountSupportFaqRefundsWorkAnswer": "I rimborsi possono essere emessi in conformità con la Politica di rimborso e cancellazione. L'idoneità al rimborso dipende dallo stato dell'ordine e dalle circostanze della richiesta.",
+  "accountSupportFaqRefundTimingQuestion": "Quanto tempo richiede un rimborso?",
+  "accountSupportFaqRefundTimingAnswer": "I tempi di elaborazione dipendono dalla banca e dal fornitore di pagamento. La maggior parte dei rimborsi viene completata entro pochi giorni lavorativi.",
+  "accountSupportFaqSellingSection": "Vendere su Truffly",
+  "accountSupportFaqBecomeSellerQuestion": "Come posso diventare venditore?",
+  "accountSupportFaqBecomeSellerAnswer": "Completa la richiesta per diventare venditore, carica i documenti richiesti e attendi l'approvazione del team Truffly.",
+  "accountSupportFaqVerifyIdentityQuestion": "Perché devo verificare la mia identità?",
+  "accountSupportFaqVerifyIdentityAnswer": "La verifica contribuisce a mantenere la piattaforma affidabile e sicura e garantisce che solo i venditori idonei possano pubblicare prodotti.",
+  "accountSupportFaqSellerApprovalTimingQuestion": "Quanto tempo richiede l'approvazione come venditore?",
+  "accountSupportFaqSellerApprovalTimingAnswer": "La maggior parte delle richieste viene esaminata entro pochi giorni lavorativi, anche se i tempi possono variare.",
+  "accountSupportFaqPublishAfterApprovalQuestion": "Posso pubblicare tartufi subito dopo l'approvazione?",
+  "accountSupportFaqPublishAfterApprovalAnswer": "Prima di pubblicare, i venditori approvati devono completare la procedura di onboarding Stripe necessaria per ricevere i pagamenti.",
+  "accountSupportFaqSellerPaymentsSection": "Pagamenti ai venditori",
+  "accountSupportFaqSellerPaymentTimingQuestion": "Quando ricevo il pagamento?",
+  "accountSupportFaqSellerPaymentTimingAnswer": "I pagamenti vengono rilasciati dopo il completamento dell'ordine, secondo il processo di pagamento di Truffly.",
+  "accountSupportFaqStripeAccountQuestion": "Perché ho bisogno di un account Stripe?",
+  "accountSupportFaqStripeAccountAnswer": "Stripe gestisce in modo sicuro i pagamenti ai venditori e aiuta a verificare le informazioni di pagamento e i requisiti di identità.",
+  "accountSupportFaqCommissionQuestion": "Qual è la commissione applicata da Truffly?",
+  "accountSupportFaqCommissionAnswer": "Truffly applica una commissione fissa sulle vendite completate. La commissione attuale viene mostrata durante l'onboarding del venditore.",
+  "accountSupportFaqAccountPrivacySection": "Account e privacy",
+  "accountSupportFaqDeleteAccountQuestion": "Come posso eliminare il mio account?",
+  "accountSupportFaqDeleteAccountAnswer": "Puoi richiedere l'eliminazione dell'account dalla pagina Impostazioni dell'app.",
+  "accountSupportFaqAfterDeleteAccountQuestion": "Cosa succede quando elimino il mio account?",
+  "accountSupportFaqAfterDeleteAccountAnswer": "I dati personali saranno eliminati o anonimizzati dove possibile. Alcuni dati possono essere conservati quando richiesto dalla legge o per esigenze di sicurezza, contabilità o prevenzione delle frodi.",
+  "accountSupportFaqProtectDataQuestion": "Come protegge Truffly i miei dati?",
+  "accountSupportFaqProtectDataAnswer": "Truffly utilizza autenticazione sicura, archiviazione protetta, controlli degli accessi e altre misure tecniche progettate per proteggere le informazioni degli utenti.",
   "accountSupportContactTitle": "Contatta il supporto",
   "accountSupportContactBody": "Se hai bisogno di aiuto con un ordine o una consegna, scrivici includendo i dettagli principali.",
   "accountSupportContactCta": "Scrivi al supporto",
@@ -563,10 +660,304 @@
   "accountSettingsAccountSection": "Account",
   "accountSettingsDeleteAccountLabel": "Elimina account",
   "accountSettingsDeleteAccountDialogTitle": "Eliminare il tuo account?",
-  "accountSettingsDeleteAccountDialogBody": "Questa azione non è ancora disponibile dall'app. Conferma solo se vuoi proseguire non appena il flusso sarà pronto.",
+  "accountSettingsDeleteAccountDialogBody": "Elimineremo il tuo account se non ci sono ordini o vendite. Se hai storico transazionale, lo disattiveremo e anonimizzeremo i dati non necessari.",
   "accountSettingsDeleteAccountDialogCancel": "Annulla",
   "accountSettingsDeleteAccountDialogConfirm": "Conferma",
-  "accountSettingsDeleteAccountPendingMessage": "La cancellazione account non è ancora disponibile in-app. Contatta il supporto se hai bisogno di aiuto immediato.",
+  "accountSettingsDeleteAccountDeletedMessage": "Il tuo account è stato eliminato. Sei stato disconnesso.",
+  "accountSettingsDeleteAccountDeactivatedMessage": "Il tuo account è stato disattivato per motivi di conformità. Sei stato disconnesso.",
+  "accountSettingsDeleteAccountUnauthorizedMessage": "La sessione è scaduta. Accedi di nuovo per eliminare l'account.",
+  "accountSettingsDeleteAccountInactiveMessage": "Questo account è già inattivo.",
+  "accountSettingsDeleteAccountErrorMessage": "Impossibile elaborare la richiesta dell'account in questo momento. Riprova.",
+  "notificationsInboxTitle": "Notifiche",
+  "notificationsMarkAllRead": "Segna tutto come letto",
+  "notificationsUnreadLabel": "Non letta",
+  "notificationsReadLabel": "Letta",
+  "notificationsEmptyState": "Sei aggiornato. Le nuove notifiche appariranno qui.",
+  "notificationsErrorState": "Impossibile caricare le notifiche al momento.",
+  "notificationsRetryButton": "Riprova",
+  "notificationGenericTitle": "Notifica",
+  "notificationGenericMessage": "Apri il centro notifiche per vedere l'ultimo aggiornamento.",
+  "notificationFallbackTruffleName": "il tuo tartufo",
+  "notificationFallbackSellerName": "il venditore",
+  "notificationFallbackTrackingCode": "tracking non disponibile",
+  "notificationFallbackSellerAmount": "il tuo pagamento",
+  "notificationOrderConfirmedTitle": "Ordine confermato",
+  "notificationOrderConfirmedMessage": "Il tuo ordine “{truffleName}” è stato confermato. Il venditore ha 48 ore per spedirlo.",
+  "@notificationOrderConfirmedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationPaymentFailedTitle": "Pagamento non riuscito",
+  "notificationPaymentFailedMessage": "Il pagamento per “{truffleName}” non è andato a buon fine. Puoi riprovare dal checkout.",
+  "@notificationPaymentFailedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderShippedTitle": "Ordine spedito",
+  "notificationOrderShippedMessage": "Il tuo ordine “{truffleName}” è stato spedito.",
+  "@notificationOrderShippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationTrackingAvailableTitle": "Tracking disponibile",
+  "notificationTrackingAvailableMessage": "Tracking disponibile per “{truffleName}”: {trackingCode}.",
+  "@notificationTrackingAvailableMessage": {
+    "placeholders": {
+      "truffleName": {},
+      "trackingCode": {}
+    }
+  },
+  "notificationDeliveryConfirmationReminderTitle": "Conferma la consegna",
+  "notificationDeliveryConfirmationReminderMessage": "Hai ricevuto “{truffleName}”? Conferma la consegna per completare l’ordine.",
+  "@notificationDeliveryConfirmationReminderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderCompletedTitle": "Ordine completato",
+  "notificationOrderCompletedMessage": "L’ordine “{truffleName}” è stato completato.",
+  "@notificationOrderCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderAutoCompletedTitle": "Ordine completato automaticamente",
+  "notificationOrderAutoCompletedMessage": "L’ordine “{truffleName}” è stato completato automaticamente.",
+  "@notificationOrderAutoCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderCancelledBySellerTitle": "Ordine cancellato",
+  "notificationOrderCancelledBySellerMessage": "L’ordine “{truffleName}” è stato cancellato dal venditore. Il rimborso verrà avviato.",
+  "@notificationOrderCancelledBySellerMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationOrderAutoCancelledUnshippedTitle": "Ordine annullato",
+  "notificationOrderAutoCancelledUnshippedMessage": "L’ordine “{truffleName}” è stato annullato perché non è stato spedito entro 48 ore.",
+  "@notificationOrderAutoCancelledUnshippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationRefundStartedTitle": "Rimborso avviato",
+  "notificationRefundStartedMessage": "Il rimborso per “{truffleName}” è stato avviato.",
+  "@notificationRefundStartedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationRefundCompletedTitle": "Rimborso completato",
+  "notificationRefundCompletedMessage": "Il rimborso per “{truffleName}” è stato completato.",
+  "@notificationRefundCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationReviewRequestTitle": "Lascia una recensione",
+  "notificationReviewRequestMessage": "Com’è stata la tua esperienza con “{sellerName}”? Lascia una recensione per “{truffleName}”.",
+  "@notificationReviewRequestMessage": {
+    "placeholders": {
+      "sellerName": {},
+      "truffleName": {}
+    }
+  },
+  "notificationReviewAutoCreatedTitle": "Recensione automatica",
+  "notificationReviewAutoCreatedMessage": "Abbiamo completato automaticamente la recensione per “{truffleName}”.",
+  "@notificationReviewAutoCreatedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationFavoriteTruffleUnavailableTitle": "Tartufo non più disponibile",
+  "notificationFavoriteTruffleUnavailableMessage": "“{truffleName}” non è più disponibile.",
+  "@notificationFavoriteTruffleUnavailableMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationFavoriteTruffleExpiringTitle": "Annuncio in scadenza",
+  "notificationFavoriteTruffleExpiringMessage": "“{truffleName}” è ancora disponibile, ma l’annuncio sta per scadere.",
+  "@notificationFavoriteTruffleExpiringMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerApplicationSubmittedTitle": "Richiesta inviata",
+  "notificationSellerApplicationSubmittedMessage": "La tua richiesta per vendere su Truffly è stata inviata. Ti avviseremo appena sarà revisionata.",
+  "notificationSellerApprovedTitle": "Venditore approvato",
+  "notificationSellerApprovedMessage": "Sei stato approvato come venditore. Completa Stripe per iniziare a pubblicare tartufi.",
+  "notificationSellerRejectedTitle": "Richiesta non approvata",
+  "notificationSellerRejectedMessage": "La tua richiesta venditore non è stata approvata. Controlla i dettagli o contatta il supporto.",
+  "notificationStripeOnboardingRequiredTitle": "Configura i pagamenti",
+  "notificationStripeOnboardingRequiredMessage": "Completa la configurazione dei pagamenti per iniziare a vendere su Truffly.",
+  "notificationStripeOnboardingCompletedTitle": "Pagamenti configurati",
+  "notificationStripeOnboardingCompletedMessage": "I pagamenti sono configurati. Ora puoi pubblicare i tuoi tartufi.",
+  "notificationTrufflePublishedTitle": "Tartufo pubblicato",
+  "notificationTrufflePublishedMessage": "“{truffleName}” è stato pubblicato ed è ora visibile agli utenti.",
+  "@notificationTrufflePublishedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationTruffleDeletedTitle": "Tartufo eliminato",
+  "notificationTruffleDeletedMessage": "“{truffleName}” è stato eliminato.",
+  "@notificationTruffleDeletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationTruffleExpiredTitle": "Annuncio scaduto",
+  "notificationTruffleExpiredMessage": "L’annuncio “{truffleName}” è scaduto e non è più visibile.",
+  "@notificationTruffleExpiredMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerNewOrderTitle": "Nuovo ordine ricevuto",
+  "notificationSellerNewOrderMessage": "Hai ricevuto un nuovo ordine per “{truffleName}”. Spediscilo entro 48 ore.",
+  "@notificationSellerNewOrderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerShipping24hReminderTitle": "Ricorda di spedire",
+  "notificationSellerShipping24hReminderMessage": "Ricorda di spedire “{truffleName}”. Hai ancora 24 ore per inserire il tracking.",
+  "@notificationSellerShipping24hReminderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerShippingFinalReminderTitle": "Ultime ore per spedire",
+  "notificationSellerShippingFinalReminderMessage": "Ultime ore per spedire “{truffleName}”. Se non inserisci il tracking, l’ordine sarà annullato.",
+  "@notificationSellerShippingFinalReminderMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerOrderCancelledUnshippedTitle": "Ordine annullato",
+  "notificationSellerOrderCancelledUnshippedMessage": "L’ordine “{truffleName}” è stato annullato perché non è stato spedito entro 48 ore.",
+  "@notificationSellerOrderCancelledUnshippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerOrderMarkedShippedTitle": "Ordine spedito",
+  "notificationSellerOrderMarkedShippedMessage": "Hai segnato “{truffleName}” come spedito. Avviseremo il compratore.",
+  "@notificationSellerOrderMarkedShippedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerDeliveryConfirmedByBuyerTitle": "Consegna confermata",
+  "notificationSellerDeliveryConfirmedByBuyerMessage": "Il compratore ha confermato la consegna di “{truffleName}”.",
+  "@notificationSellerDeliveryConfirmedByBuyerMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerOrderAutoCompletedTitle": "Ordine completato automaticamente",
+  "notificationSellerOrderAutoCompletedMessage": "L’ordine “{truffleName}” è stato completato automaticamente.",
+  "@notificationSellerOrderAutoCompletedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerPaymentReleasedTitle": "Pagamento rilasciato",
+  "notificationSellerPaymentReleasedMessage": "Il pagamento per “{truffleName}” è stato rilasciato. Riceverai {sellerAmount}.",
+  "@notificationSellerPaymentReleasedMessage": {
+    "placeholders": {
+      "truffleName": {},
+      "sellerAmount": {}
+    }
+  },
+  "notificationSellerPaymentProcessingTitle": "Pagamento in elaborazione",
+  "notificationSellerPaymentProcessingMessage": "Il pagamento per “{truffleName}” è in elaborazione.",
+  "@notificationSellerPaymentProcessingMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerPaymentFailedTitle": "Problema con il pagamento",
+  "notificationSellerPaymentFailedMessage": "C’è un problema con il pagamento dell’ordine “{truffleName}”. Stiamo verificando.",
+  "@notificationSellerPaymentFailedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerNewReviewTitle": "Nuova recensione",
+  "notificationSellerNewReviewMessage": "Hai ricevuto una nuova recensione per “{truffleName}”.",
+  "@notificationSellerNewReviewMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationSellerAutoReviewReceivedTitle": "Recensione automatica ricevuta",
+  "notificationSellerAutoReviewReceivedMessage": "È stata aggiunta una recensione automatica per l’ordine “{truffleName}”.",
+  "@notificationSellerAutoReviewReceivedMessage": {
+    "placeholders": {
+      "truffleName": {}
+    }
+  },
+  "notificationBuyerWelcomeTitle": "Benvenuto su Truffly 👋",
+  "notificationBuyerWelcomeMessage": "Esplora tartufi freschi, scopri nuovi tartufai e porta a casa il sapore autentico del tartufo.",
+  "notificationProfileUpdatedTitle": "Profilo aggiornato",
+  "notificationProfileUpdatedMessage": "Le modifiche al tuo profilo sono state salvate.",
+  "notificationSecurityNewLoginTitle": "Nuovo accesso",
+  "notificationSecurityNewLoginMessage": "È stato effettuato un nuovo accesso al tuo account.",
+  "notificationTitleGeneric": "Notifica",
+  "notificationTitleOrderPlaced": "Aggiornamento ordine",
+  "notificationTitleOrderShipped": "Ordine spedito",
+  "notificationTitleOrderCompleted": "Ordine completato",
+  "notificationTitleOrderCancelled": "Ordine annullato",
+  "notificationTitleSellerApplicationSubmitted": "Richiesta venditore",
+  "notificationTitleSellerApproved": "Venditore approvato",
+  "notificationTitleSellerRejected": "Venditore rifiutato",
+  "notificationTitlePayoutReleased": "Payout rilasciato",
+  "notificationTitleFavoriteTruffleDeleted": "Tartufo salvato non disponibile",
+  "notificationMessageOrderPlaced": "Il tuo ordine è stato confermato. Il venditore può prepararlo.",
+  "notificationMessageOrderShipped": "Il venditore ha spedito il tuo ordine.",
+  "notificationMessageOrderCompleted": "Il tuo ordine è stato completato.",
+  "notificationMessageOrderCancelled": "Il tuo ordine è stato annullato o rimborsato.",
+  "notificationMessageOrderAutoCancelledUnshippedBuyer": "Il tuo ordine è stato annullato e rimborsato perché il venditore non lo ha spedito entro 48 ore.",
+  "notificationMessageOrderAutoCancelledUnshippedSeller": "L'ordine è stato annullato e rimborsato perché non è stato spedito entro 48 ore.",
+  "notificationTitleBuyerReviewCreated": "Nuova recensione",
+  "notificationMessageBuyerReviewCreated": "Un acquirente ha lasciato una recensione per uno dei tuoi ordini completati.",
+  "notificationTitleAutoReviewCreated": "Recensione automatica",
+  "notificationMessageAutoReviewCreated": "Una recensione automatica è stata creata allo scadere della finestra di recensione.",
+  "notificationTitleOrderDeliveryConfirmationReminder": "Promemoria consegna",
+  "notificationMessageOrderDeliveryConfirmationReminder": "Conferma la consegna entro 48 ore oppure l'ordine verrà completato automaticamente.",
+  "notificationMessageSellerApplicationSubmitted": "Abbiamo preso in carico la tua richiesta. I documenti sono in revisione.",
+  "notificationMessageSellerApproved": "La tua richiesta per diventare venditore è stata approvata.",
+  "notificationMessageSellerRejected": "La tua richiesta per diventare venditore non è stata approvata.",
+  "notificationMessagePayoutReleased": "Un payout è stato rilasciato.",
+  "notificationMessageFavoriteTruffleDeleted": "Un tartufo che hai salvato non è più disponibile.",
+  "reviewSectionTitle": "Recensisci l'ordine",
+  "reviewSectionCopy": "La tua recensione aiuta altri acquirenti a scegliere con più fiducia e valorizza il lavoro del venditore.",
+  "reviewUnavailableCopy": "La recensione non è più disponibile per questo ordine.",
+  "reviewLeaveCta": "Lascia recensione",
+  "reviewSubmittedLabel": "Recensione inviata",
+  "reviewSubmittedSnackBar": "Grazie, recensione pubblicata.",
+  "reviewSubmitErrorMessage": "Impossibile inviare la recensione in questo momento.",
+  "reviewSheetTitle": "Com'è stata la tua esperienza?",
+  "reviewSheetSubtitle": "La tua recensione aiuta altri acquirenti a scegliere con più fiducia e valorizza il lavoro del venditore.",
+  "reviewRatingLabel": "Punteggio",
+  "reviewCommentLabel": "Commento",
+  "reviewCommentPlaceholder": "Racconta com'è andata: freschezza, spedizione, qualità del tartufo…",
+  "reviewWindowNote": "Hai 48 ore per lasciare una recensione. Dopo verrà lasciata automaticamente una recensione di 5 stelle.",
+  "reviewSubmitCta": "Pubblica recensione",
+  "reviewCancelCta": "Più tardi",
+  "reviewRatingRequiredError": "Scegli un punteggio.",
+  "reviewAutoLabel": "Recensione creata automaticamente",
+  "reviewAutoCommentCompletedSuccess": "Recensione automatica: ordine completato con successo.",
+  "reviewAutoCommentUnshipped48h": "Recensione automatica: ordine non spedito entro 48 ore.",
+  "reviewWindowExpiredMessage": "Il tempo per lasciare una recensione è scaduto. Se non hai recensito, verrà registrata la valutazione automatica prevista.",
+  "reviewAlreadySubmittedMessage": "Hai già lasciato una recensione per questo ordine.",
   "accountPrivacyPolicyTitle": "Privacy Policy",
   "accountPrivacyPolicyLeadTitle": "La tua privacy su Truffly",
   "accountPrivacyPolicyLeadBody": "Questa sintesi spiega come Truffly gestisce le informazioni usate per creare l'account, gestire gli ordini e supportare la tua attivita nell'app.",
@@ -588,5 +979,13 @@
   "accountTermsSectionSupportTitle": "Supporto e problemi",
   "accountTermsSectionSupportBody": "Se c'e un problema con un ordine o con la consegna, contatta rapidamente il supporto cosi il team potra valutare la situazione e indicarti i prossimi passi.",
   "accountTermsSectionUpdatesTitle": "Aggiornamenti futuri",
-  "accountTermsSectionUpdatesBody": "Questi testi sono una versione MVP e potranno essere aggiornati man mano che Truffly estendera i propri flussi legali e operativi."
+  "accountTermsSectionUpdatesBody": "Questi testi sono una versione MVP e potranno essere aggiornati man mano che Truffly estendera i propri flussi legali e operativi.",
+  "accountSettingsRefundAndCancellationLabel": "Rimborso e cancellazione",
+  "accountSettingsLegalInformationLabel": "Informazioni legali",
+  "accountRefundAndCancellationTitle": "Rimborso e cancellazione",
+  "accountLegalInformationTitle": "Informazioni legali",
+  "accountPrivacyPolicyContent": "Ultimo aggiornamento: [Data]\n\nTruffly rispetta la tua privacy e si impegna a proteggere i tuoi dati personali.\n\nLa presente Informativa sulla privacy spiega come Truffly raccoglie, utilizza, conserva, condivide e protegge le informazioni personali quando utilizzi l’app mobile Truffly e i relativi servizi.\n\n1. Titolare del trattamento\n\nIl titolare del trattamento è:\n\n[Titolare legale / Ragione sociale]\nIndirizzo: [Sede legale]\nPaese: Italia\nEmail: [Email privacy]\nEmail assistenza: truffly@gmail.com\n\n2. Cos’è Truffly\n\nTruffly è un marketplace che mette in contatto gli acquirenti con tartufai e venditori italiani verificati.\n\nTruffly fornisce la piattaforma digitale, la gestione degli account, il flusso dei pagamenti, gli strumenti per gli ordini, gli strumenti di verifica dei venditori, le notifiche e le funzionalità di assistenza.\n\nSalvo ove espressamente indicato diversamente, Truffly non vende direttamente i tartufi pubblicati dai venditori.\n\n3. Dati personali che raccogliamo\n\nQuando utilizzi Truffly, potremmo raccogliere i seguenti dati:\n\nDati dell’account\n• nome\n• cognome\n• indirizzo email\n• credenziali della password gestite tramite il nostro fornitore di autenticazione\n• Paese\n• regione, ove applicabile\n• immagine del profilo, se caricata\n• ruolo dell’account, ad esempio acquirente o venditore\n\nDati dell’acquirente\n• indirizzi di spedizione\n• numero di telefono per la consegna\n• cronologia degli ordini\n• prodotti preferiti\n• recensioni inviate\n• richieste di assistenza\n\nDati del venditore\n• informazioni del profilo venditore\n• regione\n• biografia\n• stato della richiesta venditore\n• informazioni sulla licenza o sul permesso per i tartufi\n• documenti di verifica del venditore\n• stato dell’onboarding Stripe Connect\n• prodotti pubblicati\n• cronologia delle vendite\n• recensioni ricevute\n\nDati relativi a ordini e pagamenti\n• prodotto acquistato\n• identificativi del venditore e dell’acquirente\n• importo dell’ordine\n• costo di spedizione\n• importo della commissione\n• stato del pagamento\n• stato del rimborso\n• identificativi delle transazioni Stripe\n• codice di tracciamento\n• stato dell’ordine\n\nTruffly non conserva i numeri completi delle carte né i dati completi delle carte di pagamento. I pagamenti sono elaborati da Stripe.\n\nDati tecnici\n• informazioni sul dispositivo\n• sistema operativo\n• indirizzo IP\n• log dell’app\n• log di sicurezza\n• token delle notifiche push\n• dati della sessione di autenticazione\n\n4. Perché utilizziamo i tuoi dati\n\nTrattiamo i dati personali per:\n• creare e gestire il tuo account\n• consentirti di acquistare e vendere tartufi\n• verificare le richieste dei venditori\n• elaborare pagamenti e rimborsi\n• gestire gli ordini e le informazioni di spedizione\n• inviare notifiche relative agli ordini\n• fornire assistenza clienti\n• prevenire frodi e usi impropri\n• proteggere la piattaforma\n• adempiere agli obblighi di legge\n• gestire la cancellazione dell’account e le richieste relative ai dati\n\n5. Base giuridica del trattamento\n\nTrattiamo i tuoi dati in base alle seguenti basi giuridiche:\n\nEsecuzione del contratto\nPer fornire il servizio Truffly, gestire gli account, elaborare gli ordini e consentire i pagamenti.\n\nObblighi di legge\nPer rispettare le leggi applicabili, gli obblighi contabili, le norme a tutela dei consumatori e le richieste delle autorità competenti.\n\nLegittimo interesse\nPer proteggere la piattaforma, prevenire le frodi, verificare i venditori, conservare i log di controllo e migliorare la sicurezza.\n\nConsenso\nPer le notifiche push e qualsiasi trattamento facoltativo per il quale sia richiesto il consenso.\n\nPuoi revocare in qualsiasi momento il consenso alle notifiche tramite le impostazioni del dispositivo o, ove disponibili, le impostazioni di Truffly.\n\n6. Documenti di verifica del venditore\n\nSe presenti una richiesta per diventare venditore, Truffly può richiedere documenti per verificare la tua identità e la tua idoneità a vendere tartufi.\n\nQuesti documenti sono utilizzati esclusivamente per la verifica e la sicurezza della piattaforma.\n\nOve possibile, i documenti di identità vengono eliminati al termine del processo di verifica, salvo che la loro conservazione sia richiesta dalla legge o necessaria per proteggere Truffly da frodi, controversie o pretese legali.\n\nLe informazioni relative alla licenza o al permesso del venditore possono essere conservate per tutta la durata dell’account venditore e per ogni ulteriore periodo richiesto dalla legge o da legittime esigenze di conformità.\n\n7. Pagamenti\n\nI pagamenti sono elaborati tramite Stripe.\n\nStripe può raccogliere e trattare dati di pagamento, dati di verifica dell’identità, informazioni fiscali, coordinate bancarie e altre informazioni necessarie per fornire i servizi di pagamento.\n\nTruffly può ricevere e conservare identificativi di pagamento, stato dell’ordine, stato del rimborso e stato del pagamento al venditore, ma non conserva i dati completi delle carte di pagamento.\n\n8. Notifiche push\n\nTruffly può inviare notifiche push relative a:\n• conferme degli ordini\n• aggiornamenti sulla spedizione\n• aggiornamenti sui rimborsi\n• approvazione o rifiuto del venditore\n• rilascio dei pagamenti\n• avvisi importanti relativi all’account o alla sicurezza\n\nPuoi disabilitare le notifiche push tramite le impostazioni del dispositivo.\n\nAlcune comunicazioni importanti di servizio potrebbero comunque essere mostrate all’interno dell’app.\n\n9. Con chi condividiamo i dati\n\nPotremmo condividere i dati con:\n• Stripe, per i pagamenti e l’onboarding dei venditori\n• Supabase, per autenticazione, database e archiviazione\n• Firebase Cloud Messaging, per le notifiche push\n• fornitori di hosting, infrastruttura, sicurezza e servizi tecnici\n• autorità competenti, ove richiesto dalla legge\n• acquirenti e venditori, solo quando necessario per completare un ordine\n\nAd esempio, un venditore può ricevere le informazioni di spedizione necessarie per evadere un ordine. Un acquirente può visualizzare le informazioni del profilo venditore, le valutazioni e i dettagli relativi all’ordine.\n\n10. Trasferimenti internazionali\n\nAlcuni fornitori di servizi possono trattare dati al di fuori dello Spazio economico europeo.\n\nIn tali casi, Truffly si avvale di garanzie adeguate, come le Clausole contrattuali standard o altri meccanismi di trasferimento leciti previsti dalle leggi applicabili in materia di protezione dei dati.\n\n11. Conservazione dei dati\n\nConserviamo i dati personali solo per il tempo necessario.\n\nIn linea indicativa:\n• dati dell’account: per tutta la durata dell’account\n• dati degli ordini: per il periodo richiesto dalla legge e dagli obblighi contabili\n• dati di verifica del venditore: per il tempo necessario alla verifica e alla conformità\n• richieste di assistenza: per il tempo necessario a gestire la richiesta e tutelare i diritti legali\n• log di sicurezza: per finalità di sicurezza, prevenzione delle frodi e controllo\n• account eliminati: i dati vengono eliminati o anonimizzati, salvo che la conservazione sia richiesta dalla legge\n\nSe un account ha completato ordini, recensioni, pagamenti, rimborsi o attività di vendita, alcuni dati potrebbero dover essere conservati per adempiere agli obblighi di legge e proteggere i diritti degli utenti e di Truffly.\n\n12. Cancellazione dell’account\n\nPuoi richiedere la cancellazione del tuo account dall’interno dell’app.\n\nQuando elimini il tuo account, Truffly eliminerà o anonimizzerà i dati personali ove possibile.\n\nAlcuni dati possono essere conservati quando necessario per:\n• adempiere agli obblighi di legge\n• conservare le registrazioni contabili\n• gestire controversie\n• prevenire frodi\n• proteggere i diritti di Truffly, degli acquirenti o dei venditori\n\nSe sei un venditore o hai completato transazioni, le registrazioni degli ordini possono essere conservate in forma anonimizzata o limitata.\n\n13. I tuoi diritti\n\nAi sensi delle leggi applicabili in materia di protezione dei dati, potresti avere il diritto di:\n• accedere ai tuoi dati personali\n• correggere i dati inesatti\n• richiedere la cancellazione dei tuoi dati\n• limitare il trattamento\n• opporti al trattamento\n• richiedere la portabilità dei dati\n• revocare il consenso\n• proporre reclamo a un’autorità di protezione dei dati\n\nPer esercitare i tuoi diritti, contattaci all’indirizzo:\n\n[Email privacy]\n\n14. Sicurezza\n\nTruffly utilizza misure tecniche e organizzative progettate per proteggere i dati personali, tra cui controlli degli accessi, sistemi di autenticazione, archiviazione protetta, logica aziendale lato server e log di sicurezza.\n\nNessun sistema digitale può essere garantito come completamente sicuro.\n\n15. Minori\n\nTruffly non è destinato a utenti di età inferiore ai 18 anni.\n\nSe veniamo a conoscenza del fatto che un minore ha creato un account, possiamo eliminare l’account e i dati associati.\n\n16. Modifiche alla presente Informativa sulla privacy\n\nPotremmo aggiornare periodicamente la presente Informativa sulla privacy.\n\nQuando le modifiche sono significative, potremmo informare gli utenti tramite l’app o altri canali appropriati.\n\n17. Contatti\n\nPer richieste relative alla privacy:\n[Email privacy]\n\nPer assistenza generale:\ntruffly@gmail.com",
+  "accountTermsContent": "Ultimo aggiornamento: [Data]\n\nBenvenuto su Truffly.\n\nI presenti Termini e condizioni disciplinano l’accesso e l’utilizzo dell’app mobile Truffly e dei relativi servizi.\n\nCreando un account o utilizzando Truffly, accetti i presenti Termini.\n\n1. Gestore della piattaforma\n\nTruffly è gestita da:\n\n[Titolare legale / Ragione sociale]\nIndirizzo: [Sede legale]\nPaese: Italia\nEmail assistenza: truffly@gmail.com\n\n2. Cosa fa Truffly\n\nTruffly è un marketplace digitale che consente agli acquirenti di acquistare tartufi freschi da venditori italiani verificati.\n\nTruffly fornisce:\n• la piattaforma mobile\n• la registrazione dell’account\n• gli strumenti di verifica dei venditori\n• gli strumenti per pubblicare i prodotti\n• la gestione degli ordini\n• il flusso di pagamento tramite Stripe\n• le notifiche\n• gli strumenti per le recensioni\n• gli strumenti di assistenza\n\nSalvo ove espressamente indicato diversamente, Truffly non è il venditore diretto dei prodotti pubblicati sulla piattaforma.\n\nIl contratto di vendita del prodotto è concluso tra l’acquirente e il venditore.\n\n3. Requisiti degli utenti\n\nPer utilizzare Truffly devi:\n• avere almeno 18 anni\n• fornire informazioni accurate\n• mantenere al sicuro le credenziali del tuo account\n• utilizzare la piattaforma in modo lecito\n• rispettare i presenti Termini\n\nTruffly può sospendere o chiudere gli account che violano i presenti Termini o la legge applicabile.\n\n4. Account acquirente\n\nGli acquirenti possono:\n• esplorare i tartufi\n• visualizzare i profili dei venditori\n• acquistare i prodotti disponibili\n• gestire gli indirizzi di spedizione\n• tracciare gli ordini\n• confermare la consegna\n• lasciare recensioni\n• contattare l’assistenza\n\nGli acquirenti devono fornire informazioni di spedizione e di contatto accurate.\n\nTruffly non è responsabile delle consegne non riuscite a causa di informazioni errate o incomplete fornite dall’acquirente.\n\n5. Account venditore\n\nSolo i venditori approvati possono pubblicare tartufi su Truffly.\n\nI venditori devono:\n• avere sede in Italia\n• fornire informazioni accurate sulla propria identità e idoneità\n• possedere ogni licenza, permesso, autorizzazione o requisito applicabile alla raccolta e alla vendita dei tartufi\n• pubblicare informazioni veritiere sui prodotti\n• utilizzare immagini reali dei prodotti\n• spedire i prodotti entro i tempi richiesti\n• fornire informazioni di tracciamento valide\n• rispettare le leggi fiscali, alimentari, commerciali e a tutela dei consumatori applicabili alla propria attività\n\nI venditori sono responsabili dei prodotti che pubblicano e vendono.\n\nTruffly può approvare, rifiutare, sospendere o rimuovere l’accesso del venditore quando necessario per proteggere gli utenti, rispettare la legge o preservare l’affidabilità della piattaforma.\n\n6. Inserzioni dei prodotti\n\nOgni inserzione deve contenere informazioni accurate, incluse, ove applicabili:\n• tipologia di tartufo\n• qualità\n• peso\n• prezzo\n• data di raccolta\n• regione\n• costo di spedizione\n• immagini\n\nI venditori non devono pubblicare prodotti ingannevoli, falsi, illegali, non sicuri o non disponibili.\n\nTruffly può rimuovere le inserzioni che violano i presenti Termini o le regole della piattaforma.\n\n7. Freschezza e disponibilità dei prodotti\n\nI tartufi sono prodotti freschi e deperibili.\n\nLa disponibilità può essere limitata e soggetta a variazioni rapide.\n\nUn prodotto può diventare non disponibile se viene venduto, scade, viene rimosso o cancellato secondo le regole della piattaforma.\n\n8. Ordini\n\nQuando un acquirente completa il pagamento, l’ordine viene creato e il venditore deve spedire il prodotto secondo le regole mostrate nell’app.\n\nIl venditore deve inserire le informazioni di tracciamento entro il tempo richiesto.\n\nGli stati dell’ordine possono includere:\n• pagato\n• spedito\n• completato\n• cancellato\n\nTruffly può utilizzare sistemi automatizzati per aggiornare lo stato dell’ordine secondo le regole della piattaforma.\n\n9. Pagamenti\n\nI pagamenti sono elaborati tramite Stripe.\n\nQuando un acquirente acquista un prodotto, il pagamento viene riscosso in modo sicuro e trattenuto secondo il flusso di pagamento della piattaforma.\n\nI pagamenti ai venditori vengono rilasciati secondo le regole di completamento dell’ordine.\n\nTruffly applica una commissione fissa del [10%] sulle transazioni completate, salvo ove diversamente indicato.\n\nLa commissione è calcolata dalla piattaforma.\n\n10. Spedizione\n\nIl venditore è responsabile della corretta preparazione e spedizione del prodotto.\n\nI venditori devono utilizzare imballaggi adatti ai tartufi freschi e rispettare i requisiti applicabili in materia di spedizione e sicurezza alimentare.\n\nTempi e costi di spedizione possono variare in base alla destinazione e alle impostazioni del venditore.\n\nTruffly non è responsabile dei ritardi causati dai corrieri, da indirizzi errati, da cause di forza maggiore o da eventi al di fuori del ragionevole controllo di Truffly.\n\n11. Conferma dell’acquirente e completamento automatico\n\nDopo la spedizione, l’acquirente può confermare la consegna nell’app.\n\nSe l’acquirente non conferma entro il termine mostrato nell’app, l’ordine può essere completato automaticamente dopo il periodo di attesa applicabile.\n\nQuando un ordine è completato, il pagamento al venditore può essere rilasciato secondo il flusso di pagamento.\n\n12. Cancellazioni\n\nGli ordini possono essere cancellati nei casi descritti nella Politica di rimborso e cancellazione.\n\nSe il venditore non spedisce entro il tempo richiesto, l’ordine può essere cancellato e rimborsato automaticamente.\n\nGli acquirenti non possono cancellare liberamente un ordine dopo il pagamento, salvo che ciò sia consentito dalla legge, dalle politiche della piattaforma o a seguito di una valutazione dell’assistenza.\n\n13. Diritto di recesso\n\nI tartufi freschi sono prodotti alimentari deperibili.\n\nPer questo motivo, il diritto di recesso potrebbe non applicarsi agli acquisti di tartufi freschi quando il prodotto è soggetto a deteriorarsi o scadere rapidamente.\n\nCiò non pregiudica eventuali diritti inderogabili dei consumatori che non possono essere esclusi dalla legge.\n\n14. Recensioni\n\nGli acquirenti possono lasciare una recensione per ogni ordine completato.\n\nLe recensioni devono essere oneste, pertinenti e basate su un acquisto reale.\n\nGli utenti non possono pubblicare:\n• recensioni false\n• contenuti offensivi\n• contenuti discriminatori\n• spam\n• dati personali privati\n• minacce\n• contenuti illegali\n\nTruffly può rimuovere le recensioni che violano i presenti Termini o la legge applicabile.\n\nSe l’app prevede recensioni automatiche dopo un determinato periodo, ciò verrà indicato nell’app.\n\n15. Contenuti degli utenti\n\nGli utenti possono caricare o pubblicare contenuti quali informazioni del profilo, immagini dei prodotti, descrizioni e recensioni.\n\nCaricando un contenuto, confermi che:\n• hai il diritto di utilizzarlo\n• è accurato e lecito\n• non viola diritti di terzi\n• non contiene materiale illegale, dannoso o ingannevole\n\nTruffly può rimuovere i contenuti che violano i presenti Termini.\n\n16. Usi vietati\n\nNon devi:\n• creare account falsi\n• impersonare un’altra persona\n• pubblicare informazioni false sui prodotti\n• manipolare le recensioni\n• tentare di aggirare i sistemi di pagamento\n• molestare altri utenti\n• caricare contenuti illegali o dannosi\n• interferire con la sicurezza della piattaforma\n• utilizzare Truffly per frodi o attività illecite\n\n17. Ruolo della piattaforma e limitazione di responsabilità\n\nTruffly opera come piattaforma marketplace e intermediario tecnologico.\n\nI venditori sono responsabili dei prodotti che pubblicano e vendono.\n\nAcquirenti e venditori sono responsabili del rispetto delle leggi applicabili alla propria condotta.\n\nNella misura massima consentita dalla legge, Truffly non è responsabile per:\n• informazioni false fornite dagli utenti\n• problemi di qualità dei prodotti causati dai venditori\n• uso improprio dei prodotti\n• ritardi dei corrieri\n• informazioni di spedizione errate\n• obblighi fiscali dei venditori\n• controversie non causate da una violazione di Truffly\n\nNessuna disposizione dei presenti Termini limita i diritti che non possono essere esclusi ai sensi della normativa applicabile a tutela dei consumatori.\n\n18. Imposte\n\nI venditori sono responsabili della determinazione e dell’adempimento dei propri obblighi fiscali, di fatturazione, contabili e dichiarativi.\n\nTruffly non fornisce consulenza fiscale.\n\nAcquirenti e venditori dovrebbero consultare un professionista qualificato ove necessario.\n\n19. Sospensione o chiusura dell’account\n\nTruffly può sospendere o chiudere un account se:\n• l’utente viola i presenti Termini\n• l’utente fornisce informazioni false\n• si sospettano frodi o abusi\n• è richiesto dalla legge\n• è necessario per proteggere gli utenti o la piattaforma\n\nGli utenti possono eliminare il proprio account dall’interno dell’app, fatti salvi gli obblighi legali di conservazione.\n\n20. Modifiche al servizio\n\nTruffly può aggiornare, modificare, sospendere o interrompere parti della piattaforma.\n\nQuando le modifiche incidono in modo sostanziale sugli utenti, Truffly può fornire un avviso tramite l’app o altri canali appropriati.\n\n21. Legge applicabile\n\nI presenti Termini sono disciplinati dalla legge italiana, fatti salvi i diritti inderogabili a tutela dei consumatori eventualmente applicabili nel Paese di residenza dell’acquirente.\n\n22. Contatti\n\nPer assistenza:\ntruffly@gmail.com\n\nPer richieste legali:\n[Email legale]",
+  "accountRefundAndCancellationContent": "Ultimo aggiornamento: [Data]\n\nLa presente Politica di rimborso e cancellazione spiega come funzionano su Truffly le cancellazioni, i rimborsi, i termini di spedizione e il rilascio dei pagamenti.\n\n1. Principio generale\n\nTruffly è un marketplace di tartufi freschi venduti da venditori italiani verificati.\n\nI tartufi freschi sono prodotti deperibili. Per questo motivo, rimborsi e cancellazioni sono gestiti in base alla freschezza del prodotto, allo stato della spedizione, agli obblighi del venditore e alle leggi applicabili a tutela dei consumatori.\n\n2. Protezione del pagamento\n\nQuando un acquirente paga un ordine, il pagamento viene elaborato in modo sicuro tramite Stripe.\n\nIl pagamento può essere trattenuto secondo il flusso di pagamento di Truffly fino a quando l’ordine non viene spedito, confermato, completato, cancellato o rimborsato.\n\n3. Termine di spedizione del venditore\n\nI venditori devono spedire il prodotto e fornire le informazioni di tracciamento entro il termine mostrato nell’app.\n\nNel flusso standard di Truffly, i venditori devono spedire entro 48 ore dalla conferma dell’ordine, salvo ove diversamente indicato.\n\n4. Cancellazione automatica se il venditore non spedisce\n\nSe il venditore non fornisce le informazioni di tracciamento entro il termine richiesto, Truffly può cancellare automaticamente l’ordine.\n\nIn questo caso:\n• l’acquirente riceve un rimborso\n• il venditore non riceve il pagamento\n• il prodotto può tornare disponibile, ove applicabile\n\n5. Cancellazione da parte dell’acquirente\n\nPoiché i tartufi freschi sono prodotti deperibili e soggetti a tempi ristretti, in genere gli acquirenti non possono cancellare un ordine dopo il pagamento una volta che il venditore ha iniziato a preparare o spedire il prodotto.\n\nUn acquirente può contattare l’assistenza se:\n• l’ordine è stato effettuato per errore\n• l’indirizzo di spedizione non è corretto\n• il venditore non ha ancora spedito\n• esiste un altro problema grave\n\nTruffly valuterà la richiesta, ma non può garantire la cancellazione in ogni caso.\n\n6. Cancellazione da parte del venditore\n\nUn venditore può cancellare un ordine prima della spedizione solo quando consentito dal flusso dell’app o dall’assistenza Truffly.\n\nI motivi possono includere:\n• prodotto non più idoneo alla vendita\n• problema di qualità del prodotto\n• impossibilità di spedire\n• informazioni errate nell’inserzione\n\nSe il venditore cancella prima della spedizione, l’acquirente riceverà un rimborso.\n\nCancellazioni ripetute da parte del venditore possono comportare la revisione o la sospensione dell’account.\n\n7. Rimborso dopo la spedizione\n\nDopo la spedizione di un ordine, i rimborsi non sono automatici.\n\nUn acquirente può contattare l’assistenza se:\n• il prodotto non è stato consegnato\n• il prodotto è arrivato danneggiato\n• il prodotto è sostanzialmente diverso dall’inserzione\n• esiste un problema grave di freschezza o qualità\n• le informazioni di tracciamento mostrano un problema di consegna\n\nTruffly può chiedere all’acquirente di fornire prove, quali fotografie, informazioni di tracciamento o dettagli dell’ordine.\n\n8. Conferma della consegna\n\nQuando l’acquirente riceve il prodotto, può confermare la consegna nell’app.\n\nUna volta confermata la consegna, l’ordine può essere completato e il pagamento al venditore può essere rilasciato.\n\n9. Completamento automatico\n\nSe l’acquirente non conferma la consegna o non segnala un problema entro il termine mostrato nell’app, l’ordine può essere completato automaticamente.\n\nDopo il completamento automatico, il pagamento al venditore può essere rilasciato.\n\nCiò non elimina i diritti inderogabili previsti dalla legge.\n\n10. Diritto di recesso\n\nI tartufi freschi sono prodotti alimentari deperibili e possono deteriorarsi o scadere rapidamente.\n\nPer questo motivo, il diritto legale di recesso potrebbe non applicarsi agli acquisti di tartufi freschi.\n\nCiò non pregiudica eventuali diritti inderogabili riconosciuti ai consumatori dalla legge applicabile, inclusi i diritti relativi a prodotti difettosi, danneggiati o non conformi.\n\n11. Metodo e tempi del rimborso\n\nOve possibile, i rimborsi vengono elaborati sul metodo di pagamento originale.\n\nI tempi del rimborso possono dipendere da:\n• tempi di elaborazione di Stripe\n• banca o emittente della carta dell’acquirente\n• metodo di pagamento utilizzato\n• controlli antifrode o di conformità\n\nTruffly non può controllare i ritardi causati dalle banche o dai fornitori di pagamento.\n\n12. Costi di spedizione\n\nQuando un ordine viene cancellato prima della spedizione per inadempimento del venditore, i costi di spedizione pagati dall’acquirente possono essere rimborsati.\n\nQuando viene richiesto un rimborso dopo la spedizione, i costi di spedizione possono essere rimborsati o esclusi in base al motivo del rimborso, alla legge applicabile e alla valutazione dell’assistenza.\n\n13. Controversie\n\nIn caso di problemi con un ordine, l’acquirente deve contattare l’assistenza il prima possibile.\n\nEmail assistenza:\ntruffly@gmail.com\n\nL’acquirente deve includere:\n• numero dell’ordine\n• descrizione del problema\n• fotografie, se pertinenti\n• dettagli di tracciamento, se disponibili\n\n14. Abusi\n\nTruffly può rifiutare rimborsi, sospendere account o limitare l’accesso quando sospetta frodi, abusi, dichiarazioni false o un uso improprio ripetuto della procedura di rimborso.\n\n15. Contatti\n\nPer richieste di rimborso e cancellazione:\ntruffly@gmail.com",
+  "accountLegalInformationContent": "Ultimo aggiornamento: [Data]\n\nQuesta pagina fornisce informazioni legali su Truffly e sul gestore della piattaforma.\n\nGestore della piattaforma\n\nTruffly è gestita da:\n\n[Titolare legale / Ragione sociale]\nIndirizzo: [Sede legale]\nPaese: Italia\nEmail: [Email legale]\nEmail assistenza: truffly@gmail.com\n\nInformazioni fiscali / Partita IVA:\n[Partita IVA / Codice fiscale / Non applicabile / Da aggiungere]\n\nNatura del servizio\n\nTruffly è un marketplace digitale che mette in contatto gli acquirenti con venditori italiani verificati di tartufi freschi.\n\nSalvo ove espressamente indicato diversamente, Truffly non vende direttamente i prodotti pubblicati nell’app.\n\nIl contratto di vendita di ciascun prodotto è concluso tra l’acquirente e il venditore.\n\nResponsabilità del venditore\n\nI venditori sono responsabili per:\n• l’accuratezza delle proprie inserzioni\n• la qualità e le condizioni dei prodotti venduti\n• il rispetto delle leggi applicabili in materia di raccolta, alimenti, fiscalità, commercio e tutela dei consumatori\n• il corretto imballaggio e la corretta spedizione del prodotto\n• la fornitura di informazioni di tracciamento valide\n\nResponsabilità dell’acquirente\n\nGli acquirenti sono responsabili per:\n• la fornitura di informazioni accurate sull’account\n• la fornitura di un indirizzo di spedizione corretto\n• il controllo dei dettagli dell’ordine prima del pagamento\n• la tempestiva segnalazione di problemi relativi alla consegna o al prodotto\n• l’utilizzo lecito della piattaforma\n\nPagamenti\n\nI pagamenti sono elaborati in modo sicuro tramite Stripe.\n\nTruffly può applicare una commissione della piattaforma alle transazioni completate.\n\nI pagamenti ai venditori, i rimborsi e il rilascio dei pagamenti sono gestiti secondo il flusso di pagamento e le politiche della piattaforma applicabili.\n\nInformazioni per i consumatori\n\nPrima di completare un acquisto, agli acquirenti vengono mostrate le principali informazioni sull’ordine, tra cui i dettagli del prodotto, il prezzo, il costo di spedizione, le informazioni sul venditore ove disponibili e l’importo totale.\n\nI tartufi freschi sono prodotti alimentari deperibili. Il diritto di recesso potrebbe non applicarsi quando i prodotti sono soggetti a deteriorarsi o scadere rapidamente.\n\nCancellazione dell’account e richieste sui dati\n\nGli utenti possono richiedere la cancellazione dell’account dall’interno dell’app.\n\nAlcuni dati possono essere conservati quando richiesto dalla legge o quando necessario per sicurezza, contabilità, prevenzione delle frodi, controversie o pretese legali.\n\nLe richieste relative alla privacy possono essere inviate a:\n[Email privacy]\n\nAssistenza\n\nPer assistenza generale:\ntruffly@gmail.com\n\nNote legali\n\nTutti i marchi, loghi, design dell’app, testi, immagini e materiali della piattaforma sono di proprietà di Truffly o utilizzati con autorizzazione, salvo ove diversamente indicato.\n\nGli utenti non possono copiare, riprodurre, distribuire o utilizzare impropriamente i contenuti di Truffly senza autorizzazione.\n\nLegge applicabile\n\nLa piattaforma è gestita dall’Italia.\n\nLe presenti note legali sono disciplinate dalla legge italiana, fatti salvi i diritti inderogabili a tutela dei consumatori eventualmente applicabili nel Paese di residenza dell’utente."
 }

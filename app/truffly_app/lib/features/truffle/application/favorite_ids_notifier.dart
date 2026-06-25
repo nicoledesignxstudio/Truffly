@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/truffle/application/truffle_service_providers.dart';
 import 'package:truffly_app/features/truffle/data/favorites_service.dart';
 
@@ -37,6 +38,7 @@ const Object _sentinel = Object();
 final class FavoriteIdsNotifier extends Notifier<FavoriteIdsState> {
   @override
   FavoriteIdsState build() {
+    ref.watch(authNotifierProvider);
     Future.microtask(load);
     return const FavoriteIdsState(isLoading: true);
   }

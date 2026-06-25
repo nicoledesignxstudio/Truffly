@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/support/european_countries.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
-import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/account/application/shipping_address_form_notifier.dart';
@@ -14,15 +13,13 @@ import 'package:truffly_app/features/account/domain/shipping_address_form_state.
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:truffly_app/features/account/presentation/widgets/destructive_confirmation_dialog.dart';
 import 'package:truffly_app/features/onboarding/presentation/supporting/onboarding_country_options.dart';
 import 'package:truffly_app/features/onboarding/presentation/widgets/onboarding_input_field.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class ShippingAddressFormPage extends ConsumerStatefulWidget {
-  const ShippingAddressFormPage({
-    super.key,
-    this.addressId,
-  });
+  const ShippingAddressFormPage({super.key, this.addressId});
 
   final String? addressId;
 
@@ -105,6 +102,7 @@ class _ShippingAddressFormPageState
             widget.addressId == null
                 ? l10n.shippingAddressAddTitle
                 : l10n.shippingAddressEditTitle,
+            textAlign: TextAlign.center,
             style: AppTextStyles.sectionTitle.copyWith(fontSize: 20),
           ),
         ),
@@ -133,31 +131,28 @@ class _ShippingAddressFormPageState
                             : null,
                       ),
                       if (form.isEditing) ...[
-                        const SizedBox(height: AppSpacing.spacingXS),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: isBusy ? null : () => _handleDelete(notifier),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(55),
-                              foregroundColor: AppColors.error,
-                              side: const BorderSide(color: AppColors.error),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: AppRadii.authBorderRadius,
-                              ),
-                              textStyle: AppTextStyles.buttonText,
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: isBusy
+                              ? null
+                              : () => _handleDelete(notifier),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.error,
+                            textStyle: AppTextStyles.micro.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
-                            child: state.isDeleting
-                                ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.error,
-                                    ),
-                                  )
-                                : Text(l10n.shippingAddressDeleteCta),
                           ),
+                          child: state.isDeleting
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.error,
+                                  ),
+                                )
+                              : Text(l10n.shippingAddressDeleteCta),
                         ),
                       ],
                     ],
@@ -168,195 +163,181 @@ class _ShippingAddressFormPageState
           child: state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : form == null
-                  ? _ShippingAddressFormErrorState(
-                      message: _submitMessage(
-                        l10n,
-                        state.errorMessage ?? 'unknown',
+              ? _ShippingAddressFormErrorState(
+                  message: _submitMessage(
+                    l10n,
+                    state.errorMessage ?? 'unknown',
+                  ),
+                  onRetry: () => ref.invalidate(
+                    shippingAddressFormNotifierProvider(widget.addressId),
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.spacingM,
+                    AppSpacing.spacingS,
+                    AppSpacing.spacingM,
+                    AppSpacing.spacingXXL,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _FieldLabel(label: l10n.shippingAddressFullNameLabel),
+                      AuthTextField(
+                        key: const Key('shipping_full_name_field'),
+                        controller: _fullNameController,
+                        labelText: l10n.shippingAddressFullNamePlaceholder,
+                        enabled: !isBusy,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        onChanged: notifier.updateFullName,
+                        errorText: _fieldError(
+                          l10n,
+                          notifier.errorFor(ShippingAddressField.fullName),
+                        ),
                       ),
-                      onRetry: () => ref.invalidate(
-                        shippingAddressFormNotifierProvider(widget.addressId),
+                      const SizedBox(height: AppSpacing.spacingM),
+                      _FieldLabel(label: l10n.shippingAddressStreetLabel),
+                      AuthTextField(
+                        key: const Key('shipping_street_field'),
+                        controller: _streetController,
+                        labelText: l10n.shippingAddressStreetPlaceholder,
+                        enabled: !isBusy,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        onChanged: notifier.updateStreet,
+                        errorText: _fieldError(
+                          l10n,
+                          notifier.errorFor(ShippingAddressField.street),
+                        ),
                       ),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.spacingM,
-                        AppSpacing.spacingS,
-                        AppSpacing.spacingM,
-                        AppSpacing.spacingXXL,
+                      const SizedBox(height: AppSpacing.spacingM),
+                      _FieldLabel(label: l10n.shippingAddressCityLabel),
+                      AuthTextField(
+                        key: const Key('shipping_city_field'),
+                        controller: _cityController,
+                        labelText: l10n.shippingAddressCityPlaceholder,
+                        enabled: !isBusy,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        onChanged: notifier.updateCity,
+                        errorText: _fieldError(
+                          l10n,
+                          notifier.errorFor(ShippingAddressField.city),
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      const SizedBox(height: AppSpacing.spacingM),
+                      _FieldLabel(label: l10n.shippingAddressPostalCodeLabel),
+                      AuthTextField(
+                        key: const Key('shipping_postal_code_field'),
+                        controller: _postalCodeController,
+                        labelText: l10n.shippingAddressPostalCodePlaceholder,
+                        enabled: !isBusy,
+                        keyboardType: TextInputType.streetAddress,
+                        textInputAction: TextInputAction.next,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.singleLineFormatter,
+                        ],
+                        onChanged: notifier.updatePostalCode,
+                        errorText: _fieldError(
+                          l10n,
+                          notifier.errorFor(ShippingAddressField.postalCode),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.spacingM),
+                      _FieldLabel(label: l10n.shippingAddressCountryLabel),
+                      OnboardingDropdownField<String>(
+                        key: const Key('shipping_country_field'),
+                        initialValue: form.countryCode.isEmpty
+                            ? null
+                            : form.countryCode,
+                        hintText: l10n.shippingAddressCountryPlaceholder,
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(l10n.shippingAddressCountryPlaceholder),
+                          ),
+                          for (final option in onboardingCountryOptions)
+                            DropdownMenuItem<String>(
+                              value: option.code,
+                              child: Text(option.localizedName(l10n)),
+                            ),
+                        ],
+                        errorText: _fieldError(
+                          l10n,
+                          notifier.errorFor(ShippingAddressField.countryCode),
+                        ),
+                        onChanged: isBusy
+                            ? (_) {}
+                            : (value) =>
+                                  _handleCountryChanged(notifier, value ?? ''),
+                      ),
+                      const SizedBox(height: AppSpacing.spacingM),
+                      _FieldLabel(label: l10n.shippingAddressPhoneLabel),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l10n.shippingAddressFormSubtitle,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              color: AppColors.black80,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.spacingL),
-                          _FieldLabel(label: l10n.shippingAddressFullNameLabel),
-                          AuthTextField(
-                            key: const Key('shipping_full_name_field'),
-                            controller: _fullNameController,
-                            labelText: l10n.shippingAddressFullNamePlaceholder,
-                            enabled: !isBusy,
-                            textCapitalization: TextCapitalization.words,
-                            textInputAction: TextInputAction.next,
-                            onChanged: notifier.updateFullName,
-                            errorText: _fieldError(
-                              l10n,
-                              notifier.errorFor(ShippingAddressField.fullName),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.spacingM),
-                          _FieldLabel(label: l10n.shippingAddressStreetLabel),
-                          AuthTextField(
-                            key: const Key('shipping_street_field'),
-                            controller: _streetController,
-                            labelText: l10n.shippingAddressStreetPlaceholder,
-                            enabled: !isBusy,
-                            textCapitalization: TextCapitalization.words,
-                            textInputAction: TextInputAction.next,
-                            onChanged: notifier.updateStreet,
-                            errorText: _fieldError(
-                              l10n,
-                              notifier.errorFor(ShippingAddressField.street),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.spacingM),
-                          _FieldLabel(label: l10n.shippingAddressCityLabel),
-                          AuthTextField(
-                            key: const Key('shipping_city_field'),
-                            controller: _cityController,
-                            labelText: l10n.shippingAddressCityPlaceholder,
-                            enabled: !isBusy,
-                            textCapitalization: TextCapitalization.words,
-                            textInputAction: TextInputAction.next,
-                            onChanged: notifier.updateCity,
-                            errorText: _fieldError(
-                              l10n,
-                              notifier.errorFor(ShippingAddressField.city),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.spacingM),
-                          _FieldLabel(label: l10n.shippingAddressPostalCodeLabel),
-                          AuthTextField(
-                            key: const Key('shipping_postal_code_field'),
-                            controller: _postalCodeController,
-                            labelText: l10n.shippingAddressPostalCodePlaceholder,
-                            enabled: !isBusy,
-                            keyboardType: TextInputType.streetAddress,
-                            textInputAction: TextInputAction.next,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.singleLineFormatter,
-                            ],
-                            onChanged: notifier.updatePostalCode,
-                            errorText: _fieldError(
-                              l10n,
-                              notifier.errorFor(ShippingAddressField.postalCode),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.spacingM),
-                          _FieldLabel(label: l10n.shippingAddressCountryLabel),
-                          OnboardingDropdownField<String>(
-                            key: const Key('shipping_country_field'),
-                            initialValue: form.countryCode.isEmpty
-                                ? null
-                                : form.countryCode,
-                            hintText: l10n.shippingAddressCountryPlaceholder,
-                            items: [
-                              DropdownMenuItem<String>(
-                                value: null,
-                                child: Text(
-                                  l10n.shippingAddressCountryPlaceholder,
-                                ),
-                              ),
-                              for (final option in onboardingCountryOptions)
-                                DropdownMenuItem<String>(
-                                  value: option.code,
-                                  child: Text(
-                                    option.localizedName(l10n),
+                          SizedBox(
+                            width: 123,
+                            child: OnboardingDropdownField<String>(
+                              key: const Key('shipping_phone_prefix_field'),
+                              initialValue: _selectedPhonePrefix,
+                              hintText: _phonePrefixHint(l10n),
+                              items: [
+                                for (final option in onboardingCountryOptions)
+                                  DropdownMenuItem<String>(
+                                    value: option.phonePrefix,
+                                    child: Text(option.phonePrefix),
                                   ),
-                                ),
-                            ],
-                            errorText: _fieldError(
-                              l10n,
-                              notifier.errorFor(ShippingAddressField.countryCode),
-                            ),
-                            onChanged: isBusy
-                                ? (_) {}
-                                : (value) => _handleCountryChanged(
+                              ],
+                              onChanged: isBusy
+                                  ? (_) {}
+                                  : (value) => _handlePhonePrefixChanged(
                                       notifier,
-                                      value ?? '',
+                                      value,
                                     ),
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.spacingM),
-                          _FieldLabel(label: l10n.shippingAddressPhoneLabel),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 123,
-                                child: OnboardingDropdownField<String>(
-                                  key: const Key('shipping_phone_prefix_field'),
-                                  initialValue: _selectedPhonePrefix,
-                                  hintText: _phonePrefixHint(l10n),
-                                  items: [
-                                    for (final option in onboardingCountryOptions)
-                                      DropdownMenuItem<String>(
-                                        value: option.phonePrefix,
-                                        child: Text(option.phonePrefix),
-                                      ),
-                                  ],
-                                  onChanged: isBusy
-                                      ? (_) {}
-                                      : (value) => _handlePhonePrefixChanged(
-                                            notifier,
-                                            value,
-                                          ),
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.spacingXS),
-                              Expanded(
-                                flex: 4,
-                                child: AuthTextField(
-                                  key: const Key('shipping_phone_field'),
-                                  controller: _phoneController,
-                                  labelText: _phoneNumberPlaceholder(l10n),
-                                  enabled: !isBusy,
-                                  keyboardType: TextInputType.phone,
-                                  textInputAction: TextInputAction.done,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter
-                                        .singleLineFormatter,
-                                  ],
-                                  onChanged: (_) =>
-                                      _syncCombinedPhoneValue(notifier),
-                                  errorText: _fieldError(
-                                    l10n,
-                                    notifier.errorFor(ShippingAddressField.phone),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.spacingM),
-                          _DefaultAddressSwitch(
-                            value: form.isDefault,
-                            onChanged: isBusy ? null : notifier.updateIsDefault,
-                          ),
-                          if (state.errorMessage != null) ...[
-                            const SizedBox(height: AppSpacing.spacingM),
-                            Text(
-                              _submitMessage(l10n, state.errorMessage!),
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.error,
+                          const SizedBox(width: AppSpacing.spacingXS),
+                          Expanded(
+                            flex: 4,
+                            child: AuthTextField(
+                              key: const Key('shipping_phone_field'),
+                              controller: _phoneController,
+                              labelText: _phoneNumberPlaceholder(l10n),
+                              enabled: !isBusy,
+                              keyboardType: TextInputType.phone,
+                              textInputAction: TextInputAction.done,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.singleLineFormatter,
+                              ],
+                              onChanged: (_) =>
+                                  _syncCombinedPhoneValue(notifier),
+                              errorText: _fieldError(
+                                l10n,
+                                notifier.errorFor(ShippingAddressField.phone),
                               ),
                             ),
-                          ],
+                          ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: AppSpacing.spacingM),
+                      _DefaultAddressSwitch(
+                        value: form.isDefault,
+                        onChanged: isBusy ? null : notifier.updateIsDefault,
+                      ),
+                      if (state.errorMessage != null) ...[
+                        const SizedBox(height: AppSpacing.spacingM),
+                        Text(
+                          _submitMessage(l10n, state.errorMessage!),
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
         ),
       ),
     );
@@ -366,7 +347,9 @@ class _ShippingAddressFormPageState
     FocusScope.of(context).unfocus();
     final l10n = AppLocalizations.of(context)!;
     final didSave = await notifier.save();
-    final state = ref.read(shippingAddressFormNotifierProvider(widget.addressId));
+    final state = ref.read(
+      shippingAddressFormNotifierProvider(widget.addressId),
+    );
 
     if (!mounted) return;
 
@@ -389,26 +372,20 @@ class _ShippingAddressFormPageState
     final l10n = AppLocalizations.of(context)!;
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.shippingAddressDeleteDialogTitle),
-        content: Text(l10n.shippingAddressDeleteDialogMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.shippingAddressDeleteDialogCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.shippingAddressDeleteDialogConfirm),
-          ),
-        ],
+      builder: (context) => DestructiveConfirmationDialog(
+        title: l10n.shippingAddressDeleteDialogTitle,
+        message: l10n.shippingAddressDeleteDialogMessage,
+        confirmLabel: l10n.shippingAddressDeleteDialogConfirm,
+        cancelLabel: l10n.shippingAddressDeleteDialogCancel,
       ),
     );
 
     if (!mounted || shouldDelete != true) return;
 
     final didDelete = await notifier.delete();
-    final state = ref.read(shippingAddressFormNotifierProvider(widget.addressId));
+    final state = ref.read(
+      shippingAddressFormNotifierProvider(widget.addressId),
+    );
 
     if (!mounted) return;
 
@@ -485,10 +462,7 @@ class _FieldLabel extends StatelessWidget {
 }
 
 class _DefaultAddressSwitch extends StatelessWidget {
-  const _DefaultAddressSwitch({
-    required this.value,
-    required this.onChanged,
-  });
+  const _DefaultAddressSwitch({required this.value, required this.onChanged});
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -513,15 +487,11 @@ class _DefaultAddressSwitch extends StatelessWidget {
         activeThumbColor: AppColors.accent,
         title: Text(
           l10n.shippingAddressDefaultToggleLabel,
-          style: AppTextStyles.bodyLarge.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           l10n.shippingAddressDefaultToggleHelper,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.black80,
-          ),
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.black80),
         ),
       ),
     );
@@ -584,11 +554,15 @@ String _submitMessage(AppLocalizations l10n, String code) {
     'network' => l10n.shippingAddressesNetworkError,
     'unauthorized' => l10n.shippingAddressesUnauthorizedError,
     'not_found' => l10n.shippingAddressesNotFoundError,
-    'shipping_address_full_name_required' => l10n.shippingAddressFullNameRequiredError,
-    'shipping_address_street_required' => l10n.shippingAddressStreetRequiredError,
+    'shipping_address_full_name_required' =>
+      l10n.shippingAddressFullNameRequiredError,
+    'shipping_address_street_required' =>
+      l10n.shippingAddressStreetRequiredError,
     'shipping_address_city_required' => l10n.shippingAddressCityRequiredError,
-    'shipping_address_postal_code_required' => l10n.shippingAddressPostalCodeRequiredError,
-    'shipping_address_country_code_invalid' => l10n.shippingAddressCountryInvalidError,
+    'shipping_address_postal_code_required' =>
+      l10n.shippingAddressPostalCodeRequiredError,
+    'shipping_address_country_code_invalid' =>
+      l10n.shippingAddressCountryInvalidError,
     'shipping_address_phone_required' => l10n.shippingAddressPhoneRequiredError,
     'validation' => l10n.shippingAddressesValidationError,
     _ => l10n.shippingAddressSaveError,
@@ -596,7 +570,7 @@ String _submitMessage(AppLocalizations l10n, String code) {
 }
 
 String _phonePrefixHint(AppLocalizations l10n) {
-  return l10n.localeName.startsWith('it') ? 'Prefisso' : 'Prefix';
+  return '+';
 }
 
 String _phoneNumberPlaceholder(AppLocalizations l10n) {

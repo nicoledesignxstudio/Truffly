@@ -40,6 +40,12 @@ final class AccountDetailsNotifier extends AutoDisposeNotifier<AccountDetailsSta
     field: AccountDetailsField.countryCode,
     update: (form) {
       final normalizedCountry = value.trim().toUpperCase();
+      if (form.hasStartedSellerJourney && normalizedCountry != 'IT') {
+        return form.copyWith(
+          countryCode: 'IT',
+          region: form.region,
+        );
+      }
       final shouldKeepRegion = normalizedCountry == 'IT';
       return form.copyWith(
         countryCode: normalizedCountry,
@@ -67,6 +73,27 @@ final class AccountDetailsNotifier extends AutoDisposeNotifier<AccountDetailsSta
     field: AccountDetailsField.profileImageUrl,
     update: (form) => form.copyWith(profileImageUrl: null),
   );
+
+  void syncProfileImageUrl(String? value) {
+    final currentForm = state.form;
+    final currentInitialForm = state.initialForm;
+    if (currentForm == null || currentInitialForm == null) return;
+
+    final nextForm = currentForm.copyWith(profileImageUrl: value);
+    final nextInitialForm = currentInitialForm.copyWith(profileImageUrl: value);
+
+    state = state.copyWith(
+      status: AccountDetailsStatus.ready,
+      form: nextForm,
+      initialForm: nextInitialForm,
+      touchedFields: {
+        ...state.touchedFields,
+        AccountDetailsField.profileImageUrl,
+      },
+      errorMessage: null,
+      lastSubmissionResult: null,
+    );
+  }
 
   String? errorFor(AccountDetailsField field) {
     final form = state.form;
@@ -107,6 +134,20 @@ final class AccountDetailsNotifier extends AutoDisposeNotifier<AccountDetailsSta
     final currentForm = state.form;
     final initialForm = state.initialForm;
     if (currentForm == null || initialForm == null) return null;
+
+    if (currentForm.hasStartedSellerJourney &&
+        currentForm.normalizedCountryCode != 'IT') {
+      state = state.copyWith(
+        submitAttempted: true,
+        errorMessage: 'seller_country_invalid',
+        lastSubmissionResult: null,
+        form: currentForm.copyWith(
+          countryCode: 'IT',
+          region: initialForm.region ?? currentForm.region,
+        ),
+      );
+      return null;
+    }
 
     final validationErrorExists = _hasValidationErrors(
       currentForm,
@@ -253,6 +294,7 @@ final class AccountDetailsNotifier extends AutoDisposeNotifier<AccountDetailsSta
         bio: data.bio,
         profileImageUrl: data.profileImageUrl,
         isSeller: data.isSeller,
+        sellerStatus: data.sellerStatus,
       ).normalized();
 
       state = AccountDetailsState(
@@ -351,12 +393,15 @@ final class AccountDetailsNotifier extends AutoDisposeNotifier<AccountDetailsSta
     return switch (failure) {
       NetworkErrorFailure() => 'network',
       TimeoutFailure() => 'timeout',
+      EmailResendRateLimitedFailure() => 'rate_limited',
+      EmailDeliveryRestrictedFailure() => 'delivery_restricted',
       EmailAlreadyUsedFailure() => 'email_already_used',
       InvalidCredentialsFailure() => 'invalid_credentials',
       UnauthenticatedFailure() => 'unauthenticated',
       EmailNotVerifiedFailure() => 'email_not_verified',
       UserProfileMissingFailure() => 'profile_missing',
-      ResetLinkInvalidFailure() || UnknownAuthFailure() => 'unknown',
+      ResetLinkInvalidFailure() ||
+      UnknownAuthFailure() => 'unknown',
     };
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
-import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 
@@ -25,23 +24,26 @@ class AccountSectionCard extends StatelessWidget {
             title,
             style: AppTextStyles.micro.copyWith(
               color: AppColors.black50,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+              letterSpacing: 0,
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.spacingXS),
-        Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: AppColors.white,
+        const SizedBox(height: 4),
+        Material(
+          color: AppColors.white,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: AppColors.black10,
-              width: 1.2,
+            side: const BorderSide(
+              color: AppColors.black20,
+              width: 1,
             ),
-            boxShadow: AppShadows.authField,
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(children: children),
         ),
       ],

@@ -6,91 +6,144 @@ import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
+import 'package:truffly_app/features/account/application/account_providers.dart';
+import 'package:truffly_app/features/account/data/account_deletion_service.dart';
 import 'package:truffly_app/features/account/presentation/widgets/account_menu_row.dart';
 import 'package:truffly_app/features/account/presentation/widgets/account_section_card.dart';
 import 'package:truffly_app/features/account/presentation/widgets/account_subpage_scaffold.dart';
+import 'package:truffly_app/features/account/presentation/widgets/destructive_confirmation_dialog.dart';
+import 'package:truffly_app/features/auth/application/auth_notifier.dart';
+import 'package:truffly_app/features/push/application/notification_preferences_provider.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
-class AccountSettingsPage extends ConsumerWidget {
+class AccountSettingsPage extends ConsumerStatefulWidget {
   const AccountSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountSettingsPage> createState() =>
+      _AccountSettingsPageState();
+}
+
+class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
+  bool _isDeletingAccount = false;
+  bool _isUpdatingNotifications = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeCode = ref.watch(appLocaleCodeProvider);
-    final notificationsEnabled = ref.watch(notificationsEnabledProvider);
+    final notificationsEnabledAsync = ref.watch(notificationsEnabledProvider);
+    final notificationsEnabled = notificationsEnabledAsync.valueOrNull ?? false;
+    final notificationsAvailable = notificationsEnabledAsync.hasValue;
 
     return AccountSubpageScaffold(
       title: l10n.accountSettingsTitle,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.spacingM,
-          AppSpacing.spacingS,
-          AppSpacing.spacingM,
-          AppSpacing.spacingL,
-        ),
+      body: Stack(
         children: [
-          Text(
-            l10n.accountSettingsIntro,
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.black80),
+          AbsorbPointer(
+            absorbing: _isDeletingAccount,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.spacingM,
+                AppSpacing.spacingS,
+                AppSpacing.spacingM,
+                AppSpacing.spacingL,
+              ),
+              children: [
+                Text(
+                  l10n.accountSettingsIntro,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.black80,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.spacingM),
+                AccountSectionCard(
+                  title: l10n.accountSettingsPreferencesSection,
+                  children: [
+                    _SettingsValueRow(
+                      key: const Key('settings_language_tile'),
+                      icon: Icons.language_outlined,
+                      label: l10n.accountSettingsLanguageLabel,
+                      value: _languageLabel(l10n, localeCode),
+                      onTap: () => _showLanguageSheet(context, ref),
+                    ),
+                    const Divider(height: 1, color: AppColors.black10),
+                    _SettingsSwitchRow(
+                      key: const Key('settings_notifications_tile'),
+                      icon: Icons.notifications_none_rounded,
+                      label: l10n.accountSettingsNotificationsLabel,
+                      value: notificationsEnabled,
+                      isEnabled:
+                          notificationsAvailable && !_isUpdatingNotifications,
+                      onChanged:
+                          notificationsAvailable && !_isUpdatingNotifications
+                          ? (value) {
+                              _updateNotificationsPreference(value);
+                            }
+                          : null,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.spacingM),
+                AccountSectionCard(
+                  title: l10n.accountSettingsLegalSection,
+                  children: [
+                    AccountMenuRow(
+                      key: const Key('settings_privacy_tile'),
+                      label: l10n.accountSettingsPrivacyPolicyLabel,
+                      icon: Icons.privacy_tip_outlined,
+                      onTap: () => context.push(AppRoutes.accountPrivacyPolicy),
+                    ),
+                    const Divider(height: 1, color: AppColors.black10),
+                    AccountMenuRow(
+                      key: const Key('settings_terms_tile'),
+                      label: l10n.accountSettingsTermsLabel,
+                      icon: Icons.description_outlined,
+                      onTap: () => context.push(AppRoutes.accountTerms),
+                    ),
+                    const Divider(height: 1, color: AppColors.black10),
+                    AccountMenuRow(
+                      key: const Key('settings_refund_tile'),
+                      label: l10n.accountSettingsRefundAndCancellationLabel,
+                      icon: Icons.currency_exchange_rounded,
+                      onTap: () =>
+                          context.push(AppRoutes.accountRefundAndCancellation),
+                    ),
+                    const Divider(height: 1, color: AppColors.black10),
+                    AccountMenuRow(
+                      key: const Key('settings_legal_information_tile'),
+                      label: l10n.accountSettingsLegalInformationLabel,
+                      icon: Icons.gavel_outlined,
+                      onTap: () =>
+                          context.push(AppRoutes.accountLegalInformation),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.spacingL),
+                AccountSectionCard(
+                  title: l10n.accountSettingsAccountSection,
+                  children: [
+                    AccountMenuRow(
+                      key: const Key('settings_delete_account_tile'),
+                      label: l10n.accountSettingsDeleteAccountLabel,
+                      icon: Icons.delete_outline_rounded,
+                      isDestructive: true,
+                      onTap: _isDeletingAccount
+                          ? null
+                          : () => _confirmDeleteAccount(context),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.spacingM),
-          AccountSectionCard(
-            title: l10n.accountSettingsPreferencesSection,
-            children: [
-              _SettingsValueRow(
-                key: const Key('settings_language_tile'),
-                icon: Icons.language_outlined,
-                label: l10n.accountSettingsLanguageLabel,
-                value: _languageLabel(l10n, localeCode),
-                onTap: () => _showLanguageSheet(context, ref),
+          if (_isDeletingAccount)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Color(0x66FFFFFF),
+                child: Center(child: CircularProgressIndicator()),
               ),
-              const Divider(height: 1, color: AppColors.black10),
-              _SettingsSwitchRow(
-                key: const Key('settings_notifications_tile'),
-                icon: Icons.notifications_none_rounded,
-                label: l10n.accountSettingsNotificationsLabel,
-                value: notificationsEnabled,
-                onChanged: (value) {
-                  ref
-                      .read(notificationsEnabledProvider.notifier)
-                      .setEnabled(value);
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.spacingM),
-          AccountSectionCard(
-            title: l10n.accountSettingsLegalSection,
-            children: [
-              AccountMenuRow(
-                key: const Key('settings_privacy_tile'),
-                label: l10n.accountSettingsPrivacyPolicyLabel,
-                icon: Icons.privacy_tip_outlined,
-                onTap: () => context.push(AppRoutes.accountPrivacyPolicy),
-              ),
-              const Divider(height: 1, color: AppColors.black10),
-              AccountMenuRow(
-                key: const Key('settings_terms_tile'),
-                label: l10n.accountSettingsTermsLabel,
-                icon: Icons.description_outlined,
-                onTap: () => context.push(AppRoutes.accountTerms),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.spacingL),
-          AccountSectionCard(
-            title: l10n.accountSettingsAccountSection,
-            children: [
-              AccountMenuRow(
-                key: const Key('settings_delete_account_tile'),
-                label: l10n.accountSettingsDeleteAccountLabel,
-                icon: Icons.delete_outline_rounded,
-                isDestructive: true,
-                onTap: () => _confirmDeleteAccount(context),
-              ),
-            ],
-          ),
+            ),
         ],
       ),
     );
@@ -164,32 +217,103 @@ class AccountSettingsPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.accountSettingsDeleteAccountDialogTitle),
-          content: Text(l10n.accountSettingsDeleteAccountDialogBody),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.accountSettingsDeleteAccountDialogCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-              child: Text(l10n.accountSettingsDeleteAccountDialogConfirm),
-            ),
-          ],
+        return DestructiveConfirmationDialog(
+          title: l10n.accountSettingsDeleteAccountDialogTitle,
+          message: l10n.accountSettingsDeleteAccountDialogBody,
+          confirmLabel: l10n.accountSettingsDeleteAccountDialogConfirm,
+          cancelLabel: l10n.accountSettingsDeleteAccountDialogCancel,
         );
       },
     );
 
     if (!context.mounted || confirmed != true) return;
 
-    // TODO: Connect this confirmation to the real account deletion flow.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.accountSettingsDeleteAccountPendingMessage),
-      ),
-    );
+    await _deleteAccount(context);
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    if (_isDeletingAccount) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isDeletingAccount = true;
+    });
+
+    try {
+      final result = await ref
+          .read(accountDeletionServiceProvider)
+          .deleteCurrentAccount();
+      if (!context.mounted) return;
+
+      final message = switch (result.status) {
+        AccountDeletionOutcome.deleted =>
+          l10n.accountSettingsDeleteAccountDeletedMessage,
+        AccountDeletionOutcome.deactivated =>
+          l10n.accountSettingsDeleteAccountDeactivatedMessage,
+      };
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+
+      await ref.read(authNotifierProvider.notifier).signOut();
+    } on AccountDeletionServiceException catch (error) {
+      if (!context.mounted) return;
+
+      final message = switch (error.failure) {
+        AccountDeletionFailure.unauthenticated =>
+          l10n.accountSettingsDeleteAccountUnauthorizedMessage,
+        AccountDeletionFailure.inactiveAccount =>
+          l10n.accountSettingsDeleteAccountInactiveMessage,
+        AccountDeletionFailure.requestFailed ||
+        AccountDeletionFailure.network ||
+        AccountDeletionFailure.unknown =>
+          l10n.accountSettingsDeleteAccountErrorMessage,
+      };
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDeletingAccount = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _updateNotificationsPreference(bool enabled) async {
+    if (_isUpdatingNotifications) return;
+
+    setState(() {
+      _isUpdatingNotifications = true;
+    });
+
+    try {
+      await ref
+          .read(notificationPreferenceServiceProvider)
+          .setCurrentDeviceNotificationsEnabled(enabled);
+      ref.invalidate(notificationsEnabledProvider);
+    } catch (_) {
+      if (!mounted) return;
+      final isItalian = Localizations.localeOf(context).languageCode == 'it';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isItalian
+                ? 'Impossibile aggiornare la preferenza notifiche.'
+                : 'Unable to update the notifications preference.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingNotifications = false;
+        });
+      }
+    }
   }
 }
 
@@ -225,9 +349,8 @@ class _SettingsValueRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: AppTextStyles.sectionTitle.copyWith(
+                  style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.black80,
-                    fontSize: 18,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -260,13 +383,15 @@ class _SettingsSwitchRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    required this.isEnabled,
     required this.onChanged,
   });
 
   final IconData icon;
   final String label;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final bool isEnabled;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -282,17 +407,16 @@ class _SettingsSwitchRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: AppTextStyles.sectionTitle.copyWith(
+              style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.black80,
-                fontSize: 18,
                 fontWeight: FontWeight.w400,
               ),
             ),
           ),
           Switch(
             value: value,
-            activeColor: AppColors.accent,
-            onChanged: onChanged,
+            activeThumbColor: AppColors.accent,
+            onChanged: isEnabled ? onChanged : null,
           ),
         ],
       ),
@@ -315,11 +439,7 @@ class _SettingsLeadingIcon extends StatelessWidget {
       child: SizedBox(
         width: 30,
         height: 30,
-        child: Icon(
-          icon,
-          color: AppColors.white,
-          size: 18,
-        ),
+        child: Icon(icon, color: AppColors.white, size: 18),
       ),
     );
   }
@@ -356,9 +476,7 @@ class _LanguageOptionTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Expanded(
-                child: Text(label, style: AppTextStyles.bodyLarge),
-              ),
+              Expanded(child: Text(label, style: AppTextStyles.bodyLarge)),
               Icon(
                 selected ? Icons.check_circle : Icons.circle_outlined,
                 color: selected ? AppColors.accent : AppColors.black50,

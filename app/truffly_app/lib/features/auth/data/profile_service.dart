@@ -32,7 +32,9 @@ final class CurrentUserProfile {
   final String? bio;
   final String? profileImageUrl;
 
-  bool get isSeller => role == 'seller';
+  bool get isSeller => sellerStatus == 'approved';
+  bool get isSellerRequestPending => sellerStatus == 'pending';
+  bool get isSellerRequestApproved => sellerStatus == 'approved';
 
   String get displayName {
     final first = (firstName ?? '').trim();

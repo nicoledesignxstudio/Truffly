@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:truffly_app/core/theme/app_colors.dart';
+import 'package:truffly_app/core/theme/app_shadows.dart';
+import 'package:truffly_app/core/theme/app_spacing.dart';
+import 'package:truffly_app/core/theme/app_text_styles.dart';
+import 'package:truffly_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:truffly_app/features/onboarding/application/onboarding_providers.dart';
+import 'package:truffly_app/features/onboarding/domain/onboarding_state.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class OnboardingWelcomePage extends ConsumerWidget {
@@ -11,47 +17,144 @@ class OnboardingWelcomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final onboardingState = ref.watch(onboardingNotifierProvider);
 
-    final title = onboardingState.isSellerFlow
-        ? l10n.onboardingWelcomeSellerTitle
-        : onboardingState.isBuyerFlow
-            ? l10n.onboardingWelcomeBuyerTitle
-            : l10n.onboardingWelcomeDefaultTitle;
-    final subtitle = onboardingState.isSellerFlow
-        ? l10n.onboardingWelcomeSellerSubtitle
-        : onboardingState.isBuyerFlow
-            ? l10n.onboardingWelcomeBuyerSubtitle
-            : l10n.onboardingWelcomeDefaultSubtitle;
-    final message = onboardingState.isSellerFlow
-        ? l10n.onboardingWelcomeSellerMessage
-        : onboardingState.isBuyerFlow
-            ? l10n.onboardingWelcomeBuyerMessage
-            : l10n.onboardingWelcomeDefaultMessage;
+    if (onboardingState.isSellerFlow) {
+      return _SellerWelcomePage(
+        title: l10n.onboardingWelcomeSellerTitle,
+        message: l10n.onboardingWelcomeSellerMessage,
+        buttonLabel: l10n.onboardingFlowEnterAppButton,
+        isLoading: onboardingState.isSubmitting,
+        onPressed: () => _handleEnterApp(ref, onboardingState),
+      );
+    }
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
+    return _BuyerWelcomePage(
+      readyLabel: l10n.onboardingWelcomeBuyerReadyLabel,
+      title: l10n.onboardingWelcomeBuyerTitle,
+      message: l10n.onboardingWelcomeBuyerMessage,
+      buttonLabel: l10n.onboardingFlowEnterAppButton,
+      isLoading: onboardingState.isSubmitting,
+      onPressed: () => _handleEnterApp(ref, onboardingState),
+    );
+  }
+
+  Future<void> _handleEnterApp(
+    WidgetRef ref,
+    OnboardingState onboardingState,
+  ) async {
+    final notifier = ref.read(onboardingNotifierProvider.notifier);
+
+    if (onboardingState.isBuyerFlow) {
+      await notifier.completeBuyerOnboarding();
+      return;
+    }
+
+    if (onboardingState.isSellerFlow) {
+      await notifier.completeSellerOnboarding();
+    }
+  }
+}
+
+class _BuyerWelcomePage extends StatelessWidget {
+  const _BuyerWelcomePage({
+    required this.readyLabel,
+    required this.title,
+    required this.message,
+    required this.buttonLabel,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final String readyLabel;
+  final String title;
+  final String message;
+  final String buttonLabel;
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenHorizontal,
+          0,
+          AppSpacing.screenHorizontal,
+          0,
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _WelcomeHero(isSellerFlow: onboardingState.isSellerFlow),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
+            const SizedBox(height: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Expanded(child: _BuyerHeroCard()),
+                  const SizedBox(height: AppSpacing.authGroupGap + 10),
+                  _BuyerCompletionBadge(label: readyLabel),
+                  const SizedBox(height: AppSpacing.authFieldGap + 10),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.authScreenTitle.copyWith(fontSize: 31),
+                  ),
+                  const SizedBox(height: 10),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.black80,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
+            const SizedBox(height: AppSpacing.authGroupGap + 10),
+            AuthPrimaryButton(
+              label: buttonLabel,
+              onPressed: onPressed,
+              enabled: !isLoading,
+              isLoading: isLoading,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BuyerCompletionBadge extends StatelessWidget {
+  const _BuyerCompletionBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: AppColors.black10),
+          boxShadow: AppShadows.authField,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _CompletionIcon(),
+            SizedBox(width: 10),
             Text(
-              message,
-              style: Theme.of(context).textTheme.bodyLarge,
-              textAlign: TextAlign.center,
+              label,
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: AppColors.black,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -60,37 +163,136 @@ class OnboardingWelcomePage extends ConsumerWidget {
   }
 }
 
-class _WelcomeHero extends StatelessWidget {
-  const _WelcomeHero({
-    required this.isSellerFlow,
-  });
-
-  final bool isSellerFlow;
+class _CompletionIcon extends StatelessWidget {
+  const _CompletionIcon();
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
-      width: 168,
-      height: 168,
+      width: 28,
+      height: 28,
+      decoration: const BoxDecoration(
+        color: AppColors.black,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(Icons.check_rounded, size: 18, color: AppColors.white),
+    );
+  }
+}
+
+class _BuyerHeroCard extends StatelessWidget {
+  const _BuyerHeroCard();
+
+  static const BorderRadius _borderRadius = BorderRadius.all(
+    Radius.circular(22),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primaryContainer,
-            colorScheme.secondaryContainer,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: AppColors.white,
+        borderRadius: _borderRadius,
+        border: Border.all(color: AppColors.black10),
+        boxShadow: AppShadows.authField,
+      ),
+      child: ClipRRect(
+        borderRadius: _borderRadius,
+        child: Image.asset(
+          'assets/images/onboarding/welcome_buyer.webp',
+          width: double.infinity,
+          fit: BoxFit.fitWidth,
+          alignment: Alignment.topCenter,
         ),
-        borderRadius: BorderRadius.circular(28),
       ),
-      alignment: Alignment.center,
-      child: Icon(
-        isSellerFlow ? Icons.storefront_outlined : Icons.eco_outlined,
-        size: 72,
-        color: colorScheme.primary,
-      ),
+    );
+  }
+}
+
+class _SellerWelcomePage extends StatelessWidget {
+  const _SellerWelcomePage({
+    required this.title,
+    required this.message,
+    required this.buttonLabel,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String message;
+  final String buttonLabel;
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/onboarding/welcome_seller.webp',
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.black.withValues(alpha: 0.42),
+                  AppColors.black.withValues(alpha: 0.18),
+                  AppColors.black.withValues(alpha: 0.68),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.spacingL,
+              AppSpacing.screenHorizontal,
+              AppSpacing.spacingL,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(),
+                Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: AppTextStyles.authScreenTitle.copyWith(
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.authFieldGap),
+                Text(
+                  message,
+                  textAlign: TextAlign.left,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.authGroupGap + 10),
+                AuthPrimaryButton(
+                  label: buttonLabel,
+                  onPressed: onPressed,
+                  enabled: !isLoading,
+                  isLoading: isLoading,
+                  backgroundColor: AppColors.white,
+                  foregroundColor: AppColors.black,
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

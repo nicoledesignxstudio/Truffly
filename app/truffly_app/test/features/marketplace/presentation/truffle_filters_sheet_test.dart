@@ -38,9 +38,11 @@ void main() {
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Prima scelta'));
+    await tester.tap(find.text('First choice'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Applica filtri'));
+    await tester.ensureVisible(find.text('Apply filters'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apply filters'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -85,9 +87,11 @@ void main() {
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Reset'));
+    await tester.tap(find.byIcon(Icons.refresh_rounded));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Applica filtri'));
+    await tester.ensureVisible(find.text('Apply filters'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Apply filters'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
