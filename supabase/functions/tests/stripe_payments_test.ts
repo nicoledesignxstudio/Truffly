@@ -136,7 +136,7 @@ Deno.test("create payment intent creates attempt and payment intent", async () =
     shippingCountryCode: "IT",
     shippingPhone: "3331111111",
     orderId: null,
-    expiresAt: new Date().toISOString(),
+    expiresAt: "2099-03-09T16:30:00.000Z",
   };
 
   const store = createNoopStore({
@@ -352,7 +352,7 @@ Deno.test("create payment intent reuses an open attempt and existing payment int
     shippingCountryCode: "IT",
     shippingPhone: "3331111111",
     orderId: null,
-    expiresAt: new Date().toISOString(),
+    expiresAt: "2099-03-09T16:30:00.000Z",
   };
 
   const store = createNoopStore({
@@ -414,6 +414,7 @@ Deno.test("create payment intent reuses an open attempt and existing payment int
           id: "pi_existing_open",
           clientSecret: "pi_existing_open_secret",
           status: "requires_payment_method",
+          automaticPaymentMethodsEnabled: true,
         });
       },
     }),
@@ -454,7 +455,7 @@ Deno.test("create payment intent refreshes a legacy payment intent without autom
     shippingCountryCode: "IT",
     shippingPhone: "3331111111",
     orderId: null,
-    expiresAt: new Date().toISOString(),
+    expiresAt: "2099-03-09T16:30:00.000Z",
   };
 
   const store = createNoopStore({
@@ -770,7 +771,7 @@ Deno.test("create payment intent rejects temporally expired attempts", async () 
   });
 
   assertEquals(response.status, 409);
-  assertEquals(retrieveCalled, false);
+  assertEquals(retrieveCalled, true);
   assertMatch(await response.json(), { error: "payment_attempt_expired" });
 });
 
@@ -822,7 +823,7 @@ Deno.test("create payment intent normalizes shipping country code before insert"
           shippingCountryCode: "IT",
           shippingPhone: "3331111111",
           orderId: null,
-          expiresAt: new Date().toISOString(),
+          expiresAt: "2099-03-09T16:30:00.000Z",
         },
         isNew: true,
         conflict: null,

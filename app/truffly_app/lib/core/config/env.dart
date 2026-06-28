@@ -36,7 +36,9 @@ class Env {
       );
     }
 
-    if (uri.query.isNotEmpty || uri.fragment.isNotEmpty) {
+    if ((uri.path.isNotEmpty && uri.path != '/') ||
+        uri.query.isNotEmpty ||
+        uri.fragment.isNotEmpty) {
       throw StateError(
         'SUPABASE_URL must be the Supabase project origin, without a path. '
         'Example: https://project-ref.supabase.co',

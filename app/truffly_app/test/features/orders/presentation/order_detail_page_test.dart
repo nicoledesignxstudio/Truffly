@@ -340,6 +340,7 @@ void main() {
       await _scrollUntilTextVisible(tester, 'Lascia recensione');
       await tester.tap(find.text('Lascia recensione'));
       await tester.pumpAndSettle();
+      await _scrollUntilTextVisible(tester, 'Pubblica recensione');
       await tester.tap(find.text('Pubblica recensione'));
       await tester.pumpAndSettle();
 
@@ -433,6 +434,7 @@ void main() {
       await _scrollUntilTextVisible(tester, 'Lascia recensione');
       await tester.tap(find.text('Lascia recensione'));
       await tester.pumpAndSettle();
+      await _scrollUntilTextVisible(tester, 'Pubblica recensione');
       await tester.tap(find.text('Pubblica recensione'));
       await tester.pumpAndSettle();
 

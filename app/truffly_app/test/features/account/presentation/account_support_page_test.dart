@@ -42,7 +42,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Support'), findsOneWidget);
-    expect(find.text('FAQ'), findsOneWidget);
+    expect(find.text('Buying & Orders'), findsOneWidget);
     expect(find.byKey(const Key('support_faq_buy_truffle')), findsOneWidget);
 
     await tester.dragUntilVisible(

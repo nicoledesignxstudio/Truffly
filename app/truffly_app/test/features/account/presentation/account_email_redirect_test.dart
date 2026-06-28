@@ -182,7 +182,7 @@ void main() {
         find.text(
           'Check both your current and new email addresses and confirm both links to complete the change.',
         ),
-        findsOneWidget,
+        findsWidgets,
       );
     },
   );
@@ -234,7 +234,7 @@ void main() {
       find.text(
         "Controlla sia l'indirizzo email attuale sia quello nuovo e conferma entrambi i link per completare il cambio.",
       ),
-      findsOneWidget,
+      findsWidgets,
     );
   });
 

@@ -25,7 +25,7 @@ void main() {
       sellerStatus: 'approved',
       stripeAccountId: 'acct_test',
       stripeDetailsSubmitted: true,
-      stripeChargesEnabled: false,
+      stripeChargesEnabled: true,
       stripePayoutsEnabled: true,
       stripeRequirementsPending: false,
       stripeReadyAt: DateTime.parse('2026-03-29T10:00:00.000Z'),

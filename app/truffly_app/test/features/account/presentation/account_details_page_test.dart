@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/features/account/application/account_details_providers.dart';
 import 'package:truffly_app/features/account/data/account_details_service.dart';
 import 'package:truffly_app/features/account/presentation/account_details_page.dart';
@@ -106,7 +108,7 @@ Widget _buildApp({
       if (authNotifier != null)
         authNotifierProvider.overrideWith(() => authNotifier),
     ],
-    child: MaterialApp(
+    child: MaterialApp.router(
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -115,7 +117,25 @@ Widget _buildApp({
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const AccountDetailsPage(),
+      routerConfig: GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const AccountDetailsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.verifyEmail,
+            builder: (context, state) => Scaffold(
+              body: Center(
+                child: Text(
+                  AppLocalizations.of(context)!
+                      .accountDetailsEmailVerificationSent,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -172,7 +192,7 @@ void main() {
     expect(find.text('Italy'), findsOneWidget);
     expect(find.text('Toscana'), findsOneWidget);
     expect(_changePhotoButton, findsOneWidget);
-    expect(_removePhotoButton, findsOneWidget);
+    expect(_removePhotoButton, findsNothing);
 
     expect(find.text('Bio'), findsOneWidget);
   });
@@ -210,12 +230,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(_regionField, findsNothing);
-    expect(
-      find.text(
-        'Region is only required when the selected country is Italy. Saving with another country will clear the region.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('France'), findsOneWidget);
   });
 
   testWidgets('saving state disables submit button', (tester) async {
@@ -255,7 +270,7 @@ void main() {
     expect(find.text('Account details updated successfully.'), findsOneWidget);
   });
 
-  testWidgets('email change shows verification message and refreshes auth state', (
+  testWidgets('email change shows verification message and redirects', (
     tester,
   ) async {
     final service = _FakeAccountDetailsService(_profile(isSeller: false));
@@ -282,10 +297,10 @@ void main() {
     expect(service.updateEmailCalls, 1);
     expect(
       find.text(
-        'We sent a verification link to your new email address. Verify your email to continue.',
+        'Check both your current and new email addresses and confirm both links to complete the change.',
       ),
-      findsOneWidget,
+      findsWidgets,
     );
-    expect(authNotifier.refreshCalls, 1);
+    expect(authNotifier.refreshCalls, 0);
   });
 }

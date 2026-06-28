@@ -77,7 +77,13 @@ class _TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: Center(child: child),
+        body: Center(
+          child: SizedBox(
+            width: 220,
+            height: 280,
+            child: child,
+          ),
+        ),
       ),
     );
   }
