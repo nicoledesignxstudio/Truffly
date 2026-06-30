@@ -11,6 +11,7 @@ import 'package:truffly_app/features/account/application/account_providers.dart'
 import 'package:truffly_app/features/account/presentation/widgets/account_menu_row.dart';
 import 'package:truffly_app/features/account/presentation/widgets/account_section_card.dart';
 import 'package:truffly_app/features/account/presentation/widgets/destructive_confirmation_dialog.dart';
+import 'package:truffly_app/features/admin/presentation/admin_providers.dart';
 import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
 import 'package:truffly_app/features/auth/presentation/widgets/auth_back_button.dart';
@@ -135,6 +136,7 @@ class _AccountContent extends ConsumerWidget {
       currentSellerStripeStatusProvider,
     );
     final sellerStripeStatus = sellerStripeStatusAsync.valueOrNull;
+    final isAdmin = ref.watch(currentUserIsAdminProvider);
 
     final showSellerProgress =
         profile.isSellerRequestPending || profile.isSellerRequestApproved;
@@ -269,6 +271,15 @@ class _AccountContent extends ConsumerWidget {
       ),
     ];
 
+    final adminItems = [
+      if (isAdmin)
+        _AccountDestination(
+          label: _text(context, it: 'Admin Dashboard', en: 'Admin Dashboard'),
+          icon: Icons.admin_panel_settings_outlined,
+          onTap: () => context.push(AppRoutes.accountAdmin),
+        ),
+    ];
+
     final notificationsEnabledAsync = ref.watch(notificationsEnabledProvider);
     final notificationsEnabled = notificationsEnabledAsync.valueOrNull;
 
@@ -327,6 +338,20 @@ class _AccountContent extends ConsumerWidget {
                 ),
             ],
           ),
+          if (adminItems.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.spacingM),
+            AccountSectionCard(
+              title: _text(context, it: 'Admin', en: 'Admin'),
+              children: [
+                for (final item in adminItems)
+                  AccountMenuRow(
+                    label: item.label,
+                    icon: item.icon,
+                    onTap: item.onTap,
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.spacingM),
           AccountSectionCard(
             title: _text(context, it: 'Sessione', en: 'Session'),

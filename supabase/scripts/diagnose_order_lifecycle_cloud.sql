@@ -31,7 +31,8 @@ where jobname in (
   'truffly-cancel-unshipped-orders',
   'truffly-retry-financial-operations',
   'truffly-auto-create-missing-reviews',
-  'truffly-cleanup-unverified-accounts'
+  'truffly-cleanup-unverified-accounts',
+  'truffly-dispatch-notification-pushes'
 )
 order by jobname;
 

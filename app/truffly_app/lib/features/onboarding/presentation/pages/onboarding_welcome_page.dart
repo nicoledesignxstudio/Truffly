@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
+import 'package:truffly_app/core/theme/app_radii.dart';
 import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
@@ -22,6 +23,12 @@ class OnboardingWelcomePage extends ConsumerWidget {
         title: l10n.onboardingWelcomeSellerTitle,
         message: l10n.onboardingWelcomeSellerMessage,
         buttonLabel: l10n.onboardingFlowEnterAppButton,
+        reviewDocumentsTitle: l10n.onboardingWelcomeSellerReviewDocumentsTitle,
+        reviewDocumentsBody: l10n.onboardingWelcomeSellerReviewDocumentsBody,
+        notifyUpdatesTitle: l10n.onboardingWelcomeSellerNotifyUpdatesTitle,
+        notifyUpdatesBody: l10n.onboardingWelcomeSellerNotifyUpdatesBody,
+        exploreTitle: l10n.onboardingWelcomeSellerExploreTitle,
+        exploreBody: l10n.onboardingWelcomeSellerExploreBody,
         isLoading: onboardingState.isSubmitting,
         onPressed: () => _handleEnterApp(ref, onboardingState),
       );
@@ -213,6 +220,12 @@ class _SellerWelcomePage extends StatelessWidget {
   const _SellerWelcomePage({
     required this.title,
     required this.message,
+    required this.reviewDocumentsTitle,
+    required this.reviewDocumentsBody,
+    required this.notifyUpdatesTitle,
+    required this.notifyUpdatesBody,
+    required this.exploreTitle,
+    required this.exploreBody,
     required this.buttonLabel,
     required this.isLoading,
     required this.onPressed,
@@ -220,78 +233,235 @@ class _SellerWelcomePage extends StatelessWidget {
 
   final String title;
   final String message;
+  final String reviewDocumentsTitle;
+  final String reviewDocumentsBody;
+  final String notifyUpdatesTitle;
+  final String notifyUpdatesBody;
+  final String exploreTitle;
+  final String exploreBody;
   final String buttonLabel;
   final bool isLoading;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(
-          child: Image.asset(
-            'assets/images/onboarding/welcome_seller.webp',
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-          ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenHorizontal,
+          12,
+          AppSpacing.screenHorizontal,
+          AppSpacing.spacingL,
         ),
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.black.withValues(alpha: 0.42),
-                  AppColors.black.withValues(alpha: 0.18),
-                  AppColors.black.withValues(alpha: 0.68),
-                ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 4),
+            Center(
+              child: Container(
+                width: 104,
+                height: 104,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.black10),
+                  boxShadow: AppShadows.authField,
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF1F8EE),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.check_rounded,
+                      size: 44,
+                      color: Color(0xFF2E8B2D),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screenHorizontal,
-              AppSpacing.spacingL,
-              AppSpacing.screenHorizontal,
-              AppSpacing.spacingL,
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.authScreenTitle.copyWith(
+                color: AppColors.black,
+                fontSize: 29,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Spacer(),
-                Text(
-                  title,
-                  textAlign: TextAlign.left,
-                  style: AppTextStyles.authScreenTitle.copyWith(
-                    color: AppColors.white,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.authFieldGap),
-                Text(
+            const SizedBox(height: AppSpacing.authFieldGap),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
                   message,
-                  textAlign: TextAlign.left,
+                  textAlign: TextAlign.center,
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.8),
+                    color: AppColors.black80,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.authGroupGap + 10),
-                AuthPrimaryButton(
-                  label: buttonLabel,
-                  onPressed: onPressed,
-                  enabled: !isLoading,
-                  isLoading: isLoading,
-                  backgroundColor: AppColors.white,
-                  foregroundColor: AppColors.black,
-                ),
-                const SizedBox(height: 20),
-              ],
+              ),
             ),
+            const SizedBox(height: 24),
+            _SellerInfoCard(
+              reviewDocumentsTitle: reviewDocumentsTitle,
+              reviewDocumentsBody: reviewDocumentsBody,
+              notifyUpdatesTitle: notifyUpdatesTitle,
+              notifyUpdatesBody: notifyUpdatesBody,
+              exploreTitle: exploreTitle,
+              exploreBody: exploreBody,
+            ),
+            const Spacer(),
+            AuthPrimaryButton(
+              label: buttonLabel,
+              onPressed: onPressed,
+              enabled: !isLoading,
+              isLoading: isLoading,
+              backgroundColor: AppColors.black,
+              foregroundColor: AppColors.white,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SellerInfoCard extends StatelessWidget {
+  const _SellerInfoCard({
+    required this.reviewDocumentsTitle,
+    required this.reviewDocumentsBody,
+    required this.notifyUpdatesTitle,
+    required this.notifyUpdatesBody,
+    required this.exploreTitle,
+    required this.exploreBody,
+  });
+
+  final String reviewDocumentsTitle;
+  final String reviewDocumentsBody;
+  final String notifyUpdatesTitle;
+  final String notifyUpdatesBody;
+  final String exploreTitle;
+  final String exploreBody;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadii.dialogBorderRadius,
+        border: Border.all(color: AppColors.black10),
+        boxShadow: AppShadows.authField,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingM),
+        child: Column(
+          children: [
+            _SellerInfoRow(
+              icon: Icons.description_outlined,
+              title: reviewDocumentsTitle,
+              body: reviewDocumentsBody,
+              iconBackground: AppColors.softGrey,
+              iconColor: AppColors.black,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 14),
+              child: Divider(height: 1, color: AppColors.black10),
+            ),
+            _SellerInfoRow(
+              icon: Icons.notifications_none_rounded,
+              title: notifyUpdatesTitle,
+              body: notifyUpdatesBody,
+              iconBackground: AppColors.softGrey,
+              iconColor: AppColors.black,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 14),
+              child: Divider(height: 1, color: AppColors.black10),
+            ),
+            _SellerInfoRow(
+              icon: Icons.storefront_outlined,
+              title: exploreTitle,
+              body: exploreBody,
+              iconBackground: AppColors.softGrey,
+              iconColor: AppColors.black,
+              trailingIcon: Icons.chevron_right_rounded,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SellerInfoRow extends StatelessWidget {
+  const _SellerInfoRow({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.iconBackground,
+    required this.iconColor,
+    this.trailingIcon,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final Color iconBackground;
+  final Color iconColor;
+  final IconData? trailingIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: iconBackground,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.black10),
+          ),
+          child: Icon(icon, color: iconColor, size: 22),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                body,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.black80,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ),
+        if (trailingIcon != null) ...[
+          const SizedBox(width: 8),
+          Icon(trailingIcon, color: AppColors.black50, size: 24),
+        ],
       ],
     );
   }

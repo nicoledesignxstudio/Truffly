@@ -50,7 +50,7 @@ final class SellerProfileService {
         firstName: profileRow['first_name'] as String?,
         lastName: profileRow['last_name'] as String?,
         profileImageUrl: profileRow['profile_image_url'] as String?,
-        joinedAt: null,
+        joinedAt: _parseOptionalDateTime(profileRow['created_at']),
         region: profileRow['region'] as String?,
         bio: profileRow['bio'] as String?,
         ratingAverage: _toDouble(profileRow['seller_rating_avg']),
@@ -144,7 +144,15 @@ final class SellerProfileService {
       comment: row['comment'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
       isAuto: row['is_auto'] == true,
+      reviewerName: row['buyer_full_name'] as String?,
     );
+  }
+
+  DateTime? _parseOptionalDateTime(Object? value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    if (text.isEmpty) return null;
+    return DateTime.tryParse(text);
   }
 
   double _toDouble(Object? value) {

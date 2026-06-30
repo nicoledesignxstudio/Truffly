@@ -7,9 +7,7 @@ import 'package:truffly_app/core/bootstrap/domain/bootstrap_state.dart';
 import 'package:truffly_app/core/providers/app_providers.dart';
 
 final bootstrapNotifierProvider =
-    NotifierProvider<BootstrapNotifier, BootstrapState>(
-  BootstrapNotifier.new,
-);
+    NotifierProvider<BootstrapNotifier, BootstrapState>(BootstrapNotifier.new);
 
 class BootstrapNotifier extends Notifier<BootstrapState> {
   bool _isRunning = false;
@@ -37,7 +35,9 @@ class BootstrapNotifier extends Notifier<BootstrapState> {
     debugPrint('[BOOTSTRAP] Starting checks');
 
     try {
-      final healthResult = await ref.read(backendHealthServiceProvider).checkHealth();
+      final healthResult = await ref
+          .read(backendHealthServiceProvider)
+          .checkHealth();
       switch (healthResult) {
         case BackendHealthy():
           debugPrint('[BOOTSTRAP] Backend reachable');
@@ -48,7 +48,9 @@ class BootstrapNotifier extends Notifier<BootstrapState> {
           return;
       }
 
-      final sessionResult = ref.read(authSessionServiceProvider).getSessionStatus();
+      final sessionResult = await ref
+          .read(authSessionServiceProvider)
+          .getSessionStatus();
       state = _resolveSessionState(sessionResult);
     } catch (error) {
       debugPrint('[BOOTSTRAP] Health check failed: $error');
@@ -78,7 +80,8 @@ class BootstrapNotifier extends Notifier<BootstrapState> {
 
   BootstrapFailure _mapHealthIssueToFailure(BackendHealthIssue issue) {
     return switch (issue) {
-      BackendHealthIssue.backendUnavailable => const BackendUnavailableFailure(),
+      BackendHealthIssue.backendUnavailable =>
+        const BackendUnavailableFailure(),
       BackendHealthIssue.timeout => const NetworkTimeoutFailure(),
       BackendHealthIssue.network => const NetworkFailure(),
       BackendHealthIssue.config => const ConfigFailure(),

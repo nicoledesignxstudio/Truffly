@@ -28,7 +28,11 @@ export async function handleSendTestPush(
 
   let payload: TestPushPayload;
   try {
-    payload = await request.json();
+    const parsedPayload = await readUtf8JsonBody(request);
+    if (!isObjectPayload(parsedPayload)) {
+      return jsonResponse({ error: "invalid_json_body" }, 400, requestId);
+    }
+    payload = parsedPayload;
   } catch {
     return jsonResponse({ error: "invalid_json_body" }, 400, requestId);
   }
@@ -78,7 +82,8 @@ export async function handleSendTestPush(
     targetId: null,
     metadata: {},
     title: normalizedString(payload.title) ?? "Test Truffly",
-    body: normalizedString(payload.body) ?? "Questa è una notifica di test",
+    body: normalizedString(payload.body) ??
+      "Questa \u00e8 una notifica di test",
     requestId,
     bypassImportanceFilter: true,
   });
@@ -104,6 +109,15 @@ function normalizedString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function isObjectPayload(value: unknown): value is TestPushPayload {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function readUtf8JsonBody(request: Request): Promise<unknown> {
+  const bytes = new Uint8Array(await request.arrayBuffer());
+  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+}
+
 function jsonResponse(
   body: Record<string, unknown>,
   status: number,
@@ -111,6 +125,6 @@ function jsonResponse(
 ): Response {
   return new Response(JSON.stringify({ ...body, request_id: requestId }), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json; charset=utf-8" },
   });
 }

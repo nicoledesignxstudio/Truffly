@@ -47,7 +47,7 @@ export async function createBusinessNotificationAndPush(
       target_id: envelope.targetId,
       metadata: envelope.metadata,
     })
-    .select("id")
+    .select("id,type,target_route,target_id,metadata")
     .single();
 
   if (insertResult.error || !insertResult.data?.id) {
@@ -60,15 +60,29 @@ export async function createBusinessNotificationAndPush(
   }
 
   const notificationId = String(insertResult.data.id);
+  const persistedMetadata = isRecord(insertResult.data.metadata)
+    ? insertResult.data.metadata
+    : envelope.metadata;
+  const persistedTargetRoute =
+    typeof insertResult.data.target_route === "string"
+      ? insertResult.data.target_route
+      : envelope.targetRoute;
+  const persistedTargetId = typeof insertResult.data.target_id === "string"
+    ? insertResult.data.target_id
+    : envelope.targetId;
+  const persistedType = typeof insertResult.data.type === "string"
+    ? insertResult.data.type
+    : envelope.type;
+
   await claimOutboxForImmediateSend(args.adminClient, notificationId);
   const result = await sendNotificationPush({
     adminClient: args.adminClient,
     notificationId,
     userId: args.userId,
-    type: envelope.type,
-    metadata: envelope.metadata,
-    targetRoute: envelope.targetRoute,
-    targetId: envelope.targetId,
+    type: persistedType,
+    metadata: persistedMetadata,
+    targetRoute: persistedTargetRoute,
+    targetId: persistedTargetId,
     title: args.title,
     data: args.data,
     requestId: args.requestId,
@@ -193,4 +207,8 @@ function readErrorMessage(error: unknown): string {
     if (typeof value === "string") return value;
   }
   return "";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

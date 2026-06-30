@@ -31,21 +31,27 @@ final pushNotificationsCoordinatorProvider = Provider<void>((ref) {
 
   unawaited(tokenService.initialize());
   if (authState is AuthAuthenticatedReady) {
-    unawaited(tokenService.syncCurrentToken());
+    unawaited(
+      tokenService.enableCurrentDeviceNotifications(requestPermission: false),
+    );
   }
-  unawaited(_configureForegroundHandling(
-    router: router,
-    messaging: messaging,
-    ref: ref,
-    notificationsRepository: notificationsRepository,
-  ).then((subscriptions) {
-    foregroundSubscription = subscriptions.foreground;
-    openedAppSubscription = subscriptions.openedApp;
-  }));
+  unawaited(
+    _configureForegroundHandling(
+      router: router,
+      messaging: messaging,
+      ref: ref,
+      notificationsRepository: notificationsRepository,
+    ).then((subscriptions) {
+      foregroundSubscription = subscriptions.foreground;
+      openedAppSubscription = subscriptions.openedApp;
+    }),
+  );
 
   ref.listen<AuthState>(authNotifierProvider, (previous, next) {
     if (next is AuthAuthenticatedReady) {
-      unawaited(tokenService.syncCurrentToken());
+      unawaited(
+        tokenService.enableCurrentDeviceNotifications(requestPermission: false),
+      );
     }
   });
 
@@ -78,14 +84,11 @@ Future<_PushMessageSubscriptions> _configureForegroundHandling({
     ref.invalidate(notificationsInboxProvider);
   });
 
-  final openedAppSubscription = FirebaseMessaging.onMessageOpenedApp.listen((message) {
+  final openedAppSubscription = FirebaseMessaging.onMessageOpenedApp.listen((
+    message,
+  ) {
     unawaited(
-      _handlePushOpen(
-        router,
-        ref,
-        notificationsRepository,
-        message.data,
-      ),
+      _handlePushOpen(router, ref, notificationsRepository, message.data),
     );
   });
 

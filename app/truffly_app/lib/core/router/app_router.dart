@@ -22,6 +22,8 @@ import 'package:truffly_app/features/account/presentation/account_support_page.d
 import 'package:truffly_app/features/account/presentation/account_terms_and_conditions_page.dart';
 import 'package:truffly_app/features/account/presentation/shipping_address_form_page.dart';
 import 'package:truffly_app/features/account/presentation/shipping_addresses_page.dart';
+import 'package:truffly_app/features/admin/presentation/admin_dashboard_screen.dart';
+import 'package:truffly_app/features/admin/presentation/admin_seller_application_detail_screen.dart';
 import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/auth/data/auth_result.dart';
 import 'package:truffly_app/features/auth/data/profile_service.dart';
@@ -160,6 +162,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AccountSellerOnboardingPage(),
       ),
       GoRoute(
+        path: AppRoutes.accountAdmin,
+        builder: (context, state) => const AdminDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accountAdminSellerApplication,
+        builder: (context, state) => AdminSellerApplicationDetailScreen(
+          userId: state.pathParameters['userId'] ?? '',
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.accountMyTruffles,
         builder: (context, state) => const SellerMyTrufflesPage(),
         redirect: (_, _) => _redirectAccountMyTruffles(ref),
@@ -217,8 +229,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.sellerProfile,
-        builder: (context, state) =>
-            SellerProfilePage(sellerId: state.pathParameters['sellerId'] ?? ''),
+        builder: (context, state) => SellerProfilePage(
+          sellerId: state.pathParameters['sellerId'] ?? '',
+          initialSection: state.uri.queryParameters['section'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.truffleGuide,
@@ -472,6 +486,8 @@ const Set<String> _authenticatedReadyAllowedRoutes = {
   AppRoutes.accountShippingEdit,
   AppRoutes.accountBecomeSeller,
   AppRoutes.accountSellerOnboarding,
+  AppRoutes.accountAdmin,
+  AppRoutes.accountAdminSellerApplication,
   AppRoutes.accountMyTruffles,
   AppRoutes.accountGuide,
   AppRoutes.accountSupport,

@@ -40,34 +40,35 @@ void main() {
       currentUserId: 'seller-42',
     );
 
-    expect(route, AppRoutes.sellerProfilePath('seller-42'));
+    expect(
+      route,
+      '${AppRoutes.sellerProfilePath('seller-42')}?section=reviews',
+    );
   });
 
-  test('parses push payload metadata and falls back to notifications inbox', () {
-    final route = resolveNotificationRouteFromPushData(
-      {
+  test(
+    'parses push payload metadata and falls back to notifications inbox',
+    () {
+      final route = resolveNotificationRouteFromPushData({
         'type': 'generic',
         'notification_id': 'notif-1',
         'target_route': '   ',
         'target_id': 'target-1',
         'metadata': '{"foo":"bar","count":2}',
-      },
-      currentUserId: 'user-1',
-    );
+      }, currentUserId: 'user-1');
 
-    expect(route, AppRoutes.notifications);
-  });
+      expect(route, AppRoutes.notifications);
+    },
+  );
 
   test('parses push payload explicit route for order detail', () {
-    final payload = parsePushNotificationPayload(
-      {
-        'notification_type': 'order_completed',
-        'notification_id': 'notif-2',
-        'target_route': '/orders/order-55',
-        'target_id': 'order-55',
-        'metadata': {'order_id': 'order-55'},
-      },
-    );
+    final payload = parsePushNotificationPayload({
+      'notification_type': 'order_completed',
+      'notification_id': 'notif-2',
+      'target_route': '/orders/order-55',
+      'target_id': 'order-55',
+      'metadata': {'order_id': 'order-55'},
+    });
 
     expect(payload.notificationId, 'notif-2');
     expect(payload.targetRoute, '/orders/order-55');
@@ -76,6 +77,63 @@ void main() {
     expect(
       payload.resolveRoute(currentUserId: 'user-1'),
       AppRoutes.accountOrderDetailPath('order-55'),
+    );
+  });
+
+  test('maps submitted seller application notifications to account page', () {
+    final route = resolveNotificationRoute(
+      AppNotification(
+        id: 'n3',
+        type: 'seller_application_submitted',
+        message: '',
+        isRead: false,
+        createdAt: DateTime(2026, 6, 28),
+        targetRoute: null,
+        targetId: null,
+        metadata: const {},
+      ),
+      currentUserId: 'user-1',
+    );
+
+    expect(route, AppRoutes.account);
+  });
+
+  test('maps seller status route to account page instead of Stripe setup', () {
+    final route = resolveNotificationRouteFromPushData({
+      'type': 'seller_application_submitted',
+      'target_route': '/account/seller-status',
+    }, currentUserId: 'user-1');
+
+    expect(route, AppRoutes.account);
+  });
+
+  test('keeps Stripe payment route mapped to seller payment setup', () {
+    final route = resolveNotificationRouteFromPushData({
+      'type': 'seller_approved',
+      'target_route': '/account/payments/stripe',
+    }, currentUserId: 'user-1');
+
+    expect(route, AppRoutes.accountBecomeSeller);
+  });
+
+  test('maps seller review type to current seller reviews section', () {
+    final route = resolveNotificationRoute(
+      AppNotification(
+        id: 'n4',
+        type: 'seller_new_review',
+        message: '',
+        isRead: false,
+        createdAt: DateTime(2026, 6, 29),
+        targetRoute: null,
+        targetId: null,
+        metadata: const {},
+      ),
+      currentUserId: 'seller-42',
+    );
+
+    expect(
+      route,
+      '${AppRoutes.sellerProfilePath('seller-42')}?section=reviews',
     );
   });
 }

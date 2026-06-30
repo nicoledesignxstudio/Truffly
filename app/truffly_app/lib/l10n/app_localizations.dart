@@ -803,13 +803,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSellerDocumentsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Upload your seller documents'**
+  /// **'Verify your seller account'**
   String get onboardingSellerDocumentsTitle;
 
   /// No description provided for @onboardingSellerDocumentsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Select the required documents locally. Nothing is uploaded during onboarding until the final submit step.'**
+  /// **'Upload your ID and truffle hunting license to complete your verification and start selling on Truffly.'**
   String get onboardingSellerDocumentsSubtitle;
 
   /// No description provided for @onboardingTesserinoNumberLabel.
@@ -851,7 +851,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTesserinoDocumentTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tesserino document'**
+  /// **'Truffle license'**
   String get onboardingTesserinoDocumentTitle;
 
   /// No description provided for @onboardingTesserinoDocumentDescription.
@@ -872,6 +872,12 @@ abstract class AppLocalizations {
   /// **'Pick file'**
   String get onboardingDocumentPickButton;
 
+  /// No description provided for @onboardingDocumentUploadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get onboardingDocumentUploadButton;
+
   /// No description provided for @onboardingDocumentReplaceButton.
   ///
   /// In en, this message translates to:
@@ -883,6 +889,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get onboardingDocumentRemoveButton;
+
+  /// No description provided for @onboardingDocumentRequiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get onboardingDocumentRequiredLabel;
 
   /// No description provided for @onboardingDocumentTakePhotoOption.
   ///
@@ -971,13 +983,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingNotificationsSellerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Never miss a sale'**
+  /// **'Enable notifications'**
   String get onboardingNotificationsSellerTitle;
 
   /// No description provided for @onboardingNotificationsSellerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enable notifications to stay updated on orders, shipments, payments, and seller activity.'**
+  /// **'Receive updates on orders, shipments, and payments.'**
   String get onboardingNotificationsSellerSubtitle;
 
   /// No description provided for @onboardingNotificationsSellerBenefit1.
@@ -1064,6 +1076,12 @@ abstract class AppLocalizations {
   /// **'Unable to request notification permission right now. You can continue and try again later.'**
   String get onboardingNotificationsPermissionError;
 
+  /// No description provided for @notificationsOpenSystemSettingsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are disabled in your phone settings. Open Truffly notification settings and turn them on, then try again.'**
+  String get notificationsOpenSystemSettingsMessage;
+
   /// No description provided for @onboardingWelcomeBuyerTitle.
   ///
   /// In en, this message translates to:
@@ -1091,7 +1109,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeSellerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Application submitted'**
+  /// **'Application submitted\nsuccessfully'**
   String get onboardingWelcomeSellerTitle;
 
   /// No description provided for @onboardingWelcomeSellerSubtitle.
@@ -1103,8 +1121,44 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeSellerMessage.
   ///
   /// In en, this message translates to:
-  /// **'Your seller request has been successfully submitted and is now under review.\nYou’ll receive a notification as your application status progresses.'**
+  /// **'Thank you! We\'ve received your application. We\'ll notify you as soon as it is updated.'**
   String get onboardingWelcomeSellerMessage;
+
+  /// No description provided for @onboardingWelcomeSellerReviewDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document verification'**
+  String get onboardingWelcomeSellerReviewDocumentsTitle;
+
+  /// No description provided for @onboardingWelcomeSellerReviewDocumentsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll review your ID and truffle hunting license.'**
+  String get onboardingWelcomeSellerReviewDocumentsBody;
+
+  /// No description provided for @onboardingWelcomeSellerNotifyUpdatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll keep you updated'**
+  String get onboardingWelcomeSellerNotifyUpdatesTitle;
+
+  /// No description provided for @onboardingWelcomeSellerNotifyUpdatesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll receive a notification if your application is approved or if we need more information.'**
+  String get onboardingWelcomeSellerNotifyUpdatesBody;
+
+  /// No description provided for @onboardingWelcomeSellerExploreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore the marketplace'**
+  String get onboardingWelcomeSellerExploreTitle;
+
+  /// No description provided for @onboardingWelcomeSellerExploreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'In the meantime, explore Truffly and discover available truffles.'**
+  String get onboardingWelcomeSellerExploreBody;
 
   /// No description provided for @onboardingWelcomeDefaultTitle.
   ///
@@ -3721,6 +3775,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications'**
   String get accountSettingsNotificationsLabel;
+
+  /// No description provided for @accountSettingsNotificationsUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to update the notifications preference.'**
+  String get accountSettingsNotificationsUpdateError;
 
   /// No description provided for @accountSettingsLanguageSheetTitle.
   ///

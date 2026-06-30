@@ -1,7 +1,7 @@
 -- Run this in the production Supabase SQL editor after replacing placeholders.
 -- It schedules protected Edge Functions through pg_cron + pg_net.
 --
--- Important: do not leave <cron-secret> placeholders in this file.
+-- Important: do not leave <PROD_PROJECT_REF> or <PROD_CRON_SECRET> placeholders in this file.
 -- The jobs will be installed successfully with placeholder text, but every
 -- protected Edge Function call will return 401 and nothing will be processed.
 
@@ -24,10 +24,10 @@ select cron.schedule(
   '* * * * *',
   $$
   select net.http_post(
-    url := 'https://<project-ref>.supabase.co/functions/v1/dispatch_notification_pushes',
+    url := 'https://<PROD_PROJECT_REF>.supabase.co/functions/v1/dispatch_notification_pushes',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <cron-secret>'
+      'Authorization', 'Bearer <PROD_CRON_SECRET>'
     ),
     body := '{}'::jsonb
   );
@@ -39,10 +39,10 @@ select cron.schedule(
   '*/30 * * * *',
   $$
   select net.http_post(
-    url := 'https://lozpfnnakceyclhqjdbu.supabase.co/functions/v1/auto_complete_orders',
+    url := 'https://<PROD_PROJECT_REF>.supabase.co/functions/v1/auto_complete_orders',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <cron-secret>'
+      'Authorization', 'Bearer <PROD_CRON_SECRET>'
     ),
     body := '{}'::jsonb
   );
@@ -54,10 +54,10 @@ select cron.schedule(
   '*/30 * * * *',
   $$
   select net.http_post(
-    url := 'https://lozpfnnakceyclhqjdbu.supabase.co/functions/v1/cancel_unshipped_orders',
+    url := 'https://<PROD_PROJECT_REF>.supabase.co/functions/v1/cancel_unshipped_orders',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <cron-secret>'
+      'Authorization', 'Bearer <PROD_CRON_SECRET>'
     ),
     body := '{}'::jsonb
   );
@@ -69,10 +69,10 @@ select cron.schedule(
   '*/15 * * * *',
   $$
   select net.http_post(
-    url := 'https://<project-ref>.supabase.co/functions/v1/retry_financial_operations',
+    url := 'https://<PROD_PROJECT_REF>.supabase.co/functions/v1/retry_financial_operations',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <cron-secret>'
+      'Authorization', 'Bearer <PROD_CRON_SECRET>'
     ),
     body := '{"limit":10}'::jsonb
   );
@@ -84,10 +84,10 @@ select cron.schedule(
   '0 3 * * *',
   $$
   select net.http_post(
-    url := 'https://<project-ref>.supabase.co/functions/v1/auto_create_missing_reviews',
+    url := 'https://<PROD_PROJECT_REF>.supabase.co/functions/v1/auto_create_missing_reviews',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <cron-secret>'
+      'Authorization', 'Bearer <PROD_CRON_SECRET>'
     ),
     body := '{}'::jsonb
   );
@@ -99,10 +99,10 @@ select cron.schedule(
   '30 3 * * *',
   $$
   select net.http_post(
-    url := 'https://<project-ref>.supabase.co/functions/v1/cleanup_unverified_accounts',
+    url := 'https://<PROD_PROJECT_REF>.supabase.co/functions/v1/cleanup_unverified_accounts',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <cron-secret>'
+      'Authorization', 'Bearer <PROD_CRON_SECRET>'
     ),
     body := '{}'::jsonb
   );

@@ -419,6 +419,7 @@ class _SellerRequestPendingCard extends StatelessWidget {
     return _StatusNoticeCard(
       icon: Icons.hourglass_bottom_rounded,
       title: isItalian ? 'Richiesta in revisione' : 'Request under review',
+      titleFontSize: 15,
       body: isItalian
           ? 'Stiamo verificando il tuo profilo per permetterti di iniziare a vendere su Truffly. Ti aggiorneremo il prima possibile.'
           : 'We are reviewing your profile so you can start selling on Truffly. We will update you as soon as possible.',
@@ -559,11 +560,13 @@ class _StatusNoticeCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.body,
+    this.titleFontSize = 16,
   });
 
   final IconData icon;
   final String title;
   final String body;
+  final double titleFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -598,7 +601,7 @@ class _StatusNoticeCard extends StatelessWidget {
                     maxLines: 2,
                     style: AppTextStyles.cardTitle.copyWith(
                       color: AppColors.white,
-                      fontSize: 16,
+                      fontSize: titleFontSize,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

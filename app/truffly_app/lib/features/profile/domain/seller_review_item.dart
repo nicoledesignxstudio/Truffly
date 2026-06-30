@@ -5,6 +5,7 @@ final class SellerReviewItem {
     required this.comment,
     required this.createdAt,
     required this.isAuto,
+    required this.reviewerName,
   });
 
   final String id;
@@ -12,6 +13,7 @@ final class SellerReviewItem {
   final String? comment;
   final DateTime createdAt;
   final bool isAuto;
+  final String? reviewerName;
 
   bool get hasComment => comment != null && comment!.trim().isNotEmpty;
 }

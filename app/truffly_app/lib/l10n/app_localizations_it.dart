@@ -394,11 +394,12 @@ class AppLocalizationsIt extends AppLocalizations {
       'Al momento, solo i tartufai residenti in Italia possono vendere su Truffly. Proseguendo, dichiari di risiedere in Italia.';
 
   @override
-  String get onboardingSellerDocumentsTitle => 'Carica i documenti seller';
+  String get onboardingSellerDocumentsTitle =>
+      'Verifica il tuo account venditore';
 
   @override
   String get onboardingSellerDocumentsSubtitle =>
-      'Seleziona localmente i documenti richiesti. Durante l\'onboarding non viene caricato nulla fino al submit finale.';
+      'Carica il tuo documento d\'identità e il tesserino da tartufaio per completare la verifica e iniziare a vendere su Truffly.';
 
   @override
   String get onboardingTesserinoNumberLabel => 'Numero tesserino';
@@ -423,7 +424,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Il documento di identità è obbligatorio.';
 
   @override
-  String get onboardingTesserinoDocumentTitle => 'Documento tesserino';
+  String get onboardingTesserinoDocumentTitle => 'Tesserino da tartufaio';
 
   @override
   String get onboardingTesserinoDocumentDescription =>
@@ -437,10 +438,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get onboardingDocumentPickButton => 'Seleziona file';
 
   @override
+  String get onboardingDocumentUploadButton => 'Carica';
+
+  @override
   String get onboardingDocumentReplaceButton => 'Sostituisci file';
 
   @override
   String get onboardingDocumentRemoveButton => 'Rimuovi';
+
+  @override
+  String get onboardingDocumentRequiredLabel => 'Obbligatorio';
 
   @override
   String get onboardingDocumentTakePhotoOption => 'Scatta foto';
@@ -494,12 +501,11 @@ class AppLocalizationsIt extends AppLocalizations {
       'Nuovi tartufi in linea con i tuoi interessi.';
 
   @override
-  String get onboardingNotificationsSellerTitle =>
-      'Non perdere nessuna vendita';
+  String get onboardingNotificationsSellerTitle => 'Attiva le notifiche';
 
   @override
   String get onboardingNotificationsSellerSubtitle =>
-      'Attiva le notifiche per ricevere aggiornamenti su ordini, spedizioni, pagamenti e attività del tuo account venditore.';
+      'Ricevi aggiornamenti su\nordini, spedizioni e pagamenti.';
 
   @override
   String get onboardingNotificationsSellerBenefit1 =>
@@ -556,6 +562,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Impossibile richiedere il permesso notifiche in questo momento. Puoi continuare e riprovare più tardi.';
 
   @override
+  String get notificationsOpenSystemSettingsMessage =>
+      'Le notifiche sono disattivate nelle impostazioni del telefono. Apri le impostazioni notifiche di Truffly, attivale e riprova.';
+
+  @override
   String get onboardingWelcomeBuyerTitle =>
       'Inizia il tuo viaggio nel mondo del tartufo';
 
@@ -571,7 +581,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get onboardingWelcomeBuyerReadyLabel => 'Sei pronto';
 
   @override
-  String get onboardingWelcomeSellerTitle => 'Richiesta inviata';
+  String get onboardingWelcomeSellerTitle => 'Richiesta inviata\ncon successo';
 
   @override
   String get onboardingWelcomeSellerSubtitle =>
@@ -579,7 +589,30 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get onboardingWelcomeSellerMessage =>
-      'La tua richiesta seller è stata inviata correttamente ed è ora in revisione.\nRiceverai una notifica man mano che lo stato della tua candidatura progredisce.';
+      'Grazie! Abbiamo ricevuto la tua candidatura. Ti avviseremo non appena verrà aggiornata.';
+
+  @override
+  String get onboardingWelcomeSellerReviewDocumentsTitle =>
+      'Verifica dei documenti';
+
+  @override
+  String get onboardingWelcomeSellerReviewDocumentsBody =>
+      'Verificheremo il tuo documento d\'identità e il tesserino da tartufaio.';
+
+  @override
+  String get onboardingWelcomeSellerNotifyUpdatesTitle =>
+      'Ti terremo aggiornato';
+
+  @override
+  String get onboardingWelcomeSellerNotifyUpdatesBody =>
+      'Riceverai una notifica se la tua richiesta verrà approvata o se servono altre informazioni.';
+
+  @override
+  String get onboardingWelcomeSellerExploreTitle => 'Esplora il marketplace';
+
+  @override
+  String get onboardingWelcomeSellerExploreBody =>
+      'Nel frattempo, esplora Truffly e scopri i tartufi disponibili.';
 
   @override
   String get onboardingWelcomeDefaultTitle => 'Benvenuto su Truffly';
@@ -2102,6 +2135,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get accountSettingsNotificationsLabel => 'Notifiche';
+
+  @override
+  String get accountSettingsNotificationsUpdateError =>
+      'Impossibile aggiornare la preferenza notifiche.';
 
   @override
   String get accountSettingsLanguageSheetTitle => 'Scegli una lingua';

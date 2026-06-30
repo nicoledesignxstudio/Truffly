@@ -391,11 +391,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'At the moment, only truffle hunters residing in Italy can sell on Truffly. By continuing, you confirm that you reside in Italy.';
 
   @override
-  String get onboardingSellerDocumentsTitle => 'Upload your seller documents';
+  String get onboardingSellerDocumentsTitle => 'Verify your seller account';
 
   @override
   String get onboardingSellerDocumentsSubtitle =>
-      'Select the required documents locally. Nothing is uploaded during onboarding until the final submit step.';
+      'Upload your ID and truffle hunting license to complete your verification and start selling on Truffly.';
 
   @override
   String get onboardingTesserinoNumberLabel => 'Tesserino number';
@@ -419,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Identity document is required.';
 
   @override
-  String get onboardingTesserinoDocumentTitle => 'Tesserino document';
+  String get onboardingTesserinoDocumentTitle => 'Truffle license';
 
   @override
   String get onboardingTesserinoDocumentDescription =>
@@ -433,10 +433,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingDocumentPickButton => 'Pick file';
 
   @override
+  String get onboardingDocumentUploadButton => 'Upload';
+
+  @override
   String get onboardingDocumentReplaceButton => 'Replace file';
 
   @override
   String get onboardingDocumentRemoveButton => 'Remove';
+
+  @override
+  String get onboardingDocumentRequiredLabel => 'Required';
 
   @override
   String get onboardingDocumentTakePhotoOption => 'Take photo';
@@ -488,11 +494,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'New truffles matching your interests.';
 
   @override
-  String get onboardingNotificationsSellerTitle => 'Never miss a sale';
+  String get onboardingNotificationsSellerTitle => 'Enable notifications';
 
   @override
   String get onboardingNotificationsSellerSubtitle =>
-      'Enable notifications to stay updated on orders, shipments, payments, and seller activity.';
+      'Receive updates on orders, shipments, and payments.';
 
   @override
   String get onboardingNotificationsSellerBenefit1 =>
@@ -549,6 +555,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to request notification permission right now. You can continue and try again later.';
 
   @override
+  String get notificationsOpenSystemSettingsMessage =>
+      'Notifications are disabled in your phone settings. Open Truffly notification settings and turn them on, then try again.';
+
+  @override
   String get onboardingWelcomeBuyerTitle => 'Your truffle journey starts here';
 
   @override
@@ -563,7 +573,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingWelcomeBuyerReadyLabel => 'You\'re ready';
 
   @override
-  String get onboardingWelcomeSellerTitle => 'Application submitted';
+  String get onboardingWelcomeSellerTitle =>
+      'Application submitted\nsuccessfully';
 
   @override
   String get onboardingWelcomeSellerSubtitle =>
@@ -571,7 +582,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingWelcomeSellerMessage =>
-      'Your seller request has been successfully submitted and is now under review.\nYou’ll receive a notification as your application status progresses.';
+      'Thank you! We\'ve received your application. We\'ll notify you as soon as it is updated.';
+
+  @override
+  String get onboardingWelcomeSellerReviewDocumentsTitle =>
+      'Document verification';
+
+  @override
+  String get onboardingWelcomeSellerReviewDocumentsBody =>
+      'We\'ll review your ID and truffle hunting license.';
+
+  @override
+  String get onboardingWelcomeSellerNotifyUpdatesTitle =>
+      'We\'ll keep you updated';
+
+  @override
+  String get onboardingWelcomeSellerNotifyUpdatesBody =>
+      'You\'ll receive a notification if your application is approved or if we need more information.';
+
+  @override
+  String get onboardingWelcomeSellerExploreTitle => 'Explore the marketplace';
+
+  @override
+  String get onboardingWelcomeSellerExploreBody =>
+      'In the meantime, explore Truffly and discover available truffles.';
 
   @override
   String get onboardingWelcomeDefaultTitle => 'Welcome to Truffly';
@@ -2085,6 +2119,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountSettingsNotificationsLabel => 'Notifications';
+
+  @override
+  String get accountSettingsNotificationsUpdateError =>
+      'Unable to update the notifications preference.';
 
   @override
   String get accountSettingsLanguageSheetTitle => 'Choose a language';

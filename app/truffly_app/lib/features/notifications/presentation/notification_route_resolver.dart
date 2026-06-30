@@ -70,9 +70,8 @@ String? resolveNotificationRoute(
     'favorite_truffle_unavailable' => AppRoutes.accountFavorites,
     'favorite_truffle_expiring' when truffleId != null =>
       AppRoutes.truffleDetailPath(truffleId),
-    'seller_application_submitted' ||
+    'seller_application_submitted' || 'seller_rejected' => AppRoutes.account,
     'seller_approved' ||
-    'seller_rejected' ||
     'stripe_onboarding_required' ||
     'stripe_onboarding_completed' => AppRoutes.accountBecomeSeller,
     'truffle_published' when truffleId != null => AppRoutes.truffleDetailPath(
@@ -92,7 +91,7 @@ String? resolveNotificationRoute(
       AppRoutes.accountOrderDetailPath(orderId),
     'seller_new_review' || 'seller_auto_review_received'
         when currentUserId != null =>
-      AppRoutes.sellerProfilePath(currentUserId),
+      _sellerReviewsPath(currentUserId),
     'profile_updated' => AppRoutes.accountDetails,
     'security_new_login' => AppRoutes.accountSettings,
     'buyer_welcome' => AppRoutes.truffles,
@@ -161,8 +160,10 @@ String? _resolveExplicitRoute(
   if (route == '/favorites') {
     return AppRoutes.accountFavorites;
   }
-  if (route == '/account/seller-status' ||
-      route == '/account/payments/stripe') {
+  if (route == '/account/seller-status') {
+    return AppRoutes.account;
+  }
+  if (route == '/account/payments/stripe') {
     return AppRoutes.accountBecomeSeller;
   }
   if (route == '/seller/truffles/new') {
@@ -171,7 +172,7 @@ String? _resolveExplicitRoute(
   if (route == '/seller/profile/reviews') {
     return currentUserId == null
         ? AppRoutes.account
-        : AppRoutes.sellerProfilePath(currentUserId);
+        : _sellerReviewsPath(currentUserId);
   }
   if (route == '/account/details') {
     return AppRoutes.accountDetails;
@@ -184,6 +185,10 @@ String? _resolveExplicitRoute(
   }
 
   return route.startsWith('/') ? route : null;
+}
+
+String _sellerReviewsPath(String sellerId) {
+  return '${AppRoutes.sellerProfilePath(sellerId)}?section=reviews';
 }
 
 String? _extractTailId(String route, String segment, {String? fallback}) {

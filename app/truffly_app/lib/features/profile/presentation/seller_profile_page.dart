@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:truffly_app/core/router/app_routes.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
-import 'package:truffly_app/core/theme/app_radii.dart';
-import 'package:truffly_app/core/theme/app_shadows.dart';
 import 'package:truffly_app/core/theme/app_spacing.dart';
 import 'package:truffly_app/core/theme/app_text_styles.dart';
 import 'package:truffly_app/features/account/application/account_providers.dart';
@@ -21,9 +19,14 @@ import 'package:truffly_app/features/truffle/presentation/widgets/truffle_ui_for
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class SellerProfilePage extends ConsumerWidget {
-  const SellerProfilePage({super.key, required this.sellerId});
+  const SellerProfilePage({
+    super.key,
+    required this.sellerId,
+    this.initialSection,
+  });
 
   final String sellerId;
+  final String? initialSection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -81,7 +84,10 @@ class SellerProfilePage extends ConsumerWidget {
                   // The user can retry by pulling again.
                 }
               },
-              child: _SellerProfileContent(profile: profile),
+              child: _SellerProfileContent(
+                profile: profile,
+                initialSection: initialSection,
+              ),
             )
           : profileAsync.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -91,20 +97,30 @@ class SellerProfilePage extends ConsumerWidget {
 }
 
 class _SellerProfileContent extends ConsumerStatefulWidget {
-  const _SellerProfileContent({required this.profile});
+  const _SellerProfileContent({
+    required this.profile,
+    required this.initialSection,
+  });
 
   final SellerProfileDetail profile;
+  final String? initialSection;
 
   @override
   ConsumerState<_SellerProfileContent> createState() =>
       _SellerProfileContentState();
 }
 
-enum _SellerSection { info, truffles, reviews }
+enum _SellerSection { truffles, reviews }
 
 class _SellerProfileContentState extends ConsumerState<_SellerProfileContent> {
-  _SellerSection _selectedSection = _SellerSection.info;
+  late _SellerSection _selectedSection = _initialSection();
   bool _isAvatarPreviewOpen = false;
+
+  _SellerSection _initialSection() {
+    return widget.initialSection == 'truffles'
+        ? _SellerSection.truffles
+        : _SellerSection.reviews;
+  }
 
   void _selectSection(_SellerSection section) {
     if (_selectedSection == section) return;
@@ -131,7 +147,6 @@ class _SellerProfileContentState extends ConsumerState<_SellerProfileContent> {
     final ratingValue = profile.reviewCount > 0
         ? profile.ratingAverage.toStringAsFixed(1)
         : '0';
-    final ordersValue = profile.completedOrdersCount.toString();
     final bioText = (profile.bio?.trim().isNotEmpty ?? false)
         ? profile.bio!.trim()
         : l10n.sellerProfileBioFallback;
@@ -142,69 +157,37 @@ class _SellerProfileContentState extends ConsumerState<_SellerProfileContent> {
         ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.spacingS,
-            AppSpacing.spacingS,
+            AppSpacing.spacingM,
             AppSpacing.spacingS,
             AppSpacing.spacingM,
+            AppSpacing.spacingL,
           ),
           children: [
-            _SellerHeroCard(
+            _SellerProfileHeader(
               profile: profile,
               ratingValue: ratingValue,
-              ordersValue: ordersValue,
+              regionText: regionText,
               bioText: bioText,
               onAvatarTap: _openAvatarPreview,
             ),
             const SizedBox(height: AppSpacing.spacingS),
-            Row(
-              children: [
-                Expanded(
-                  child: _SectionChip(
-                    label: l10n.sellerProfileInfoTab,
-                    selected: _selectedSection == _SellerSection.info,
-                    onSelected: () => _selectSection(_SellerSection.info),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _SectionChip(
-                    label: l10n.sellerProfileReviewsTab,
-                    selected: _selectedSection == _SellerSection.reviews,
-                    onSelected: () => _selectSection(_SellerSection.reviews),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _SectionChip(
-                    label: l10n.sellerProfileTrufflesTab,
-                    selected: _selectedSection == _SellerSection.truffles,
-                    onSelected: () => _selectSection(_SellerSection.truffles),
-                  ),
-                ),
-              ],
+            _SellerStatsPanel(
+              soldCount: profile.completedOrdersCount,
+              reviewCount: profile.reviewCount,
+              joinedAt: profile.joinedAt,
             ),
             const SizedBox(height: AppSpacing.spacingS),
+            _SectionTabs(
+              selectedSection: _selectedSection,
+              onSelected: _selectSection,
+            ),
+            const SizedBox(height: AppSpacing.spacingM),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 180),
               child: switch (_selectedSection) {
-                _SellerSection.info => _InfoTabContent(
-                  key: const ValueKey('info'),
-                  profile: profile,
-                  regionText: regionText,
-                  reviews: profile.latestReviews,
-                  activeTruffles: profile.activeTruffles,
-                  onShowReviews: () => _selectSection(_SellerSection.reviews),
-                  onShowTruffles: () => _selectSection(_SellerSection.truffles),
-                  onOpenTruffle: (item) =>
-                      context.push(AppRoutes.truffleDetailPath(item.id)),
-                  onFavoriteTap: (item) =>
-                      favoriteNotifier.toggleFavorite(item.id),
-                  isFavorite: (id) => favoriteState.ids.contains(id),
-                  isFavoritePending: (id) =>
-                      favoriteState.pendingIds.contains(id),
-                ),
                 _SellerSection.reviews => _ReviewsTabContent(
                   key: const ValueKey('reviews'),
+                  profile: profile,
                   reviewsAsync: reviewsAsync,
                 ),
                 _SellerSection.truffles => _TrufflesTabContent(
@@ -254,7 +237,7 @@ class _SellerProfileContentState extends ConsumerState<_SellerProfileContent> {
                         child: SellerAvatar(
                           imageUrl: profile.profileImageUrl,
                           initials: profile.initials,
-                          size: 180,
+                          size: 160,
                         ),
                       ),
                     ),
@@ -268,95 +251,168 @@ class _SellerProfileContentState extends ConsumerState<_SellerProfileContent> {
   }
 }
 
-class _SellerHeroCard extends StatelessWidget {
-  const _SellerHeroCard({
+class _SellerProfileHeader extends StatelessWidget {
+  const _SellerProfileHeader({
     required this.profile,
     required this.ratingValue,
-    required this.ordersValue,
+    required this.regionText,
     required this.bioText,
     required this.onAvatarTap,
   });
 
   final SellerProfileDetail profile;
   final String ratingValue;
-  final String ordersValue;
+  final String regionText;
   final String bioText;
   final VoidCallback onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onAvatarTap,
+                customBorder: const CircleBorder(),
+                child: SellerAvatar(
+                  imageUrl: profile.profileImageUrl,
+                  initials: profile.initials,
+                  size: 88,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.spacingM),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.fullName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.sectionTitle.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacingXS),
+                  Wrap(
+                    spacing: AppSpacing.spacingM,
+                    runSpacing: AppSpacing.spacingXXS,
+                    children: [
+                      _InlineMeta(
+                        icon: Icons.location_on_rounded,
+                        label: '$regionText, Italia',
+                        iconColor: AppColors.black,
+                      ),
+                      _InlineMeta(
+                        icon: Icons.star_rounded,
+                        label:
+                            '$ratingValue (${l10n.sellerReviewsCount(profile.reviewCount)})',
+                        iconColor: AppColors.accent,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.spacingM),
+        Text(
+          bioText,
+          style: AppTextStyles.bodySmall.copyWith(
+            fontSize: 14,
+            height: 1.34,
+            color: AppColors.black80,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InlineMeta extends StatelessWidget {
+  const _InlineMeta({
+    required this.icon,
+    required this.label,
+    required this.iconColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: iconColor),
+        const SizedBox(width: AppSpacing.spacingXXS),
+        Text(
+          label,
+          style: AppTextStyles.bodySmall.copyWith(
+            fontSize: 14,
+            color: AppColors.black,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SellerStatsPanel extends StatelessWidget {
+  const _SellerStatsPanel({
+    required this.soldCount,
+    required this.reviewCount,
+    required this.joinedAt,
+  });
+
+  final int soldCount;
+  final int reviewCount;
+  final DateTime? joinedAt;
+
+  @override
+  Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.black,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+        border: Border.all(color: AppColors.black10),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingS),
+        child: Row(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onAvatarTap,
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.white, width: 1.5),
-                      ),
-                      child: SellerAvatar(
-                        imageUrl: profile.profileImageUrl,
-                        initials: profile.initials,
-                        size: 72,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.spacingS),
-                Expanded(
-                  child: _StatsKpiStrip(
-                    ratingValue: ratingValue,
-                    ratingLabel: l10n.sellerProfileRatingStarsLabel,
-                    reviewsValue: ordersValue,
-                    reviewsLabel: l10n.sellerProfileOrdersLabel,
-                  ),
-                ),
-              ],
+            Expanded(
+              child: _ProfileStat(
+                icon: Icons.inventory_2_outlined,
+                value: soldCount.toString(),
+                label: 'Vendite',
+              ),
             ),
-            const SizedBox(height: AppSpacing.spacingS),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    profile.fullName,
-                    style: AppTextStyles.authScreenTitle.copyWith(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.verified_rounded,
-                  color: AppColors.white,
-                  size: 20,
-                ),
-              ],
+            const _VerticalDivider(),
+            Expanded(
+              child: _ProfileStat(
+                icon: Icons.group_rounded,
+                value: reviewCount.toString(),
+                label: 'Recensioni',
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              bioText,
-              style: AppTextStyles.bodySmall.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: Colors.white.withValues(alpha: 0.8),
+            const _VerticalDivider(),
+            Expanded(
+              child: _ProfileStat(
+                icon: Icons.schedule_rounded,
+                value: _sellerTenureLabel(joinedAt),
+                label: 'Su Truffly',
               ),
             ),
           ],
@@ -366,133 +422,109 @@ class _SellerHeroCard extends StatelessWidget {
   }
 }
 
-class _InfoTabContent extends StatelessWidget {
-  const _InfoTabContent({
-    super.key,
-    required this.profile,
-    required this.regionText,
-    required this.reviews,
-    required this.activeTruffles,
-    required this.onShowReviews,
-    required this.onShowTruffles,
-    required this.onOpenTruffle,
-    required this.onFavoriteTap,
-    required this.isFavorite,
-    required this.isFavoritePending,
+class _ProfileStat extends StatelessWidget {
+  const _ProfileStat({
+    required this.icon,
+    required this.value,
+    required this.label,
   });
 
-  final SellerProfileDetail profile;
-  final String regionText;
-  final List<SellerReviewItem> reviews;
-  final List<TruffleListItem> activeTruffles;
-  final VoidCallback onShowReviews;
-  final VoidCallback onShowTruffles;
-  final ValueChanged<TruffleListItem> onOpenTruffle;
-  final ValueChanged<TruffleListItem> onFavoriteTap;
-  final bool Function(String id) isFavorite;
-  final bool Function(String id) isFavoritePending;
+  final IconData icon;
+  final String value;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final ratingText = profile.reviewCount > 0
-        ? profile.ratingAverage.toStringAsFixed(1)
-        : l10n.sellerRatingNew;
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _SectionCard(
-          title: l10n.sellerProfileSummaryTitle,
-          child: Column(
-            children: [
-              _InfoRow(label: l10n.sellerProfileRegionLabel, value: regionText),
-              const SizedBox(height: AppSpacing.spacingS),
-              _InfoRow(
-                label: l10n.sellerProfileRatingStarsLabel,
-                value: ratingText,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: AppColors.black),
+            const SizedBox(width: AppSpacing.spacingXS),
+            Flexible(
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.sectionTitle.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(height: AppSpacing.spacingS),
-              _InfoRow(
-                label: l10n.sellerProfileOrdersLabel,
-                value: profile.completedOrdersCount.toString(),
-              ),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.spacingXS),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodySmall.copyWith(
+            fontSize: 12,
+            color: AppColors.black80,
           ),
-        ),
-        const SizedBox(height: AppSpacing.spacingS),
-        _PreviewSection(
-          title: l10n.sellerProfileRecentReviewsTitle,
-          actionLabel: l10n.sellerProfileReadAll,
-          onActionTap: onShowReviews,
-          child: reviews.isEmpty
-              ? _EmptyInfoBox(message: l10n.sellerProfileNoReviews)
-              : Column(
-                  children: [
-                    for (
-                      var index = 0;
-                      index < reviews.take(2).length;
-                      index++
-                    ) ...[
-                      if (index > 0)
-                        const SizedBox(height: AppSpacing.spacingS),
-                      _ReviewCard(review: reviews[index]),
-                    ],
-                  ],
-                ),
-        ),
-        const SizedBox(height: AppSpacing.spacingS),
-        _PreviewSection(
-          title: l10n.sellerProfileActiveTrufflesTitle,
-          actionLabel: l10n.sellerProfileReadAll,
-          onActionTap: onShowTruffles,
-          child: activeTruffles.isEmpty
-              ? _EmptyInfoBox(message: l10n.sellerProfileNoActiveTruffles)
-              : _TruffleCardsWrap(
-                  items: activeTruffles.take(2).toList(growable: false),
-                  isFavorite: isFavorite,
-                  isFavoritePending: isFavoritePending,
-                  onOpenTruffle: onOpenTruffle,
-                  onFavoriteTap: onFavoriteTap,
-                ),
         ),
       ],
     );
   }
 }
 
-class _ReviewsTabContent extends StatelessWidget {
-  const _ReviewsTabContent({super.key, required this.reviewsAsync});
+class _VerticalDivider extends StatelessWidget {
+  const _VerticalDivider();
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 1, height: 40, color: AppColors.black10);
+  }
+}
+
+class _ReviewsTabContent extends StatelessWidget {
+  const _ReviewsTabContent({
+    super.key,
+    required this.profile,
+    required this.reviewsAsync,
+  });
+
+  final SellerProfileDetail profile;
   final AsyncValue<List<SellerReviewItem>> reviewsAsync;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return _SectionCard(
-      title: l10n.sellerProfileReviewsTab,
-      child: reviewsAsync.when(
-        data: (reviews) {
-          if (reviews.isEmpty) {
-            return _EmptyInfoBox(message: l10n.sellerProfileNoReviews);
-          }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        reviewsAsync.when(
+          data: (reviews) {
+            if (reviews.isEmpty) {
+              return _EmptyInfoBox(message: l10n.sellerProfileNoReviews);
+            }
 
-          return Column(
-            children: [
-              for (var index = 0; index < reviews.length; index++) ...[
-                if (index > 0) const SizedBox(height: AppSpacing.spacingS),
-                _ReviewCard(review: reviews[index]),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ReviewsSummary(
+                  ratingAverage: profile.ratingAverage,
+                  reviewCount: profile.reviewCount,
+                  reviews: reviews,
+                ),
+                const SizedBox(height: AppSpacing.spacingM),
+                for (var index = 0; index < reviews.length; index++) ...[
+                  if (index > 0) const SizedBox(height: AppSpacing.spacingS),
+                  _ReviewCard(review: reviews[index]),
+                ],
               ],
-            ],
-          );
-        },
-        loading: () => const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.spacingS),
-          child: Center(child: CircularProgressIndicator()),
+            );
+          },
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.spacingS),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, _) =>
+              _EmptyInfoBox(message: l10n.sellerProfileUnableToLoadReviews),
         ),
-        error: (_, _) =>
-            _EmptyInfoBox(message: l10n.sellerProfileUnableToLoadReviews),
-      ),
+      ],
     );
   }
 }
@@ -573,65 +605,37 @@ class _TruffleCardsWrap extends StatelessWidget {
   }
 }
 
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection({
-    required this.title,
-    required this.actionLabel,
-    required this.onActionTap,
-    required this.child,
-  });
+class _SectionTabs extends StatelessWidget {
+  const _SectionTabs({required this.selectedSection, required this.onSelected});
 
-  final String title;
-  final String actionLabel;
-  final VoidCallback onActionTap;
-  final Widget child;
+  final _SellerSection selectedSection;
+  final ValueChanged<_SellerSection> onSelected;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.black10),
+        color: AppColors.softGrey.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(3),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: AppTextStyles.sectionTitle.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: onActionTap,
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    minimumSize: Size.zero,
-                  ),
-                  child: Text(
-                    actionLabel,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 13,
-                      color: AppColors.accent,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
+            Expanded(
+              child: _SectionTab(
+                label: 'Tartufi',
+                selected: selectedSection == _SellerSection.truffles,
+                onTap: () => onSelected(_SellerSection.truffles),
+              ),
             ),
-            const SizedBox(height: 10),
-            child,
+            Expanded(
+              child: _SectionTab(
+                label: AppLocalizations.of(context)!.sellerProfileReviewsTab,
+                selected: selectedSection == _SellerSection.reviews,
+                onTap: () => onSelected(_SellerSection.reviews),
+              ),
+            ),
           ],
         ),
       ),
@@ -639,163 +643,47 @@ class _PreviewSection extends StatelessWidget {
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.black80,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.black,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SectionChip extends StatelessWidget {
-  const _SectionChip({
+class _SectionTab extends StatelessWidget {
+  const _SectionTab({
     required this.label,
     required this.selected,
-    required this.onSelected,
+    required this.onTap,
   });
 
   final String label;
   final bool selected;
-  final VoidCallback onSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
       decoration: BoxDecoration(
-        color: selected ? AppColors.black : AppColors.white,
-        borderRadius: AppRadii.authBorderRadius,
-        border: Border.all(
-          color: selected ? AppColors.black : AppColors.black10,
-        ),
-        boxShadow: AppShadows.authField,
+        color: selected ? AppColors.black : Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onSelected,
-          borderRadius: AppRadii.authBorderRadius,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.spacingS,
-              vertical: AppSpacing.spacingS,
-            ),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 34,
             child: Center(
               child: Text(
                 label,
-                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.bodySmall.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: selected ? AppColors.white : AppColors.black80,
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  color: selected ? AppColors.white : AppColors.black,
                 ),
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _StatsKpiStrip extends StatelessWidget {
-  const _StatsKpiStrip({
-    required this.ratingValue,
-    required this.ratingLabel,
-    required this.reviewsValue,
-    required this.reviewsLabel,
-  });
-
-  final String ratingValue;
-  final String ratingLabel;
-  final String reviewsValue;
-  final String reviewsLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacingS),
-      child: Row(
-        children: [
-          Expanded(
-            child: _KpiItem(value: ratingValue, label: ratingLabel),
-          ),
-          const SizedBox(width: AppSpacing.spacingS),
-          Container(
-            width: 1,
-            height: 34,
-            color: Colors.white.withValues(alpha: 0.24),
-          ),
-          const SizedBox(width: AppSpacing.spacingS),
-          Expanded(
-            child: _KpiItem(value: reviewsValue, label: reviewsLabel),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _KpiItem extends StatelessWidget {
-  const _KpiItem({required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodySmall.copyWith(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            color: Colors.white.withValues(alpha: 0.8),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -813,7 +701,6 @@ class _SectionCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.black10),
-        boxShadow: AppShadows.authField,
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.spacingM),
@@ -843,6 +730,189 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+class _ReviewsSummary extends StatelessWidget {
+  const _ReviewsSummary({
+    required this.ratingAverage,
+    required this.reviewCount,
+    required this.reviews,
+  });
+
+  final double ratingAverage;
+  final int reviewCount;
+  final List<SellerReviewItem> reviews;
+
+  @override
+  Widget build(BuildContext context) {
+    final counts = <int, int>{
+      for (var rating = 1; rating <= 5; rating++) rating: 0,
+    };
+    for (final review in reviews) {
+      counts[review.rating] = (counts[review.rating] ?? 0) + 1;
+    }
+    final maxCount = counts.values.fold<int>(
+      0,
+      (max, value) => value > max ? value : max,
+    );
+    final ratingText = reviewCount > 0 ? ratingAverage.toStringAsFixed(1) : '0';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        final ratingBlock = _RatingBlock(
+          ratingText: ratingText,
+          ratingAverage: ratingAverage,
+          reviewCount: reviewCount,
+        );
+        final bars = _RatingBars(counts: counts, maxCount: maxCount);
+
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ratingBlock,
+              const SizedBox(height: AppSpacing.spacingL),
+              bars,
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(width: 96, child: ratingBlock),
+            const SizedBox(width: AppSpacing.spacingL),
+            Expanded(child: bars),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _RatingBlock extends StatelessWidget {
+  const _RatingBlock({
+    required this.ratingText,
+    required this.ratingAverage,
+    required this.reviewCount,
+  });
+
+  final String ratingText;
+  final double ratingAverage;
+  final int reviewCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ratingText,
+          style: AppTextStyles.sectionTitle.copyWith(
+            fontSize: 20,
+            height: 1.1,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.spacingXS),
+        _StarRow(rating: ratingAverage, size: 20),
+        const SizedBox(height: AppSpacing.spacingXS),
+        Text(
+          l10n.sellerReviewsCount(reviewCount),
+          style: AppTextStyles.bodySmall.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.black80,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RatingBars extends StatelessWidget {
+  const _RatingBars({required this.counts, required this.maxCount});
+
+  final Map<int, int> counts;
+  final int maxCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var rating = 5; rating >= 1; rating--)
+          Padding(
+            padding: EdgeInsets.only(bottom: rating == 1 ? 0 : 10),
+            child: _RatingBarRow(
+              rating: rating,
+              count: counts[rating] ?? 0,
+              fraction: maxCount == 0 ? 0 : (counts[rating] ?? 0) / maxCount,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _RatingBarRow extends StatelessWidget {
+  const _RatingBarRow({
+    required this.rating,
+    required this.count,
+    required this.fraction,
+  });
+
+  final int rating;
+  final int count;
+  final double fraction;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = rating == 1 ? '1 stella' : '$rating stelle';
+    return Row(
+      children: [
+        SizedBox(
+          width: 58,
+          child: Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontSize: 12,
+              color: AppColors.black80,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.spacingS),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: SizedBox(
+              height: 8,
+              child: LinearProgressIndicator(
+                value: fraction.clamp(0, 1),
+                backgroundColor: AppColors.softGrey,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.accent,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.spacingS),
+        SizedBox(
+          width: 28,
+          child: Text(
+            count.toString(),
+            textAlign: TextAlign.right,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontSize: 12,
+              color: AppColors.black80,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ReviewCard extends StatelessWidget {
   const _ReviewCard({required this.review});
 
@@ -850,6 +920,17 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final comment = review.isAuto
+        ? localizedAutoReviewComment(
+            context,
+            rating: review.rating,
+            fallbackComment: review.comment,
+          )
+        : review.comment?.trim();
+    final reviewerName = review.isAuto
+        ? 'Truffly'
+        : _shortReviewerNameOrFallback(review.reviewerName);
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -862,51 +943,109 @@ class _ReviewCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.star_rounded,
-                  size: 16,
-                  color: AppColors.accent,
+                Expanded(
+                  child: _StarRow(rating: review.rating.toDouble(), size: 18),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  review.rating.toString(),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontSize: 13,
-                    color: AppColors.black,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const Spacer(),
                 Text(
                   formatShortDate(context, review.createdAt),
                   style: AppTextStyles.bodySmall.copyWith(
-                    fontSize: 13,
+                    fontSize: 12,
                     color: AppColors.black80,
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
-            if (review.hasComment) ...[
-              const SizedBox(height: AppSpacing.spacingS),
+            if (comment != null && comment.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.spacingXS),
               Text(
-                review.isAuto
-                    ? localizedAutoReviewComment(
-                        context,
-                        rating: review.rating,
-                        fallbackComment: review.comment,
-                      )
-                    : review.comment!.trim(),
+                comment,
                 style: AppTextStyles.bodySmall.copyWith(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: AppColors.black80,
-                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
+            const SizedBox(height: AppSpacing.spacingXS),
+            Text(
+              reviewerName,
+              style: AppTextStyles.bodySmall.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.black50,
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StarRow extends StatelessWidget {
+  const _StarRow({required this.rating, required this.size});
+
+  final double rating;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalizedRating = rating.clamp(0, 5).toDouble();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var index = 1; index <= 5; index++)
+          _RatingStar(
+            fill: (normalizedRating - (index - 1)).clamp(0, 1).toDouble(),
+            size: size,
+          ),
+      ],
+    );
+  }
+}
+
+class _RatingStar extends StatelessWidget {
+  const _RatingStar({required this.fill, required this.size});
+
+  final double fill;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    if (fill >= 0.95) {
+      return Icon(Icons.star_rounded, size: size, color: AppColors.accent);
+    }
+    if (fill <= 0.05) {
+      return Icon(
+        Icons.star_rounded,
+        size: size,
+        color: AppColors.black20.withValues(alpha: 0.45),
+      );
+    }
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        children: [
+          Icon(
+            Icons.star_rounded,
+            size: size,
+            color: AppColors.black20.withValues(alpha: 0.45),
+          ),
+          ClipRect(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              widthFactor: fill,
+              child: Icon(
+                Icons.star_rounded,
+                size: size,
+                color: AppColors.accent,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -930,7 +1069,7 @@ class _EmptyInfoBox extends StatelessWidget {
         child: Text(
           message,
           style: AppTextStyles.bodySmall.copyWith(
-            fontSize: 13,
+            fontSize: 14,
             color: AppColors.black80,
             fontWeight: FontWeight.w400,
           ),
@@ -950,6 +1089,36 @@ String _capitalizedRegion(String? region) {
   return '${lower[0].toUpperCase()}${lower.substring(1)}';
 }
 
+String _sellerTenureLabel(DateTime? joinedAt) {
+  if (joinedAt == null) return '-';
+
+  final now = DateTime.now();
+  final yearDelta = now.year - joinedAt.year;
+  final hasHadAnniversary =
+      now.month > joinedAt.month ||
+      (now.month == joinedAt.month && now.day >= joinedAt.day);
+  final years = hasHadAnniversary ? yearDelta : yearDelta - 1;
+  if (years >= 1) return years == 1 ? '1 anno' : '$years anni';
+
+  final monthDelta =
+      (now.year - joinedAt.year) * 12 + now.month - joinedAt.month;
+  final months = now.day >= joinedAt.day ? monthDelta : monthDelta - 1;
+  if (months >= 1) return months == 1 ? '1 mese' : '$months mesi';
+
+  return 'Nuovo';
+}
+
+String _shortReviewerNameOrFallback(String? name) {
+  final normalized = name?.trim();
+  if (normalized == null || normalized.isEmpty) return 'Acquirente';
+  final parts = normalized
+      .split(RegExp(r'\s+'))
+      .where((part) => part.trim().isNotEmpty)
+      .toList(growable: false);
+  if (parts.length < 2) return parts.first;
+  return '${parts.first} ${parts[1][0].toUpperCase()}.';
+}
+
 class _ProfileErrorState extends StatelessWidget {
   const _ProfileErrorState();
 
@@ -963,7 +1132,7 @@ class _ProfileErrorState extends StatelessWidget {
           l10n.sellerProfileLoadError,
           textAlign: TextAlign.center,
           style: AppTextStyles.bodySmall.copyWith(
-            fontSize: 13,
+            fontSize: 14,
             color: AppColors.black80,
             fontWeight: FontWeight.w400,
           ),

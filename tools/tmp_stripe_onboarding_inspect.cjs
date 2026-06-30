@@ -6,7 +6,11 @@
     headless: true,
   });
   const page = await browser.newPage();
-  await page.goto('https://connect.stripe.com/setup/e/acct_1TGOZ1BTD2QsfqRH/c5Ar7UCNM8Gk', { waitUntil: 'domcontentloaded', timeout: 120000 });
+  const onboardingUrl = process.env.STRIPE_ONBOARDING_INSPECT_URL;
+  if (!onboardingUrl) {
+    throw new Error('Set STRIPE_ONBOARDING_INSPECT_URL to a temporary Stripe onboarding link.');
+  }
+  await page.goto(onboardingUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.waitForTimeout(5000);
   console.log('URL=' + page.url());
   console.log('TITLE=' + await page.title());

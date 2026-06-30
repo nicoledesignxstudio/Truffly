@@ -21,10 +21,12 @@ class InvalidSession extends AuthSessionResult {
 class AuthSessionService {
   AuthSessionService(this._supabaseClient);
 
+  static const Duration _sessionHydrationTimeout = Duration(seconds: 2);
+
   final SupabaseClient _supabaseClient;
 
-  AuthSessionResult getSessionStatus() {
-    final session = _supabaseClient.auth.currentSession;
+  Future<AuthSessionResult> getSessionStatus() async {
+    final session = await _resolveCurrentSession();
     if (session == null) {
       return const UnauthenticatedSession();
     }
@@ -34,5 +36,22 @@ class AuthSessionService {
     }
 
     return AuthenticatedSession(session);
+  }
+
+  Future<Session?> _resolveCurrentSession() async {
+    final session = _supabaseClient.auth.currentSession;
+    if (session != null) {
+      return session;
+    }
+
+    try {
+      await _supabaseClient.auth.onAuthStateChange.first.timeout(
+        _sessionHydrationTimeout,
+      );
+    } catch (_) {
+      // If session hydration takes too long, fall back to the current snapshot.
+    }
+
+    return _supabaseClient.auth.currentSession;
   }
 }

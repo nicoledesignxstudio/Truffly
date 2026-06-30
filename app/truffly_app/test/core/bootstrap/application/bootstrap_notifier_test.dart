@@ -10,9 +10,7 @@ import 'package:truffly_app/core/bootstrap/domain/bootstrap_state.dart';
 import 'package:truffly_app/core/providers/app_providers.dart';
 
 class CountingBackendHealthService extends BackendHealthService {
-  CountingBackendHealthService({
-    required this.resultFutureFactory,
-  });
+  CountingBackendHealthService({required this.resultFutureFactory});
 
   int callCount = 0;
   final Future<BackendHealthResult> Function() resultFutureFactory;
@@ -37,7 +35,7 @@ class FakeAuthSessionService extends AuthSessionService {
   final AuthSessionResult result;
 
   @override
-  AuthSessionResult getSessionStatus() => result;
+  Future<AuthSessionResult> getSessionStatus() async => result;
 }
 
 void main() {
@@ -119,34 +117,37 @@ void main() {
     expect(backendHealthService.callCount, 2);
   });
 
-  test('retryBootstrap is ignored when bootstrap is not in error state', () async {
-    final backendHealthService = CountingBackendHealthService(
-      resultFutureFactory: () async => const BackendHealthy(),
-    );
-    final authSessionService = FakeAuthSessionService(
-      const UnauthenticatedSession(),
-    );
-    final container = createContainer(
-      backendHealthService: backendHealthService,
-      authSessionService: authSessionService,
-    );
-    addTearDown(container.dispose);
+  test(
+    'retryBootstrap is ignored when bootstrap is not in error state',
+    () async {
+      final backendHealthService = CountingBackendHealthService(
+        resultFutureFactory: () async => const BackendHealthy(),
+      );
+      final authSessionService = FakeAuthSessionService(
+        const UnauthenticatedSession(),
+      );
+      final container = createContainer(
+        backendHealthService: backendHealthService,
+        authSessionService: authSessionService,
+      );
+      addTearDown(container.dispose);
 
-    final notifier = container.read(bootstrapNotifierProvider.notifier);
+      final notifier = container.read(bootstrapNotifierProvider.notifier);
 
-    await notifier.startBootstrap();
-    expect(
-      container.read(bootstrapNotifierProvider),
-      isA<BootstrapUnauthenticated>(),
-    );
-    expect(backendHealthService.callCount, 1);
+      await notifier.startBootstrap();
+      expect(
+        container.read(bootstrapNotifierProvider),
+        isA<BootstrapUnauthenticated>(),
+      );
+      expect(backendHealthService.callCount, 1);
 
-    await notifier.retryBootstrap();
+      await notifier.retryBootstrap();
 
-    expect(
-      container.read(bootstrapNotifierProvider),
-      isA<BootstrapUnauthenticated>(),
-    );
-    expect(backendHealthService.callCount, 1);
-  });
+      expect(
+        container.read(bootstrapNotifierProvider),
+        isA<BootstrapUnauthenticated>(),
+      );
+      expect(backendHealthService.callCount, 1);
+    },
+  );
 }

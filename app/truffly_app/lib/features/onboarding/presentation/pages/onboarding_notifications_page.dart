@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:truffly_app/core/theme/app_colors.dart';
@@ -12,6 +10,8 @@ import 'package:truffly_app/features/onboarding/application/onboarding_notifier.
 import 'package:truffly_app/features/onboarding/application/onboarding_providers.dart';
 import 'package:truffly_app/features/onboarding/domain/onboarding_draft.dart';
 import 'package:truffly_app/features/onboarding/domain/onboarding_state.dart';
+import 'package:truffly_app/features/push/application/push_token_service_provider.dart';
+import 'package:truffly_app/features/push/data/push_token_service.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class OnboardingNotificationsPage extends ConsumerStatefulWidget {
@@ -128,23 +128,40 @@ class _OnboardingNotificationsPageState
     });
 
     notifier.setNotificationChoice(OnboardingNotificationChoice.enabled);
-    final status = await notifier.requestNotificationPermission();
+    final enableResult = await ref
+        .read(pushTokenServiceProvider)
+        .enableCurrentDeviceNotifications();
     if (!mounted) return;
+
+    final status = enableResult.isEnabled
+        ? OnboardingNotificationPermissionStatus.granted
+        : OnboardingNotificationPermissionStatus.denied;
+    notifier.setNotificationPermissionStatus(status);
 
     setState(() {
       _isRequestingPermission = false;
-      _localPermissionError = status == null
-          ? l10n.onboardingNotificationsPermissionError
-          : status == OnboardingNotificationPermissionStatus.denied &&
-                Platform.isAndroid
-          ? l10n.onboardingNotificationsStatusDenied
-          : null;
+      _localPermissionError = _messageForEnableResult(enableResult, l10n);
     });
 
-    if (status == OnboardingNotificationPermissionStatus.granted ||
-        status == OnboardingNotificationPermissionStatus.provisional) {
+    if (enableResult.isEnabled) {
       notifier.nextStep();
     }
+  }
+
+  String? _messageForEnableResult(
+    NotificationEnableResult result,
+    AppLocalizations l10n,
+  ) {
+    return switch (result.status) {
+      NotificationEnableStatus.enabled => null,
+      NotificationEnableStatus.systemNotificationsDisabled =>
+        l10n.notificationsOpenSystemSettingsMessage,
+      NotificationEnableStatus.noActiveUser ||
+      NotificationEnableStatus.tokenMissing ||
+      NotificationEnableStatus.unsupportedPlatform ||
+      NotificationEnableStatus.failed =>
+        l10n.onboardingNotificationsPermissionError,
+    };
   }
 
   void _handleSkipNotifications(OnboardingNotifier notifier) {

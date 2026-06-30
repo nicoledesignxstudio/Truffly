@@ -279,7 +279,9 @@ IconData _iconForType(String type) {
 }
 
 String _truffleName(AppLocalizations l10n, AppNotification notification) {
-  return _metadataString(notification, 'truffle_name') ??
+  return _metadataString(notification, 'truffle_display_name') ??
+      _displayTruffleName(notification) ??
+      _metadataString(notification, 'truffle_name') ??
       l10n.notificationFallbackTruffleName;
 }
 
@@ -308,4 +310,31 @@ String? _metadataString(AppNotification notification, String key) {
     return value.toString();
   }
   return null;
+}
+
+String? _displayTruffleName(AppNotification notification) {
+  final name =
+      _metadataString(notification, 'truffle_name') ??
+      _truffleTypeLabel(_metadataString(notification, 'truffle_type'));
+  final weight = _metadataString(notification, 'weight_grams');
+  if (name == null) return null;
+  if (weight == null || name.toLowerCase().endsWith('${weight}g')) {
+    return name;
+  }
+  return '$name ${weight}g';
+}
+
+String? _truffleTypeLabel(String? type) {
+  return switch (type) {
+    'TUBER_MAGNATUM' => 'Bianco pregiato',
+    'TUBER_MELANOSPORUM' => 'Nero pregiato',
+    'TUBER_AESTIVUM' => 'Scorzone',
+    'TUBER_UNCINATUM' => 'Uncinato',
+    'TUBER_BORCHII' => 'Bianchetto',
+    'TUBER_BRUMALE' => 'Brumale',
+    'TUBER_MACROSPORUM' => 'Nero liscio',
+    'TUBER_BRUMALE_MOSCHATUM' => 'Brumale moscato',
+    'TUBER_MESENTERICUM' => 'Mesenterico',
+    _ => null,
+  };
 }

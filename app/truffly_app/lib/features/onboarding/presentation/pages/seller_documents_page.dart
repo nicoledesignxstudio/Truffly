@@ -116,9 +116,8 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
                     _DocumentSelectorCard(
                       title: l10n.onboardingIdentityDocumentTitle,
                       selectedDocument: onboardingState.draft.identityDocument,
-                      pickLabel: onboardingState.draft.identityDocument == null
-                          ? l10n.onboardingDocumentPickButton
-                          : l10n.onboardingDocumentReplaceButton,
+                      uploadLabel: l10n.onboardingDocumentUploadButton,
+                      requiredLabel: l10n.onboardingDocumentRequiredLabel,
                       removeLabel: l10n.onboardingDocumentRemoveButton,
                       errorText:
                           _identityDocumentError ??
@@ -142,9 +141,8 @@ class _SellerDocumentsPageState extends ConsumerState<SellerDocumentsPage> {
                     _DocumentSelectorCard(
                       title: l10n.onboardingTesserinoDocumentTitle,
                       selectedDocument: onboardingState.draft.tesserinoDocument,
-                      pickLabel: onboardingState.draft.tesserinoDocument == null
-                          ? l10n.onboardingDocumentPickButton
-                          : l10n.onboardingDocumentReplaceButton,
+                      uploadLabel: l10n.onboardingDocumentUploadButton,
+                      requiredLabel: l10n.onboardingDocumentRequiredLabel,
                       removeLabel: l10n.onboardingDocumentRemoveButton,
                       errorText:
                           _tesserinoDocumentError ??
@@ -350,7 +348,8 @@ class _DocumentSelectorCard extends StatelessWidget {
   const _DocumentSelectorCard({
     required this.title,
     required this.selectedDocument,
-    required this.pickLabel,
+    required this.uploadLabel,
+    required this.requiredLabel,
     required this.removeLabel,
     required this.onPickPressed,
     this.onRemovePressed,
@@ -359,7 +358,8 @@ class _DocumentSelectorCard extends StatelessWidget {
 
   final String title;
   final OnboardingLocalDocument? selectedDocument;
-  final String pickLabel;
+  final String uploadLabel;
+  final String requiredLabel;
   final String removeLabel;
   final Future<void> Function() onPickPressed;
   final VoidCallback? onRemovePressed;
@@ -368,82 +368,128 @@ class _DocumentSelectorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: AppRadii.authBorderRadius,
+        borderRadius: AppRadii.dialogBorderRadius,
         boxShadow: AppShadows.authField,
-        border: Border.fromBorderSide(BorderSide(color: AppColors.black10)),
+        border: Border.all(color: AppColors.black10),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onPickPressed,
-                borderRadius: AppRadii.authBorderRadius,
-                child: Ink(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: AppRadii.authBorderRadius,
-                    border: Border.all(color: AppColors.black10),
-                  ),
-                  child: CustomPaint(
-                    painter: _DashedBorderPainter(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.spacingM),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPickPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.spacingM),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 72),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: AppColors.softGrey,
+                        borderRadius: AppRadii.dialogBorderRadius,
+                        border: Border.all(color: AppColors.black10),
+                      ),
+                      child: Icon(
+                        selectedDocument == null
+                            ? Icons.badge_outlined
+                            : Icons.description_outlined,
+                        color: AppColors.black,
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.spacingM),
+                    Expanded(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            selectedDocument == null
-                                ? Icons.upload_file_outlined
-                                : Icons.image_outlined,
-                            color: AppColors.accent,
-                            size: 28,
-                          ),
-                          const SizedBox(height: AppSpacing.spacingS),
                           Text(
-                            selectedDocument?.fileName ?? title,
+                            title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.bodyLarge,
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.black,
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.spacingXS),
+                          const SizedBox(height: 2),
                           Text(
-                            pickLabel,
-                            textAlign: TextAlign.center,
+                            requiredLabel,
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.black50,
                             ),
                           ),
+                          if (selectedDocument != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              selectedDocument!.fileName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.black80,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
+                    const SizedBox(width: AppSpacing.spacingM),
+                    SizedBox(
+                      width: 78,
+                      height: 42,
+                      child: ElevatedButton(
+                        onPressed: onPickPressed,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.black,
+                          foregroundColor: AppColors.white,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppRadii.dialogBorderRadius,
+                          ),
+                        ),
+                        child: Text(
+                          uploadLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (errorText != null) ...[
+                const SizedBox(height: AppSpacing.spacingS),
+                Text(
+                  errorText!,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.error,
                   ),
                 ),
-              ),
-            ),
-            if (errorText != null) ...[
-              const SizedBox(height: AppSpacing.spacingS),
-              Text(
-                errorText!,
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
-              ),
-            ],
-            if (selectedDocument != null && onRemovePressed != null) ...[
-              const SizedBox(height: AppSpacing.spacingXS),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: onRemovePressed,
-                  child: Text(removeLabel),
+              ],
+              if (selectedDocument != null && onRemovePressed != null) ...[
+                const SizedBox(height: AppSpacing.spacingXS),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: onRemovePressed,
+                    child: Text(removeLabel),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -516,32 +562,4 @@ class _SheetActionTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    const radius = Radius.circular(AppRadii.auth);
-    final rrect = RRect.fromRectAndRadius(Offset.zero & size, radius);
-    final borderPaint = Paint()
-      ..color = AppColors.black20
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    const dashWidth = 8.0;
-    const dashSpace = 6.0;
-    final path = Path()..addRRect(rrect);
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        canvas.drawPath(metric.extractPath(distance, next), borderPaint);
-        distance = next + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

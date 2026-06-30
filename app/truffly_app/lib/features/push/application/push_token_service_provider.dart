@@ -6,5 +6,6 @@ final pushTokenServiceProvider = Provider<PushTokenServiceApi>((ref) {
   return PushTokenService(
     ref.read(supabaseClientProvider),
     ref.read(firebaseMessagingProvider),
+    ref.read(notificationPermissionServiceProvider),
   );
 });

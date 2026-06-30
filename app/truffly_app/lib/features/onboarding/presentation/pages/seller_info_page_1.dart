@@ -12,7 +12,7 @@ class SellerInfoPage1 extends StatelessWidget {
     return OnboardingInfoPage(
       title: l10n.onboardingSellerInfo1Title,
       description: l10n.onboardingSellerInfo1Description,
-      assetName: 'buyer_info_page_1',
+      assetName: 'seller_info_page_1',
       fallbackIcon: Icons.storefront_outlined,
     );
   }

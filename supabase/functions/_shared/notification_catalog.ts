@@ -661,7 +661,46 @@ function pushFallback(
 }
 
 function truffleName(metadata: NotificationMetadata): string {
-  return readString(metadata, "truffle_name") ?? "il tuo tartufo";
+  return readString(metadata, "truffle_display_name") ??
+    displayTruffleName(metadata) ??
+    readString(metadata, "truffle_name") ??
+    "il tuo tartufo";
+}
+
+function displayTruffleName(metadata: NotificationMetadata): string | null {
+  const name = readString(metadata, "truffle_name") ??
+    truffleTypeLabel(readString(metadata, "truffle_type"));
+  const weight = readString(metadata, "weight_grams");
+  if (name == null) return null;
+  if (weight == null || name.toLowerCase().endsWith(`${weight}g`)) {
+    return name;
+  }
+  return `${name} ${weight}g`;
+}
+
+function truffleTypeLabel(type: string | null): string | null {
+  switch (type) {
+    case "TUBER_MAGNATUM":
+      return "Bianco pregiato";
+    case "TUBER_MELANOSPORUM":
+      return "Nero pregiato";
+    case "TUBER_AESTIVUM":
+      return "Scorzone";
+    case "TUBER_UNCINATUM":
+      return "Uncinato";
+    case "TUBER_BORCHII":
+      return "Bianchetto";
+    case "TUBER_BRUMALE":
+      return "Brumale";
+    case "TUBER_MACROSPORUM":
+      return "Nero liscio";
+    case "TUBER_BRUMALE_MOSCHATUM":
+      return "Brumale moscato";
+    case "TUBER_MESENTERICUM":
+      return "Mesenterico";
+    default:
+      return null;
+  }
 }
 
 function safeDataValue(value: unknown): string | null {

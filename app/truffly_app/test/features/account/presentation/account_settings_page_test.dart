@@ -66,6 +66,7 @@ class _FakePushTokenService implements PushTokenServiceApi {
   _FakePushTokenService({this.enabled = false});
 
   bool enabled;
+  int enableCalls = 0;
   int readCalls = 0;
   int setCalls = 0;
   bool? lastSetEnabled;
@@ -78,6 +79,15 @@ class _FakePushTokenService implements PushTokenServiceApi {
 
   @override
   Future<void> initialize() async {}
+
+  @override
+  Future<NotificationEnableResult> enableCurrentDeviceNotifications({
+    bool requestPermission = true,
+  }) async {
+    enableCalls += 1;
+    enabled = true;
+    return const NotificationEnableResult(NotificationEnableStatus.enabled);
+  }
 
   @override
   Future<bool> isCurrentDeviceNotificationsEnabled() async {
@@ -94,6 +104,9 @@ class _FakePushTokenService implements PushTokenServiceApi {
 
   @override
   Future<void> syncCurrentToken({String? token}) async {}
+
+  @override
+  Future<void> openSystemNotificationSettings() async {}
 }
 
 class _TestAuthNotifier extends AuthNotifier {
@@ -368,8 +381,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    expect(pushTokenService.setCalls, 1);
-    expect(pushTokenService.lastSetEnabled, isTrue);
+    expect(pushTokenService.enableCalls, 1);
     expect(tester.widget<Switch>(switchFinder).value, isTrue);
   });
 }

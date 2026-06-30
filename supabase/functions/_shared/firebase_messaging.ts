@@ -8,6 +8,9 @@ export type FirebasePushMessage = {
 
 export type FirebasePushConfig = {
   serviceAccountJson?: string;
+  clientEmail?: string;
+  privateKeyBase64?: string;
+  privateKey?: string;
   projectId?: string;
   fetchImpl?: typeof fetch;
   now?: () => Date;
@@ -68,17 +71,11 @@ export async function sendFirebasePushToUser(args: {
       return { status: "skipped", attempted: 0, sent: 0, failed: 0 };
     }
 
-    const serviceAccountJson = args.config?.serviceAccountJson?.trim() ??
-      Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON")?.trim();
-    if (!serviceAccountJson) {
-      throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured.");
-    }
-
-    const serviceAccount = parseServiceAccount(serviceAccountJson);
+    const serviceAccount = loadFirebaseServiceAccount(args.config);
     const projectId = args.config?.projectId?.trim() ||
       serviceAccount.project_id?.trim();
     if (!projectId) {
-      throw new Error("Firebase service account JSON is missing project_id.");
+      throw new Error("missing project_id");
     }
     const accessToken = args.config?.accessToken?.trim() ||
       await obtainAccessToken(
@@ -94,25 +91,27 @@ export async function sendFirebasePushToUser(args: {
     let failed = 0;
 
     for (const tokenRow of tokens) {
+      const requestBody = JSON.stringify({
+        message: {
+          token: tokenRow.token,
+          notification: {
+            title: args.message.title,
+            body: args.message.body,
+          },
+          data: args.message.data,
+          android: {
+            priority: "high",
+          },
+        },
+      });
+
       const response = await (args.config?.fetchImpl ?? fetch)(endpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          message: {
-            token: tokenRow.token,
-            notification: {
-              title: args.message.title,
-              body: args.message.body,
-            },
-            data: args.message.data,
-            android: {
-              priority: "high",
-            },
-          },
-        }),
+        body: new TextEncoder().encode(requestBody),
       });
 
       if (response.ok) {
@@ -161,17 +160,173 @@ export async function sendFirebasePushToUser(args: {
   }
 }
 
-function parseServiceAccount(value: string): FirebaseServiceAccount {
-  const account = JSON.parse(value) as FirebaseServiceAccount;
-  if (
-    !account.client_email?.trim() ||
-    !account.private_key?.trim()
-  ) {
-    throw new Error(
-      "Firebase service account JSON is missing client_email or private_key.",
-    );
+export function parseFirebaseServiceAccount(
+  raw: string,
+): FirebaseServiceAccount {
+  const normalizedRaw = raw.trim();
+  if (!normalizedRaw) {
+    throw new Error("missing service account secret");
   }
-  return account;
+
+  const account = parseFirebaseServiceAccountJson(normalizedRaw);
+  return validateFirebaseServiceAccount(account);
+}
+
+export function loadFirebaseServiceAccount(
+  config?: FirebasePushConfig,
+): FirebaseServiceAccount {
+  const serviceAccountJson = config?.serviceAccountJson !== undefined
+    ? config.serviceAccountJson.trim()
+    : readEnvString("FIREBASE_SERVICE_ACCOUNT_JSON");
+  let jsonParseError: Error | null = null;
+
+  if (serviceAccountJson) {
+    try {
+      return parseFirebaseServiceAccount(serviceAccountJson);
+    } catch (error) {
+      jsonParseError = error instanceof Error
+        ? error
+        : new Error(String(error));
+    }
+  }
+
+  const splitAccount = {
+    project_id: config?.projectId ?? readEnvString("FIREBASE_PROJECT_ID"),
+    client_email: config?.clientEmail ??
+      readEnvString("FIREBASE_CLIENT_EMAIL"),
+    private_key: readSplitPrivateKey(config),
+  };
+  const hasSplitAccountValue = Boolean(
+    splitAccount.project_id?.trim() ||
+      splitAccount.client_email?.trim() ||
+      splitAccount.private_key?.trim(),
+  );
+
+  if (hasSplitAccountValue) {
+    return validateFirebaseServiceAccount(splitAccount);
+  }
+
+  if (jsonParseError) {
+    throw jsonParseError;
+  }
+
+  throw new Error("missing service account secret");
+}
+
+function parseFirebaseServiceAccountJson(raw: string): FirebaseServiceAccount {
+  const candidates = [
+    raw,
+    unwrapSingleQuotedValue(raw),
+    unwrapQuotedValue(raw),
+  ];
+
+  for (const initialCandidate of candidates) {
+    let candidate = initialCandidate;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const parsed = JSON.parse(candidate) as unknown;
+        if (typeof parsed === "string") {
+          candidate = parsed.trim();
+          continue;
+        }
+        if (!isRecord(parsed)) {
+          break;
+        }
+        return parsed as FirebaseServiceAccount;
+      } catch {
+        break;
+      }
+    }
+  }
+
+  throw new Error("invalid service account JSON");
+}
+
+function unwrapSingleQuotedValue(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.length < 2) return trimmed;
+  return trimmed[0] === "'" && trimmed[trimmed.length - 1] === "'"
+    ? trimmed.slice(1, -1).trim()
+    : trimmed;
+}
+
+function unwrapQuotedValue(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.length < 2) return trimmed;
+
+  const first = trimmed[0];
+  const last = trimmed[trimmed.length - 1];
+  if ((first === "'" && last === "'") || (first === '"' && last === '"')) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function validateFirebaseServiceAccount(
+  account: FirebaseServiceAccount,
+): FirebaseServiceAccount {
+  const projectId = account.project_id?.trim();
+  const clientEmail = account.client_email?.trim();
+  const privateKey = normalizePrivateKey(account.private_key);
+
+  if (!projectId) {
+    throw new Error("missing project_id");
+  }
+  if (!clientEmail) {
+    throw new Error("missing client_email");
+  }
+  if (!privateKey) {
+    throw new Error("missing private_key");
+  }
+
+  return {
+    ...account,
+    project_id: projectId,
+    client_email: clientEmail,
+    private_key: privateKey,
+  };
+}
+
+function readSplitPrivateKey(config?: FirebasePushConfig): string | undefined {
+  const privateKeyBase64 = config?.privateKeyBase64 ??
+    readEnvString("FIREBASE_PRIVATE_KEY_BASE64");
+  if (privateKeyBase64?.trim()) {
+    return decodeBase64PrivateKey(privateKeyBase64);
+  }
+
+  return config?.privateKey ?? readEnvString("FIREBASE_PRIVATE_KEY");
+}
+
+function decodeBase64PrivateKey(value: string): string {
+  try {
+    return atob(value.trim());
+  } catch {
+    throw new Error("invalid private key format");
+  }
+}
+
+function normalizePrivateKey(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const normalized = trimmed.replace(/\\n/g, "\n").trim();
+  if (
+    !normalized.includes("-----BEGIN PRIVATE KEY-----") ||
+    !normalized.includes("-----END PRIVATE KEY-----")
+  ) {
+    throw new Error("invalid private key format");
+  }
+  return normalized;
+}
+
+function readEnvString(name: string): string | undefined {
+  try {
+    const value = Deno.env.get(name)?.trim();
+    return value || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function obtainAccessToken(

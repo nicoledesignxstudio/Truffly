@@ -14,6 +14,7 @@ import 'package:truffly_app/features/account/presentation/widgets/account_subpag
 import 'package:truffly_app/features/account/presentation/widgets/destructive_confirmation_dialog.dart';
 import 'package:truffly_app/features/auth/application/auth_notifier.dart';
 import 'package:truffly_app/features/push/application/notification_preferences_provider.dart';
+import 'package:truffly_app/features/push/data/push_token_service.dart';
 import 'package:truffly_app/l10n/app_localizations.dart';
 
 class AccountSettingsPage extends ConsumerStatefulWidget {
@@ -286,26 +287,30 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
   Future<void> _updateNotificationsPreference(bool enabled) async {
     if (_isUpdatingNotifications) return;
 
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isUpdatingNotifications = true;
     });
 
     try {
-      await ref
-          .read(notificationPreferenceServiceProvider)
-          .setCurrentDeviceNotificationsEnabled(enabled);
+      final preferenceService = ref.read(notificationPreferenceServiceProvider);
+      if (enabled) {
+        final result = await preferenceService
+            .enableCurrentDeviceNotifications();
+        if (!mounted) return;
+        if (!result.isEnabled) {
+          await _handleNotificationEnableFailure(result, l10n);
+          return;
+        }
+      } else {
+        await preferenceService.setCurrentDeviceNotificationsEnabled(false);
+      }
       ref.invalidate(notificationsEnabledProvider);
+      await ref.read(notificationsEnabledProvider.future);
     } catch (_) {
       if (!mounted) return;
-      final isItalian = Localizations.localeOf(context).languageCode == 'it';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            isItalian
-                ? 'Impossibile aggiornare la preferenza notifiche.'
-                : 'Unable to update the notifications preference.',
-          ),
-        ),
+        SnackBar(content: Text(l10n.accountSettingsNotificationsUpdateError)),
       );
     } finally {
       if (mounted) {
@@ -313,6 +318,33 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           _isUpdatingNotifications = false;
         });
       }
+    }
+  }
+
+  Future<void> _handleNotificationEnableFailure(
+    NotificationEnableResult result,
+    AppLocalizations l10n,
+  ) async {
+    final message = switch (result.status) {
+      NotificationEnableStatus.systemNotificationsDisabled =>
+        l10n.notificationsOpenSystemSettingsMessage,
+      NotificationEnableStatus.noActiveUser ||
+      NotificationEnableStatus.tokenMissing ||
+      NotificationEnableStatus.unsupportedPlatform ||
+      NotificationEnableStatus.failed =>
+        l10n.accountSettingsNotificationsUpdateError,
+      NotificationEnableStatus.enabled => null,
+    };
+
+    if (message == null) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+
+    if (result.status == NotificationEnableStatus.systemNotificationsDisabled) {
+      await ref
+          .read(notificationPreferenceServiceProvider)
+          .openSystemNotificationSettings();
     }
   }
 }

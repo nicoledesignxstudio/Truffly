@@ -98,7 +98,7 @@ export type SellerStripeStore = {
 };
 
 export type StripeConnectGateway = {
-  createExpressAccount(args: {
+  createConnectedAccount(args: {
     email: string | null;
     country: string;
     firstName: string | null;
@@ -200,7 +200,7 @@ export async function handleCreateSellerStripeAccountLink(
 
     let accountId = normalizeOptionalString(user.stripeAccountId);
     if (accountId == null) {
-      const createdAccount = await deps.stripeGateway.createExpressAccount({
+      const createdAccount = await deps.stripeGateway.createConnectedAccount({
         email: normalizeOptionalString(deps.authenticatedUserEmail),
         country: normalizeCountryCode(user.countryCode),
         firstName: normalizeOptionalString(user.firstName),
@@ -496,11 +496,11 @@ export function createStripeConnectGateway(
   stripeSecretKey: string,
 ): StripeConnectGateway {
   return {
-    async createExpressAccount(args) {
+    async createConnectedAccount(args) {
       const response = await fetchStripeConnect(
         fetchImpl,
         stripeSecretKey,
-        "https://api.stripe.com/v1/accounts",
+        "https://api.stripe.com/v2/core/accounts",
         {
           method: "POST",
           headers: {
@@ -508,23 +508,7 @@ export function createStripeConnectGateway(
               args.metadata.user_id,
             ),
           },
-          body: new URLSearchParams({
-            type: "express",
-            country: args.country,
-            ...(args.email == null ? {} : { email: args.email }),
-            "capabilities[transfers][requested]": "true",
-            business_type: "individual",
-            ...(args.firstName == null
-              ? {}
-              : { "individual[first_name]": args.firstName }),
-            ...(args.lastName == null
-              ? {}
-              : { "individual[last_name]": args.lastName }),
-            ...(args.email == null ? {} : { "individual[email]": args.email }),
-            "business_profile[product_description]":
-              "Fresh truffles sold by an approved seller through the Truffly marketplace.",
-            ...flattenStripeMetadata(args.metadata),
-          }),
+          body: JSON.stringify(buildStripeAccountsV2CreatePayload(args)),
         },
       );
       return parseStripeConnectAccount(response);
@@ -871,7 +855,9 @@ async function fetchStripeConnect(
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${stripeSecretKey}`);
     headers.set("Stripe-Version", stripeApiVersion);
-    if (init.body != null) {
+    if (typeof init.body === "string") {
+      headers.set("Content-Type", "application/json");
+    } else if (init.body != null) {
       headers.set("Content-Type", "application/x-www-form-urlencoded");
     }
 
@@ -932,6 +918,66 @@ function flattenStripeMetadata(
   return Object.fromEntries(
     Object.entries(metadata).map(([key, value]) => [`metadata[${key}]`, value]),
   );
+}
+
+function buildStripeAccountsV2CreatePayload(args: {
+  email: string | null;
+  country: string;
+  firstName: string | null;
+  lastName: string | null;
+  metadata: Record<string, string>;
+}): Record<string, unknown> {
+  return {
+    ...(args.email == null ? {} : { contact_email: args.email }),
+    display_name: buildStripeAccountDisplayName({
+      firstName: args.firstName,
+      lastName: args.lastName,
+      email: args.email,
+    }),
+    identity: {
+      country: args.country,
+      entity_type: "individual",
+      individual: {
+        ...(args.email == null ? {} : { email: args.email }),
+        ...(args.firstName == null ? {} : { given_name: args.firstName }),
+        ...(args.lastName == null ? {} : { surname: args.lastName }),
+      },
+    },
+    configuration: {
+      recipient: {
+        capabilities: {
+          stripe_balance: {
+            stripe_transfers: { requested: true },
+          },
+        },
+      },
+    },
+    defaults: {
+      currency: "eur",
+      profile: {
+        product_description:
+          "Fresh truffles sold by an approved seller through the Truffly marketplace.",
+      },
+      responsibilities: {
+        fees_collector: "application",
+        losses_collector: "application",
+      },
+    },
+    dashboard: "express",
+    metadata: args.metadata,
+  };
+}
+
+function buildStripeAccountDisplayName(args: {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+}): string {
+  const fullName = [args.firstName, args.lastName]
+    .filter((value): value is string => value != null)
+    .join(" ")
+    .trim();
+  return fullName.length > 0 ? fullName : args.email ?? "Truffly seller";
 }
 
 function buildStripeConnectAccountIdempotencyKey(userId: string): string {

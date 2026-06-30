@@ -32,7 +32,7 @@ class FakeAuthSessionService extends AuthSessionService {
   final AuthSessionResult result;
 
   @override
-  AuthSessionResult getSessionStatus() => result;
+  Future<AuthSessionResult> getSessionStatus() async => result;
 }
 
 void main() {
@@ -42,9 +42,7 @@ void main() {
       final backendHealthService = FakeBackendHealthService();
       final container = ProviderContainer(
         overrides: [
-          backendHealthServiceProvider.overrideWithValue(
-            backendHealthService,
-          ),
+          backendHealthServiceProvider.overrideWithValue(backendHealthService),
           authSessionServiceProvider.overrideWithValue(
             FakeAuthSessionService(const UnauthenticatedSession()),
           ),
@@ -55,9 +53,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: StartupGateScreen(),
-          ),
+          child: const MaterialApp(home: StartupGateScreen()),
         ),
       );
 
@@ -81,9 +77,7 @@ void main() {
       final backendHealthService = FakeBackendHealthService();
       final container = ProviderContainer(
         overrides: [
-          backendHealthServiceProvider.overrideWithValue(
-            backendHealthService,
-          ),
+          backendHealthServiceProvider.overrideWithValue(backendHealthService),
           authSessionServiceProvider.overrideWithValue(
             FakeAuthSessionService(const UnauthenticatedSession()),
           ),
@@ -95,9 +89,7 @@ void main() {
         return tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
-            child: const MaterialApp(
-              home: StartupGateScreen(),
-            ),
+            child: const MaterialApp(home: StartupGateScreen()),
           ),
         );
       }

@@ -188,7 +188,7 @@ class _NotificationTile extends StatelessWidget {
                                   softWrap: true,
                                   style: AppTextStyles.sectionTitle.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontSize: 15,
                                   ),
                                 ),
                                 const SizedBox(height: 2),

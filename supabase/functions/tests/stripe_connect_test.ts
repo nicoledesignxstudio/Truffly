@@ -82,7 +82,7 @@ Deno.test("seller onboarding creates connected account when missing", async () =
       },
     }),
     stripeGateway: createNoopStripeConnectGateway({
-      createExpressAccount: async (args: {
+      createConnectedAccount: async (args: {
         email: string | null;
         firstName: string | null;
         lastName: string | null;
@@ -113,13 +113,19 @@ Deno.test("seller onboarding creates connected account when missing", async () =
   });
 });
 
-Deno.test("Stripe Connect account creation sends a seller-scoped idempotency key", async () => {
+Deno.test("Stripe Connect account creation uses Accounts v2 controller configuration", async () => {
   let receivedIdempotencyKey: string | null = null;
+  let receivedUrl: string | null = null;
+  let receivedContentType: string | null = null;
+  let receivedPayload: Record<string, unknown> | null = null;
 
   const gateway = createStripeConnectGateway(
-    async (_url, init) => {
+    async (url, init) => {
+      receivedUrl = `${url}`;
       const headers = new Headers((init as globalThis.RequestInit).headers);
       receivedIdempotencyKey = headers.get("Idempotency-Key");
+      receivedContentType = headers.get("Content-Type");
+      receivedPayload = JSON.parse(`${(init as globalThis.RequestInit).body}`);
       return new Response(
         JSON.stringify({
           id: "acct_created",
@@ -134,7 +140,7 @@ Deno.test("Stripe Connect account creation sends a seller-scoped idempotency key
     "sk_test_validation",
   );
 
-  await gateway.createExpressAccount({
+  await gateway.createConnectedAccount({
     email: "seller@example.com",
     country: "IT",
     firstName: "Seller",
@@ -142,7 +148,29 @@ Deno.test("Stripe Connect account creation sends a seller-scoped idempotency key
     metadata: { user_id: "seller-1" },
   });
 
+  assertEquals(receivedUrl, "https://api.stripe.com/v2/core/accounts");
+  assertEquals(receivedContentType, "application/json");
   assertEquals(receivedIdempotencyKey, "truffly_connect_account_seller-1");
+  assertEquals(receivedPayload?.["dashboard"], "express");
+  assertEquals(readPath(receivedPayload, [
+    "defaults",
+    "responsibilities",
+    "fees_collector",
+  ]), "application");
+  assertEquals(readPath(receivedPayload, [
+    "defaults",
+    "responsibilities",
+    "losses_collector",
+  ]), "application");
+  assertEquals(readPath(receivedPayload, [
+    "configuration",
+    "recipient",
+    "capabilities",
+    "stripe_balance",
+    "stripe_transfers",
+    "requested",
+  ]), true);
+  assertEquals("type" in (receivedPayload ?? {}), false);
 });
 
 Deno.test("seller onboarding reuses existing account", async () => {
@@ -166,7 +194,7 @@ Deno.test("seller onboarding reuses existing account", async () => {
       }),
     }),
     stripeGateway: createNoopStripeConnectGateway({
-      createExpressAccount: async () => {
+      createConnectedAccount: async () => {
         createAccountCalled = true;
         return {
           id: "acct_unexpected",
@@ -376,7 +404,7 @@ function createNoopStripeConnectGateway(
   overrides: Record<string, unknown> = {},
 ) {
   return {
-    createExpressAccount: async () => ({
+    createConnectedAccount: async () => ({
       id: "acct_default",
       detailsSubmitted: false,
       chargesEnabled: false,
@@ -396,6 +424,24 @@ function createNoopStripeConnectGateway(
     }),
     ...overrides,
   } as any;
+}
+
+function readPath(
+  record: Record<string, unknown> | null,
+  path: string[],
+): unknown {
+  let current: unknown = record;
+  for (const segment of path) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !(segment in current)
+    ) {
+      return undefined;
+    }
+    current = Reflect.get(current, segment);
+  }
+  return current;
 }
 
 function assertEquals(actual: unknown, expected: unknown): void {

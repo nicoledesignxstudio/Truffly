@@ -19,6 +19,9 @@ class AppRoutes {
   static const accountShippingEdit = '/account/shipping/:addressId/edit';
   static const accountBecomeSeller = '/account/become-seller';
   static const accountSellerOnboarding = '/account/become-seller/onboarding';
+  static const accountAdmin = '/account/admin';
+  static const accountAdminSellerApplication =
+      '/account/admin/seller-applications/:userId';
   static const accountMyTruffles = '/account/my-truffles';
   static const accountGuide = '/account/guide';
   static const accountSupport = '/account/support';
@@ -77,6 +80,10 @@ class AppRoutes {
 
   static String accountShippingEditPath(String addressId) {
     return '/account/shipping/$addressId/edit';
+  }
+
+  static String adminSellerApplicationPath(String userId) {
+    return '/account/admin/seller-applications/$userId';
   }
 
   static String truffleGuidePath(String truffleType) {
